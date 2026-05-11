@@ -1,0 +1,8 @@
+{
+    "Port": 8090,
+    "RequestTimeoutSeconds": 10,
+    "AutoStartServer": true,
+    "EnableInfoLogs": true,
+    "NpmExecutablePath": "C:\\Users\\nitro\\Tools\\node-v24.15.0-win-x64\\npm.cmd",
+    "AllowRemoteConnections": false
+}

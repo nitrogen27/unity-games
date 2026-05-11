@@ -1,0 +1,205 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2334a9aecc7e6eb49abca9664e99b08b, type: 3}
+  m_Name: DemoTwoFloorLevel
+  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Level.MiniLevelDefinition
+  levelName: WolfMini Two Floor Demo
+  floors:
+  - id: Upper
+    y: 0
+    rooms:
+    - id: Upper_Spawn_Room
+      x: -1
+      z: -5
+      widthCells: 5
+      depthCells: 5
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Upper_Left_Room
+      x: -5
+      z: 2
+      widthCells: 5
+      depthCells: 4
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Upper_Right_Room
+      x: 3
+      z: 3
+      widthCells: 5
+      depthCells: 5
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Upper_End_Room
+      x: -1
+      z: 12
+      widthCells: 5
+      depthCells: 5
+      hasCeiling: 1
+      hasFloor: 1
+    corridors:
+    - id: Upper_Main_Corridor
+      x: 0
+      z: 0
+      widthCells: 3
+      depthCells: 12
+    wallValue: 8
+    floorColor: {r: 0.30588236, g: 0.30588236, b: 0.30588236, a: 1}
+    ceilingColor: {r: 0.24313726, g: 0.24313726, b: 0.24313726, a: 1}
+  - id: Lower
+    y: -3
+    rooms:
+    - id: Lower_Landing
+      x: -1
+      z: 4
+      widthCells: 5
+      depthCells: 5
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Lower_Storage
+      x: -5
+      z: 10
+      widthCells: 4
+      depthCells: 4
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Lower_Guard_Room
+      x: 3
+      z: 10
+      widthCells: 5
+      depthCells: 4
+      hasCeiling: 1
+      hasFloor: 1
+    - id: Lower_Utility
+      x: -1
+      z: 17
+      widthCells: 4
+      depthCells: 5
+      hasCeiling: 1
+      hasFloor: 1
+    corridors:
+    - id: Lower_Main_Corridor
+      x: 0
+      z: 9
+      widthCells: 3
+      depthCells: 8
+    wallValue: 8
+    floorColor: {r: 0.26666668, g: 0.26666668, b: 0.26666668, a: 1}
+    ceilingColor: {r: 0.21176471, g: 0.21176471, b: 0.21176471, a: 1}
+  doors:
+  - id: Upper_Spawn_Door
+    floorId: Upper
+    cell: {x: 1, y: 0}
+    orientation: 0
+    connectsA: Upper_Spawn_Room
+    connectsB: Upper_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Upper_Left_Door
+    floorId: Upper
+    cell: {x: 0, y: 3}
+    orientation: 1
+    connectsA: Upper_Left_Room
+    connectsB: Upper_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Upper_Right_Door
+    floorId: Upper
+    cell: {x: 2, y: 5}
+    orientation: 1
+    connectsA: Upper_Right_Room
+    connectsB: Upper_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Upper_End_Door
+    floorId: Upper
+    cell: {x: 1, y: 11}
+    orientation: 0
+    connectsA: Upper_End_Room
+    connectsB: Upper_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Lower_Storage_Door
+    floorId: Lower
+    cell: {x: 0, y: 11}
+    orientation: 1
+    connectsA: Lower_Storage
+    connectsB: Lower_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Lower_Guard_Door
+    floorId: Lower
+    cell: {x: 2, y: 11}
+    orientation: 1
+    connectsA: Lower_Guard_Room
+    connectsB: Lower_Main_Corridor
+    type: 0
+    startsOpen: 0
+  - id: Lower_Utility_Door
+    floorId: Lower
+    cell: {x: 1, y: 16}
+    orientation: 0
+    connectsA: Lower_Utility
+    connectsB: Lower_Main_Corridor
+    type: 0
+    startsOpen: 0
+  stairs:
+  - id: Main_Descent
+    upperFloorId: Upper
+    lowerFloorId: Lower
+    upperOpeningCells:
+      x: 0
+      y: 5
+      width: 3
+      height: 3
+    lowerLandingCells:
+      x: -1
+      y: 4
+      width: 5
+      height: 5
+    direction: 1
+    addRailings: 1
+    addSideWalls: 1
+  decor:
+  - id: Upper_Corridor_Light_A
+    floorId: Upper
+    type: 0
+    cell: {x: 1.5, y: 2.5}
+    rotationY: 0
+    blocking: 0
+  - id: Upper_Stair_Chandelier
+    floorId: Upper
+    type: 1
+    cell: {x: 1.5, y: 5.5}
+    rotationY: 0
+    blocking: 0
+  - id: Upper_End_Light
+    floorId: Upper
+    type: 0
+    cell: {x: 1.5, y: 14.5}
+    rotationY: 0
+    blocking: 0
+  - id: Lower_Landing_Light
+    floorId: Lower
+    type: 0
+    cell: {x: 1.5, y: 6.5}
+    rotationY: 0
+    blocking: 0
+  - id: Lower_Corridor_Light
+    floorId: Lower
+    type: 0
+    cell: {x: 1.5, y: 13.5}
+    rotationY: 0
+    blocking: 0
+  playerSpawn:
+    floorId: Upper
+    cell: {x: 1.5, y: -3}
+    rotationY: 0
