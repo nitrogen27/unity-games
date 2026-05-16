@@ -1,0 +1,17 @@
+Library/
+Logs/
+Temp/
+Obj/
+Build/
+Builds/
+UserSettings/
+MemoryCaptures/
+*.csproj
+*.sln
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+sysinfo.txt

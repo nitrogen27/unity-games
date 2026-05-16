@@ -8,10 +8,12 @@ namespace HelloWorldRoom
         [SerializeField] private Texture2D weaponTexture;
         [SerializeField] private Texture2D keyTexture;
         [SerializeField] private int floor = 1;
-        [SerializeField] private int score = 1200;
+        [SerializeField] private int score = 0;
         [SerializeField] private int lives = 3;
+        [SerializeField] private int room = 1;
         [SerializeField] private int health = 100;
         [SerializeField] private int ammo = 8;
+        [SerializeField] private string demoText = "DEMO";
         [SerializeField] private bool showHint;
 
         private GUIStyle labelStyle;
@@ -22,7 +24,7 @@ namespace HelloWorldRoom
             labelStyle = new GUIStyle
             {
                 alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.9f, 0.86f, 0.62f) },
+                normal = { textColor = Color.white },
                 fontStyle = FontStyle.Bold
             };
             valueStyle = new GUIStyle(labelStyle)
@@ -59,21 +61,38 @@ namespace HelloWorldRoom
         {
             float barHeight = Mathf.Clamp(Screen.height * 0.15f, 82f, 128f);
             Rect bar = new Rect(0f, Screen.height - barHeight, Screen.width, barHeight);
+            bool wideLayout = Screen.width >= 700;
+            int columns = wideLayout ? 7 : 5;
+            float cellW = Screen.width / (float)columns;
 
-            GUI.color = new Color(0.05f, 0.05f, 0.07f, 0.98f);
+            GUI.color = new Color(0.13f, 0.21f, 0.55f, 0.98f);
             GUI.DrawTexture(bar, Texture2D.whiteTexture);
 
-            GUI.color = new Color(0.22f, 0.22f, 0.28f, 1f);
-            GUI.DrawTexture(new Rect(0f, bar.y, Screen.width, 4f), Texture2D.whiteTexture);
+            Color frameColor = new Color(0.55f, 0.55f, 0.60f, 1f);
+            GUI.color = frameColor;
+            GUI.DrawTexture(new Rect(0f, bar.y, Screen.width, 2f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(0f, Screen.height - 2f, Screen.width, 2f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(0f, bar.y, 2f, barHeight), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(Screen.width - 2f, bar.y, 2f, barHeight), Texture2D.whiteTexture);
+
+            if (wideLayout)
+            {
+                GUI.color = new Color(0.18f, 0.18f, 0.20f, 1f);
+                GUI.DrawTexture(new Rect(3f * cellW + 2f, bar.y + 2f, cellW - 4f, barHeight - 4f), Texture2D.whiteTexture);
+            }
+
+            GUI.color = frameColor;
+            for (int i = 1; i < columns; i++)
+            {
+                GUI.DrawTexture(new Rect(i * cellW, bar.y, 2f, barHeight), Texture2D.whiteTexture);
+            }
 
             GUI.color = Color.white;
 
-            int columns = Screen.width < 900 ? 5 : 7;
-            float cellW = Screen.width / (float)columns;
             float labelY = bar.y + 9f;
             float valueY = bar.y + barHeight * 0.45f;
-            float labelSize = Mathf.Clamp(barHeight * 0.16f, 12f, 18f);
-            float valueSize = Mathf.Clamp(barHeight * 0.30f, 22f, 36f);
+            float labelSize = Mathf.Clamp(barHeight * 0.20f, 14f, 24f);
+            float valueSize = Mathf.Clamp(barHeight * 0.42f, 28f, 54f);
             labelStyle.fontSize = Mathf.RoundToInt(labelSize);
             valueStyle.fontSize = Mathf.RoundToInt(valueSize);
 
@@ -81,25 +100,17 @@ namespace HelloWorldRoom
             DrawHudCell(1, cellW, labelY, valueY, "SCORE", score.ToString("000000"));
             DrawHudCell(2, cellW, labelY, valueY, "LIVES", lives.ToString());
 
-            Rect faceRect = new Rect(3f * cellW + (cellW - barHeight * 0.62f) * 0.5f, bar.y + barHeight * 0.19f, barHeight * 0.62f, barHeight * 0.62f);
-            if (faceTexture != null && columns >= 7)
+            if (wideLayout)
             {
-                GUI.DrawTexture(faceRect, faceTexture, ScaleMode.ScaleToFit, true);
+                DrawHudCell(3, cellW, labelY, valueY, "ROOM", room.ToString("00"));
+                DrawHudCell(4, cellW, labelY, valueY, "HEALTH", Mathf.Clamp(health, 0, 100).ToString() + "%");
+                DrawHudCell(5, cellW, labelY, valueY, "AMMO", ammo.ToString());
+                DrawHudCell(6, cellW, labelY, valueY, string.Empty, demoText);
             }
-
-            int healthColumn = columns >= 7 ? 4 : 3;
-            int ammoColumn = columns >= 7 ? 5 : 4;
-            DrawHudCell(healthColumn, cellW, labelY, valueY, "HEALTH", health.ToString());
-            DrawHudCell(ammoColumn, cellW, labelY, valueY, "AMMO", ammo.ToString());
-
-            if (columns >= 7)
+            else
             {
-                DrawHudCell(6, cellW, labelY, valueY, "KEY", string.Empty);
-                if (keyTexture != null)
-                {
-                    Rect keyRect = new Rect(6f * cellW + (cellW - 34f) * 0.5f, valueY + 4f, 34f, 34f);
-                    GUI.DrawTexture(keyRect, keyTexture, ScaleMode.ScaleToFit, true);
-                }
+                DrawHudCell(3, cellW, labelY, valueY, "HEALTH", Mathf.Clamp(health, 0, 100).ToString() + "%");
+                DrawHudCell(4, cellW, labelY, valueY, "AMMO", ammo.ToString());
             }
         }
 
