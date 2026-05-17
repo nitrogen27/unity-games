@@ -1,5 +1,8 @@
 # WolfMini Agent Notes
 
+Primary Unity project: use the repository root at `/Users/kirillionov/unity-games`.
+Do not treat the nested `WolfE1M1TwoRoomsUnity` folder as the main project unless a later user explicitly asks for it.
+
 ## MASTER SPEC
 
 WolfMini is a small Unity first-person Wolfenstein3D-style demo scene. It is not a full clone, not a full game, and not an attempt to recreate all original systems.
