@@ -26,12 +26,12 @@ public static class WolfTargetRoomTextureApplier
         var darkMetal = LoadMaterial("DarkMetalTrim_Target");
         var prisonCellDoor = LoadMaterial("PrisonCellDoor_Target");
 
-        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.50f);
-        ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.70f, 0.55f);
-        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.0f, 0.35f);
-        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.20f, 0.25f);
-        ConfigureMaterial(darkMetal, new Vector2(4f, 4f), 0.85f, 0.45f);
-        ConfigureMaterial(prisonCellDoor, new Vector2(1f, 1f), 0.60f, 0.45f);
+        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.58f);
+        ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.70f, 0.72f);
+        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.04f, 0.62f);
+        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.20f, 0.38f);
+        ConfigureMaterial(darkMetal, new Vector2(4f, 4f), 0.85f, 0.68f);
+        ConfigureMaterial(prisonCellDoor, new Vector2(1f, 1f), 0.60f, 0.58f);
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
@@ -404,6 +404,8 @@ public static class WolfTargetRoomTextureApplier
         SetFloat(material, "_Glossiness", smoothness);
         SetFloat(material, "_BumpScale", 1.0f);
         SetFloat(material, "_OcclusionStrength", 1.0f);
+        SetFloat(material, "_GlossyReflections", 1.0f);
+        SetFloat(material, "_SpecularHighlights", 1.0f);
 
         EditorUtility.SetDirty(material);
     }
