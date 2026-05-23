@@ -9,13 +9,18 @@ namespace HelloWorldRoom
         [SerializeField] private int targetFrameRate = 60;
         [SerializeField] private int qualityLevel = 2;
         [SerializeField] private int maxPixelLights = 24;
-        [SerializeField] private int antiAliasingSamples = 4;
+        [SerializeField] private int antiAliasingSamples = 0;
         [SerializeField] private bool disableVSync = true;
         [SerializeField] private bool disableRealtimeReflectionProbes = false;
         [SerializeField] private bool disableRealtimeShadows = false;
         [SerializeField] private bool forceAnisotropicTextures = true;
-        [SerializeField] private bool enableCameraMsaa = true;
+        [SerializeField] private bool enableCameraMsaa = false;
         [SerializeField] private bool disableCameraHdr = false;
+        [SerializeField] private RenderingPath cameraRenderingPath = RenderingPath.DeferredShading;
+        [SerializeField] private bool enableDeferredPostAntialiasing = true;
+        [SerializeField, Range(0f, 1f)] private float postAntialiasingSubpixelBlending = 0.72f;
+        [SerializeField, Range(0.0312f, 0.333f)] private float postAntialiasingEdgeThreshold = 0.11f;
+        [SerializeField, Range(0.0156f, 0.0833f)] private float postAntialiasingEdgeThresholdMin = 0.0312f;
 
         private void Awake()
         {
@@ -91,6 +96,8 @@ namespace HelloWorldRoom
 
             foreach (Camera camera in Camera.allCameras)
             {
+                camera.renderingPath = cameraRenderingPath;
+
                 if (disableCameraHdr)
                 {
                     camera.allowHDR = false;
@@ -102,7 +109,33 @@ namespace HelloWorldRoom
 
                 camera.allowMSAA = allowMsaa;
                 camera.useOcclusionCulling = true;
+                ApplyPostAntialiasing(camera);
             }
+        }
+
+        private void ApplyPostAntialiasing(Camera camera)
+        {
+            WolfDeferredPostAntiAliasing postAntialiasing = camera.GetComponent<WolfDeferredPostAntiAliasing>();
+            if (!enableDeferredPostAntialiasing || cameraRenderingPath != RenderingPath.DeferredShading)
+            {
+                if (postAntialiasing != null)
+                {
+                    postAntialiasing.enabled = false;
+                }
+
+                return;
+            }
+
+            if (postAntialiasing == null)
+            {
+                postAntialiasing = camera.gameObject.AddComponent<WolfDeferredPostAntiAliasing>();
+            }
+
+            postAntialiasing.Configure(
+                postAntialiasingSubpixelBlending,
+                postAntialiasingEdgeThreshold,
+                postAntialiasingEdgeThresholdMin);
+            postAntialiasing.enabled = true;
         }
 
         private static int NormalizeAntiAliasingSamples(int samples)

@@ -59,8 +59,8 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_Normal.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_MetallicSmoothness.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_AO.png",
-            0.82f,
-            0.84f
+            0.88f,
+            0.90f
         );
         ConfigureDoorTargetMaterial();
 
@@ -70,8 +70,8 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/FloorTile/FloorTile_Target_Normal.png",
             $"{TextureRoot}/FloorTile/FloorTile_Target_MetallicSmoothness.png",
             $"{TextureRoot}/FloorTile/FloorTile_Target_AO.png",
-            0.06f,
-            0.78f
+            0.08f,
+            0.88f
         );
         ConfigureFloorTileMaterial();
 
@@ -82,7 +82,7 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/CeilingPanel/CeilingPanel_Target_MetallicSmoothness.png",
             $"{TextureRoot}/CeilingPanel/CeilingPanel_Target_AO.png",
             0.0f,
-            0.46f
+            0.56f
         );
         ConfigureCeilingPanelVisibility();
 
@@ -92,8 +92,8 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/DarkMetalTrim/DarkMetalTrim_Target_Normal.png",
             $"{TextureRoot}/DarkMetalTrim/DarkMetalTrim_Target_MetallicSmoothness.png",
             $"{TextureRoot}/DarkMetalTrim/DarkMetalTrim_Target_AO.png",
-            0.85f,
-            0.68f
+            0.90f,
+            0.88f
         );
 
         CreateMaterial(
@@ -102,8 +102,8 @@ public static class WolfTargetMaterialSetup
             null,
             null,
             null,
-            0.60f,
-            0.58f
+            0.76f,
+            0.82f
         );
 
         CreateWhiteStoneWallTileMaterials();
@@ -210,20 +210,20 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(mat, "_ParallaxMap", height);
         SetTextureIfHas(mat, "_EmissionMap", albedo);
 
-        SetColorIfHas(mat, "_Color", new Color(1.36f, 1.44f, 1.92f, 1f));
-        SetColorIfHas(mat, "_EmissionColor", new Color(0.04f, 0.06f, 0.20f, 1f));
+        SetColorIfHas(mat, "_Color", new Color(1.58f, 1.70f, 2.28f, 1f));
+        SetColorIfHas(mat, "_EmissionColor", new Color(0.08f, 0.12f, 0.30f, 1f));
         SetFloatIfHas(mat, "_Mode", 0.0f);
         SetFloatIfHas(mat, "_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
         SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
         SetFloatIfHas(mat, "_ZWrite", 1.0f);
-        SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.74f);
-        SetFloatIfHas(mat, "_Glossiness", 0.74f);
-        SetFloatIfHas(mat, "_GlossMapScale", 0.92f);
+        SetFloatIfHas(mat, "_Metallic", 0.02f);
+        SetFloatIfHas(mat, "_Smoothness", 0.88f);
+        SetFloatIfHas(mat, "_Glossiness", 0.88f);
+        SetFloatIfHas(mat, "_GlossMapScale", 1.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
-        SetFloatIfHas(mat, "_BumpScale", 0.82f);
-        SetFloatIfHas(mat, "_OcclusionStrength", 0.68f);
-        SetFloatIfHas(mat, "_Parallax", 0.018f);
+        SetFloatIfHas(mat, "_BumpScale", 1.14f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.42f);
+        SetFloatIfHas(mat, "_Parallax", 0.026f);
         SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
         SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
 
@@ -430,18 +430,18 @@ public static class WolfTargetMaterialSetup
         Texture albedo = GetMainTexture(material);
         Texture height = LoadTexture($"{TextureRoot}/DoorTeal/DoorTeal_Target_Height.png");
 
-        SetColorIfHas(material, "_Color", new Color(0.92f, 1.05f, 1.08f, 1f));
-        SetColorIfHas(material, "_BaseColor", new Color(0.92f, 1.05f, 1.08f, 1f));
-        SetColorIfHas(material, "_EmissionColor", new Color(0.012f, 0.035f, 0.04f, 1f));
+        SetColorIfHas(material, "_Color", new Color(1.08f, 1.20f, 1.24f, 1f));
+        SetColorIfHas(material, "_BaseColor", new Color(1.08f, 1.20f, 1.24f, 1f));
+        SetColorIfHas(material, "_EmissionColor", new Color(0.04f, 0.13f, 0.15f, 1f));
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
-        SetFloatIfHas(material, "_Metallic", 0.82f);
-        SetFloatIfHas(material, "_Smoothness", 0.84f);
-        SetFloatIfHas(material, "_Glossiness", 0.84f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.95f);
-        SetFloatIfHas(material, "_OcclusionStrength", 0.62f);
-        SetFloatIfHas(material, "_BumpScale", 0.92f);
-        SetFloatIfHas(material, "_Parallax", 0.014f);
+        SetFloatIfHas(material, "_Metallic", 0.88f);
+        SetFloatIfHas(material, "_Smoothness", 0.90f);
+        SetFloatIfHas(material, "_Glossiness", 0.90f);
+        SetFloatIfHas(material, "_GlossMapScale", 1.0f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.38f);
+        SetFloatIfHas(material, "_BumpScale", 1.08f);
+        SetFloatIfHas(material, "_Parallax", 0.020f);
         SetFloatIfHas(material, "_GlossyReflections", 1.0f);
         SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
         SetKeyword(material, "_EMISSION", true);
@@ -462,21 +462,21 @@ public static class WolfTargetMaterialSetup
         Texture albedo = GetMainTexture(material);
         Texture height = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Height.png");
 
-        SetColorIfHas(material, "_Color", new Color(1.12f, 1.08f, 1.0f, 1f));
-        SetColorIfHas(material, "_BaseColor", new Color(1.12f, 1.08f, 1.0f, 1f));
-        SetColorIfHas(material, "_EmissionColor", new Color(0.025f, 0.024f, 0.022f, 1f));
+        SetColorIfHas(material, "_Color", new Color(0.86f, 0.84f, 0.78f, 1f));
+        SetColorIfHas(material, "_BaseColor", new Color(0.86f, 0.84f, 0.78f, 1f));
+        SetColorIfHas(material, "_EmissionColor", Color.black);
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
-        SetFloatIfHas(material, "_Metallic", 0.06f);
-        SetFloatIfHas(material, "_Smoothness", 0.78f);
-        SetFloatIfHas(material, "_Glossiness", 0.78f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.92f);
-        SetFloatIfHas(material, "_OcclusionStrength", 0.48f);
-        SetFloatIfHas(material, "_BumpScale", 0.86f);
-        SetFloatIfHas(material, "_Parallax", 0.014f);
+        SetFloatIfHas(material, "_Metallic", 0.08f);
+        SetFloatIfHas(material, "_Smoothness", 0.88f);
+        SetFloatIfHas(material, "_Glossiness", 0.88f);
+        SetFloatIfHas(material, "_GlossMapScale", 1.0f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.42f);
+        SetFloatIfHas(material, "_BumpScale", 1.06f);
+        SetFloatIfHas(material, "_Parallax", 0.020f);
         SetFloatIfHas(material, "_GlossyReflections", 1.0f);
         SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
-        SetKeyword(material, "_EMISSION", true);
+        SetKeyword(material, "_EMISSION", false);
         SetKeyword(material, "_PARALLAXMAP", height != null);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
@@ -488,8 +488,8 @@ public static class WolfTargetMaterialSetup
         Texture albedo = GetMainTexture(material);
         Texture height = LoadTexture($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Height.png");
 
-        Color ceilingTint = new Color(1.32f, 1.36f, 1.28f, 1f);
-        Color visibilityEmission = new Color(0.21f, 0.22f, 0.25f, 1f);
+        Color ceilingTint = new Color(1.42f, 1.45f, 1.36f, 1f);
+        Color visibilityEmission = new Color(0.27f, 0.29f, 0.33f, 1f);
 
         SetColorIfHas(material, "_Color", ceilingTint);
         SetColorIfHas(material, "_BaseColor", ceilingTint);
@@ -497,12 +497,12 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.0f);
-        SetFloatIfHas(material, "_Smoothness", 0.46f);
-        SetFloatIfHas(material, "_Glossiness", 0.46f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.62f);
-        SetFloatIfHas(material, "_OcclusionStrength", 0.26f);
-        SetFloatIfHas(material, "_BumpScale", 0.70f);
-        SetFloatIfHas(material, "_Parallax", 0.008f);
+        SetFloatIfHas(material, "_Smoothness", 0.56f);
+        SetFloatIfHas(material, "_Glossiness", 0.56f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.72f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.20f);
+        SetFloatIfHas(material, "_BumpScale", 0.88f);
+        SetFloatIfHas(material, "_Parallax", 0.010f);
         SetFloatIfHas(material, "_GlossyReflections", 0.92f);
         SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
         SetKeyword(material, "_EMISSION", true);

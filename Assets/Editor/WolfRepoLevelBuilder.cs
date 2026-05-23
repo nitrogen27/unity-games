@@ -449,10 +449,10 @@ namespace HelloWorldRoom.Editor
 
             Light playerLight = cameraObject.AddComponent<Light>();
             playerLight.type = LightType.Point;
-            playerLight.color = new Color(1f, 0.93f, 0.82f);
-            playerLight.intensity = 0.35f;
-            playerLight.range = 10f;
-            ConfigureGeneratedLight(playerLight, 0.15f);
+            playerLight.color = new Color(1f, 0.96f, 0.88f);
+            playerLight.intensity = 0.08f;
+            playerLight.range = 5.5f;
+            ConfigureGeneratedLight(playerLight, 0f);
 
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("playerCamera").objectReferenceValue = camera;

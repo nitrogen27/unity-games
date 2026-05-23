@@ -20,7 +20,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -80,6 +80,6 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 0.78, b: 0.38, a: 1}
-    - _EmissionColor: {r: 3.2, g: 2.3040001, b: 1.1520001, a: 3.2}
+    - _EmissionColor: {r: 4.4, g: 3.1680002, b: 1.5840001, a: 4.4}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

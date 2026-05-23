@@ -12,6 +12,9 @@ public static class WolfDynamicLightingSetup
     private const string ScenePath = "Assets/Scenes/WolfRepoLevel1.unity";
     private const string RootName = "Wolf Dynamic Lighting";
     private const string PerformanceRootName = "Wolf Performance Settings";
+    private const string LightProbeRootName = "Wolf Baked Light Probes";
+    private const string BeautifulLightingSettingsPath = "Assets/Settings/WolfRepoLevel1BeautifulBakedLighting.lighting";
+    private const string BakedReflectionProbeRoot = "Assets/Scenes/WolfRepoLevel1_BakedReflectionProbes";
     private const string MaterialRoot = "Assets/Materials/WolfTargetLook";
     private const string LampGlowMaterialPath = MaterialRoot + "/DynamicLampGlow.mat";
     private const string CeilingSpillTexturePath = MaterialRoot + "/CeilingLampSpillFalloff.png";
@@ -25,12 +28,22 @@ public static class WolfDynamicLightingSetup
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
     private const int MaxRealtimeLampLights = 34;
     private const int MaxFlickeringLampLights = 4;
+    private const int MaxRealtimeSpecularAccentLights = 10;
     private const int PerformanceAntiAliasingSamples = 2;
     private const int QualityAntiAliasingSamples = 4;
-    private const int QualityReflectionProbeResolution = 128;
+    private const int QualityReflectionProbeResolution = 256;
+    private const float LightProbeSpacing = 5.5f;
+    private const float UpperProbeHeight = 0.9f;
+    private const float LowerProbeHeight = -2.1f;
+    private const float BakedPointIntensity = 4.00f;
+    private const float BakedChandelierPointIntensity = 4.60f;
+    private const float BakedCeilingScatterIntensity = 2.15f;
+    private const float BakedChandelierScatterIntensity = 2.50f;
 
     private static readonly Color WarmLamp = new Color(1.0f, 0.72f, 0.36f);
     private static readonly Color CoolLamp = new Color(0.32f, 0.88f, 1.0f);
+    private static bool waitingForBeautifulBake;
+    private static double nextBeautifulBakeLogTime;
 
     [MenuItem("Tools/Wolf Target Look/Apply Dynamic Lighting")]
     public static void ApplyDynamicLighting()
@@ -45,12 +58,12 @@ public static class WolfDynamicLightingSetup
         Directory.CreateDirectory(MaterialRoot);
 
         Material glowMaterial = CreateGlowMaterial();
-        Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(WarmCeilingSpillMaterialPath, WarmLamp, 1.45f, 0.48f);
-        Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(CoolCeilingSpillMaterialPath, CoolLamp, 1.25f, 0.42f);
-        Material warmFloorReflectionMaterial = CreateSurfaceReflectionMaterial(WarmFloorReflectionMaterialPath, FloorReflectionTexturePath, WarmLamp, 2.0f, 0.54f, true);
-        Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(CoolFloorReflectionMaterialPath, FloorReflectionTexturePath, CoolLamp, 1.8f, 0.48f, true);
-        Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(WarmWallReflectionMaterialPath, WallReflectionTexturePath, WarmLamp, 1.65f, 0.42f, false);
-        Material coolWallReflectionMaterial = CreateSurfaceReflectionMaterial(CoolWallReflectionMaterialPath, WallReflectionTexturePath, CoolLamp, 1.45f, 0.38f, false);
+        Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(WarmCeilingSpillMaterialPath, WarmLamp, 1.65f, 0.42f);
+        Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(CoolCeilingSpillMaterialPath, CoolLamp, 1.5f, 0.38f);
+        Material warmFloorReflectionMaterial = CreateSurfaceReflectionMaterial(WarmFloorReflectionMaterialPath, FloorReflectionTexturePath, WarmLamp, 0.30f, 0.075f, true);
+        Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(CoolFloorReflectionMaterialPath, FloorReflectionTexturePath, CoolLamp, 0.27f, 0.065f, true);
+        Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(WarmWallReflectionMaterialPath, WallReflectionTexturePath, WarmLamp, 0.26f, 0.070f, false);
+        Material coolWallReflectionMaterial = CreateSurfaceReflectionMaterial(CoolWallReflectionMaterialPath, WallReflectionTexturePath, CoolLamp, 0.24f, 0.060f, false);
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
@@ -73,9 +86,11 @@ public static class WolfDynamicLightingSetup
         HashSet<int> realtimeLampIndices = SelectRealtimeLampIndices(anchors);
         Physics.SyncTransforms();
         int realtimeLampCount = 0;
+        int specularAccentCount = 0;
         for (int i = 0; i < anchors.Count; i++)
         {
             bool hasRealtimeLight = realtimeLampIndices.Contains(i);
+            bool hasSpecularAccent = hasRealtimeLight && specularAccentCount < MaxRealtimeSpecularAccentLights;
             bool hasFlicker = hasRealtimeLight && realtimeLampCount < MaxFlickeringLampLights;
             if (CreateLampRig(
                 anchors[i],
@@ -89,9 +104,14 @@ public static class WolfDynamicLightingSetup
                 warmWallReflectionMaterial,
                 coolWallReflectionMaterial,
                 hasRealtimeLight,
+                hasSpecularAccent,
                 hasFlicker))
             {
                 realtimeLampCount++;
+                if (hasSpecularAccent)
+                {
+                    specularAccentCount++;
+                }
             }
         }
 
@@ -106,7 +126,7 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} lamp glows, {realtimeLampCount} realtime point lights, disabled {disabledAuthoredFixtureLights} duplicate authored fixture lights, and added performance reflection probes to {ScenePath}.");
+        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} lamp glows, {realtimeLampCount} realtime point lights, {specularAccentCount} no-shadow specular accents, disabled {disabledAuthoredFixtureLights} duplicate authored fixture lights, and added performance reflection probes to {ScenePath}.");
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Quality Lighting Settings")]
@@ -131,6 +151,78 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.Refresh();
 
         Debug.Log($"[WolfDynamicLightingSetup] Applied quality lighting profile with realtime shadows and reflections to {ScenePath}.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Apply Beautiful Baked Lighting Settings")]
+    public static void ApplyBeautifulBakedLightingSettings()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("[WolfDynamicLightingSetup] Exit Play Mode before applying baked lighting settings.");
+            return;
+        }
+
+        AssetDatabase.Refresh();
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        BeautifulLightingSummary summary = ApplyBeautifulBakedLightingProfile();
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log($"[WolfDynamicLightingSetup] Applied beautiful baked lighting profile to {ScenePath}: {summary}.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Bake Beautiful Lighting And Occlusion")]
+    public static void BakeBeautifulLightingAndOcclusion()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("[WolfDynamicLightingSetup] Exit Play Mode before baking lighting and occlusion.");
+            return;
+        }
+
+        if (Lightmapping.isRunning || StaticOcclusionCulling.isRunning)
+        {
+            Debug.LogWarning("[WolfDynamicLightingSetup] Lighting or occlusion bake is already running.");
+            return;
+        }
+
+        AssetDatabase.Refresh();
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        BeautifulLightingSummary summary = ApplyBeautifulBakedLightingProfile();
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        StaticOcclusionCulling.Clear();
+        StaticOcclusionCulling.smallestOccluder = 1.0f;
+        StaticOcclusionCulling.smallestHole = 0.25f;
+        StaticOcclusionCulling.backfaceThreshold = 100f;
+        bool occlusionStarted = StaticOcclusionCulling.GenerateInBackground();
+
+        Lightmapping.Clear();
+        bool lightingStarted = Lightmapping.BakeAsync();
+        if (!lightingStarted && !occlusionStarted)
+        {
+            Debug.LogError("[WolfDynamicLightingSetup] Failed to start lighting and occlusion bake.");
+            return;
+        }
+
+        waitingForBeautifulBake = true;
+        nextBeautifulBakeLogTime = 0d;
+        EditorApplication.update -= MonitorBeautifulBake;
+        EditorApplication.update += MonitorBeautifulBake;
+        Debug.Log($"[WolfDynamicLightingSetup] Started beautiful lighting/occlusion bake for {ScenePath}. Occlusion started={occlusionStarted}, lighting started={lightingStarted}. Profile: {summary}.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Log Beautiful Bake Status")]
+    public static void LogBeautifulBakeStatus()
+    {
+        Debug.Log($"[WolfDynamicLightingSetup] Beautiful bake status: lightingRunning={Lightmapping.isRunning}, lightingProgress={Lightmapping.buildProgress:P0}, occlusionRunning={StaticOcclusionCulling.isRunning}, occlusionData={StaticOcclusionCulling.umbraDataSize:N0} bytes.");
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Performance Settings")]
@@ -158,54 +250,602 @@ public static class WolfDynamicLightingSetup
         Debug.Log($"[WolfDynamicLightingSetup] Applied 60 FPS performance profile to {ScenePath}; disabled {disabledAuthoredFixtureLights} duplicate authored fixture lights.");
     }
 
-    private static void ApplySceneLightingSettings()
+    private static BeautifulLightingSummary ApplyBeautifulBakedLightingProfile()
     {
-        RenderSettings.ambientMode = AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.22f, 0.225f, 0.24f);
-        RenderSettings.reflectionIntensity = 1.25f;
-        RenderSettings.reflectionBounces = 2;
-        RenderSettings.defaultReflectionResolution = QualityReflectionProbeResolution;
-        RenderSettings.fog = true;
-        RenderSettings.fogMode = FogMode.ExponentialSquared;
-        RenderSettings.fogDensity = 0.0022f;
-        RenderSettings.fogColor = new Color(0.105f, 0.115f, 0.13f);
+        ApplySceneLightingSettings();
+        ApplyRendererLightingFlags(null);
+        int staticRenderers = ConfigureRendererStaticBakeFlags();
+        int bakedLights = ConfigureLightsForBeautifulBake();
+        int lightProbeCount = CreateOrUpdateBakedLightProbes();
+        ConfigureReflectionProbesForBakedQuality();
+        ConfigureBeautifulLightingSettings();
+        ApplyBeautifulRuntimeProfileToOpenScene();
+
+        return new BeautifulLightingSummary(staticRenderers, bakedLights, lightProbeCount);
+    }
+
+    private static int ConfigureRendererStaticBakeFlags()
+    {
+        int staticRendererCount = 0;
+        StaticEditorFlags staticFlags =
+            StaticEditorFlags.ContributeGI |
+            StaticEditorFlags.OccluderStatic |
+            StaticEditorFlags.OccludeeStatic |
+            StaticEditorFlags.BatchingStatic |
+            StaticEditorFlags.ReflectionProbeStatic;
+
+        foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+        {
+            GameObject go = renderer.gameObject;
+            StaticEditorFlags flags = GameObjectUtility.GetStaticEditorFlags(go);
+            if (IsDynamicBakeObject(renderer.transform))
+            {
+                flags &= ~staticFlags;
+                GameObjectUtility.SetStaticEditorFlags(go, flags);
+                EditorUtility.SetDirty(go);
+                continue;
+            }
+
+            if (renderer is MeshRenderer)
+            {
+                flags |= staticFlags;
+                GameObjectUtility.SetStaticEditorFlags(go, flags);
+                renderer.receiveShadows = true;
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+                EditorUtility.SetDirty(renderer);
+                EditorUtility.SetDirty(go);
+                staticRendererCount++;
+            }
+        }
+
+        return staticRendererCount;
+    }
+
+    private static int ConfigureLightsForBeautifulBake()
+    {
+        int bakedLightCount = 0;
+        foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude))
+        {
+            if (IsPlayerLight(light))
+            {
+                light.lightmapBakeType = LightmapBakeType.Realtime;
+                light.shadows = LightShadows.None;
+                light.renderMode = LightRenderMode.Auto;
+                light.intensity = 0.08f;
+                light.range = 5.5f;
+                light.bounceIntensity = 0f;
+                light.color = new Color(1f, 0.96f, 0.88f);
+                EditorUtility.SetDirty(light);
+                continue;
+            }
+
+            if (IsRealtimeSpecularLight(light))
+            {
+                ConfigureRealtimeSpecularLight(light);
+                EditorUtility.SetDirty(light);
+                continue;
+            }
+
+            light.lightmapBakeType = LightmapBakeType.Baked;
+            light.renderMode = LightRenderMode.Auto;
+            ConfigureBeautifulBakedLightOutput(light);
+            bakedLightCount++;
+
+            FlickerLight flicker = light.GetComponent<FlickerLight>();
+            if (flicker != null)
+            {
+                flicker.enabled = false;
+                EditorUtility.SetDirty(flicker);
+            }
+
+            EditorUtility.SetDirty(light);
+        }
+
+        return bakedLightCount;
+    }
+
+    private static void ConfigureBeautifulBakedLightOutput(Light light)
+    {
+        string objectName = light.gameObject.name;
+        string parentName = light.transform.parent != null ? light.transform.parent.name : string.Empty;
+        bool isChandelier = parentName.IndexOf("chandelier", System.StringComparison.OrdinalIgnoreCase) >= 0;
+
+        if (objectName == "point bounce")
+        {
+            light.intensity = isChandelier ? BakedChandelierPointIntensity : BakedPointIntensity;
+            light.range = isChandelier ? 30f : 26f;
+            light.bounceIntensity = 2.35f;
+            light.shadows = LightShadows.Soft;
+            light.shadowStrength = isChandelier ? 0.38f : 0.32f;
+            light.shadowBias = 0.028f;
+            light.shadowNormalBias = 0.18f;
+            light.shadowNearPlane = 0.1f;
+            light.shadowResolution = LightShadowResolution.High;
+            return;
+        }
+
+        if (objectName == "ceiling scatter")
+        {
+            light.intensity = isChandelier ? BakedChandelierScatterIntensity : BakedCeilingScatterIntensity;
+            light.range = isChandelier ? 11f : 9.5f;
+            light.bounceIntensity = 1.95f;
+            light.shadows = LightShadows.None;
+            return;
+        }
+
+        if (objectName == "cool ambient key")
+        {
+            light.intensity = 3.20f;
+            light.bounceIntensity = 1.25f;
+            light.shadows = LightShadows.None;
+            return;
+        }
+
+        if (objectName == "warm ceiling bounce")
+        {
+            light.intensity = 1.70f;
+            light.bounceIntensity = 1.15f;
+            light.shadows = LightShadows.None;
+            return;
+        }
+
+        if (light.type == LightType.Point)
+        {
+            light.intensity = Mathf.Max(light.intensity, 1.25f);
+            light.range = Mathf.Max(light.range, 18f);
+            light.bounceIntensity = Mathf.Max(light.bounceIntensity, 1.55f);
+        }
+    }
+
+    private static bool IsRealtimeSpecularLight(Light light)
+    {
+        string objectName = light.gameObject.name;
+        return objectName == "specular accent" ||
+               objectName == "cool specular key" ||
+               objectName == "warm specular lift";
+    }
+
+    private static void ConfigureRealtimeSpecularLight(Light light)
+    {
+        string objectName = light.gameObject.name;
+        light.lightmapBakeType = LightmapBakeType.Realtime;
+        light.shadows = LightShadows.None;
+        light.renderMode = LightRenderMode.ForcePixel;
+        light.bounceIntensity = 0f;
+
+        if (objectName == "cool specular key")
+        {
+            light.intensity = 0.10f;
+            light.color = new Color(0.74f, 0.88f, 1f);
+            return;
+        }
+
+        if (objectName == "warm specular lift")
+        {
+            light.intensity = 0.035f;
+            light.color = new Color(1f, 0.84f, 0.64f);
+            return;
+        }
+
+        string parentName = light.transform.parent != null ? light.transform.parent.name : string.Empty;
+        bool isChandelier = parentName.IndexOf("chandelier", System.StringComparison.OrdinalIgnoreCase) >= 0;
+        light.intensity = isChandelier ? 0.14f : 0.11f;
+        light.range = isChandelier ? 13.5f : 11.5f;
+    }
+
+    private static void ConfigureReflectionProbesForBakedQuality()
+    {
+        foreach (ReflectionProbe probe in Object.FindObjectsByType<ReflectionProbe>(FindObjectsInactive.Exclude))
+        {
+            probe.mode = ReflectionProbeMode.Baked;
+            probe.resolution = Mathf.Max(probe.resolution, QualityReflectionProbeResolution);
+            probe.intensity = Mathf.Max(probe.intensity, 1.55f);
+            probe.boxProjection = true;
+            probe.shadowDistance = 42f;
+            EditorUtility.SetDirty(probe);
+        }
+    }
+
+    private static int CreateOrUpdateBakedLightProbes()
+    {
+        GameObject probeRoot = GameObject.Find(LightProbeRootName);
+        if (probeRoot == null)
+        {
+            probeRoot = new GameObject(LightProbeRootName);
+        }
+
+        LightProbeGroup probeGroup = probeRoot.GetComponent<LightProbeGroup>();
+        if (probeGroup == null)
+        {
+            probeGroup = probeRoot.AddComponent<LightProbeGroup>();
+        }
+
+        probeRoot.transform.position = Vector3.zero;
+        probeRoot.transform.rotation = Quaternion.identity;
+        probeRoot.transform.localScale = Vector3.one;
+
+        Bounds bounds = CalculateSceneBounds(GameObject.Find(RootName) != null ? GameObject.Find(RootName).transform : null);
+        Physics.SyncTransforms();
+
+        List<Vector3> probes = new List<Vector3>();
+        AddProbeGrid(probes, bounds, UpperProbeHeight);
+        AddProbeGrid(probes, bounds, LowerProbeHeight);
+
+        if (probes.Count < 4)
+        {
+            probes.Add(bounds.center + Vector3.up * 0.5f);
+            probes.Add(bounds.center + Vector3.right * 2f + Vector3.up * 0.5f);
+            probes.Add(bounds.center - Vector3.right * 2f + Vector3.up * 0.5f);
+            probes.Add(bounds.center + Vector3.forward * 2f + Vector3.up * 0.5f);
+        }
+
+        probeGroup.probePositions = probes.ToArray();
+        EditorUtility.SetDirty(probeGroup);
+        EditorUtility.SetDirty(probeRoot);
+        return probes.Count;
+    }
+
+    private static void AddProbeGrid(List<Vector3> probes, Bounds bounds, float y)
+    {
+        if (y < bounds.min.y + 0.25f || y > bounds.max.y - 0.25f)
+        {
+            return;
+        }
+
+        float minX = Mathf.Ceil((bounds.min.x + 1f) / LightProbeSpacing) * LightProbeSpacing;
+        float maxX = bounds.max.x - 1f;
+        float minZ = Mathf.Ceil((bounds.min.z + 1f) / LightProbeSpacing) * LightProbeSpacing;
+        float maxZ = bounds.max.z - 1f;
+
+        for (float x = minX; x <= maxX; x += LightProbeSpacing)
+        {
+            for (float z = minZ; z <= maxZ; z += LightProbeSpacing)
+            {
+                Vector3 position = new Vector3(x, y, z);
+                if (Physics.CheckSphere(position, 0.28f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                {
+                    continue;
+                }
+
+                probes.Add(position);
+            }
+        }
+    }
+
+    private static void ConfigureBeautifulLightingSettings()
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(BeautifulLightingSettingsPath));
+        LightingSettings settings = AssetDatabase.LoadAssetAtPath<LightingSettings>(BeautifulLightingSettingsPath);
+        if (settings == null)
+        {
+            settings = new LightingSettings();
+            AssetDatabase.CreateAsset(settings, BeautifulLightingSettingsPath);
+        }
+
+        settings.bakedGI = true;
+        settings.realtimeGI = false;
+        settings.realtimeEnvironmentLighting = false;
+        settings.autoGenerate = false;
+        settings.mixedBakeMode = MixedLightingMode.Shadowmask;
+        settings.lightmapper = LightingSettings.Lightmapper.ProgressiveGPU;
+        settings.directionalityMode = LightmapsMode.CombinedDirectional;
+        settings.lightmapResolution = 22f;
+        settings.lightmapMaxSize = 2048;
+        settings.lightmapPadding = 3;
+        settings.lightmapCompression = LightmapCompression.HighQuality;
+        settings.compressLightmaps = true;
+        settings.ao = true;
+        settings.aoMaxDistance = 0.55f;
+        settings.aoExponentDirect = 0.12f;
+        settings.aoExponentIndirect = 0.08f;
+        settings.directSampleCount = 96;
+        settings.indirectSampleCount = 512;
+        settings.environmentSampleCount = 128;
+        settings.maxBounces = 6;
+        settings.indirectResolution = 2.5f;
+        settings.filteringMode = LightingSettings.FilterMode.Auto;
+        settings.prioritizeView = false;
+        settings.respectSceneVisibilityWhenBakingGI = false;
+
+        Lightmapping.giWorkflowMode = Lightmapping.GIWorkflowMode.OnDemand;
+        Lightmapping.bakedGI = true;
+        Lightmapping.realtimeGI = false;
+        Lightmapping.lightingSettings = settings;
+        LightmapSettings.lightmapsMode = LightmapsMode.CombinedDirectional;
+
+        EditorUtility.SetDirty(settings);
+    }
+
+    private static void ApplyBeautifulRuntimeProfileToOpenScene()
+    {
+        WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
+        ConfigureRuntimeLightingSettings(settings, 12, 0, true, false, false, RenderingPath.DeferredShading);
+        settings.Apply();
+
+        QualitySettings.pixelLightCount = 12;
+        QualitySettings.realtimeReflectionProbes = false;
+        QualitySettings.shadows = ShadowQuality.All;
+        QualitySettings.shadowResolution = ShadowResolution.High;
+        QualitySettings.shadowProjection = ShadowProjection.StableFit;
+        QualitySettings.shadowDistance = 42f;
+        QualitySettings.shadowNearPlaneOffset = 2f;
+        QualitySettings.antiAliasing = 0;
+        QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
 
         foreach (Camera camera in Object.FindObjectsByType<Camera>(FindObjectsInactive.Exclude))
         {
             camera.allowHDR = true;
-            camera.allowMSAA = true;
+            camera.allowMSAA = false;
             camera.useOcclusionCulling = true;
-            camera.renderingPath = RenderingPath.Forward;
+            camera.renderingPath = RenderingPath.DeferredShading;
+            EnsureDeferredPostAntialiasing(camera, true);
+            EditorUtility.SetDirty(camera);
+        }
+
+        EditorUtility.SetDirty(settings);
+        EditorUtility.SetDirty(settings.gameObject);
+    }
+
+    private static void MonitorBeautifulBake()
+    {
+        if (!waitingForBeautifulBake)
+        {
+            EditorApplication.update -= MonitorBeautifulBake;
+            return;
+        }
+
+        if (Lightmapping.isRunning || StaticOcclusionCulling.isRunning)
+        {
+            if (EditorApplication.timeSinceStartup >= nextBeautifulBakeLogTime)
+            {
+                nextBeautifulBakeLogTime = EditorApplication.timeSinceStartup + 10d;
+                LogBeautifulBakeStatus();
+            }
+
+            return;
+        }
+
+        waitingForBeautifulBake = false;
+        EditorApplication.update -= MonitorBeautifulBake;
+        int bakedProbes = BakeReflectionProbesForBeautifulProfile();
+        LightProbes.Tetrahedralize();
+        EditorSceneManager.SaveOpenScenes();
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"[WolfDynamicLightingSetup] Beautiful lighting/occlusion bake finished for {ScenePath}. Baked reflection probes: {bakedProbes}, occlusion data: {StaticOcclusionCulling.umbraDataSize:N0} bytes.");
+    }
+
+    private static int BakeReflectionProbesForBeautifulProfile()
+    {
+        Directory.CreateDirectory(BakedReflectionProbeRoot);
+        int bakedCount = 0;
+        foreach (ReflectionProbe probe in Object.FindObjectsByType<ReflectionProbe>(FindObjectsInactive.Exclude))
+        {
+            if (probe.mode != ReflectionProbeMode.Baked)
+            {
+                continue;
+            }
+
+            string path = $"{BakedReflectionProbeRoot}/{SanitizeFileName(probe.name)}.exr";
+            if (Lightmapping.BakeReflectionProbe(probe, path))
+            {
+                bakedCount++;
+                EditorUtility.SetDirty(probe);
+            }
+        }
+
+        return bakedCount;
+    }
+
+    private static string SanitizeFileName(string value)
+    {
+        foreach (char invalid in Path.GetInvalidFileNameChars())
+        {
+            value = value.Replace(invalid, '_');
+        }
+
+        return string.IsNullOrWhiteSpace(value) ? "ReflectionProbe" : value;
+    }
+
+    private static bool IsDynamicBakeObject(Transform transform)
+    {
+        if (transform.GetComponentInParent<WolfDoor>() != null ||
+            transform.GetComponentInParent<WolfBillboard>() != null ||
+            transform.GetComponentInParent<SimpleFirstPersonController>() != null)
+        {
+            return true;
+        }
+
+        string rootName = transform.root != null ? transform.root.name : string.Empty;
+        return rootName == RootName ||
+               rootName == LightProbeRootName ||
+               rootName == "Wolf Repo Player" ||
+               rootName == "Wolf Repo HUD" ||
+               rootName == PerformanceRootName;
+    }
+
+    private static bool IsPlayerLight(Light light)
+    {
+        string rootName = light.transform.root != null ? light.transform.root.name : string.Empty;
+        return rootName == "Wolf Repo Player";
+    }
+
+    private static void ApplySceneLightingSettings()
+    {
+        RenderSettings.ambientMode = AmbientMode.Trilight;
+        RenderSettings.ambientSkyColor = new Color(0.50f, 0.54f, 0.62f);
+        RenderSettings.ambientEquatorColor = new Color(0.42f, 0.44f, 0.50f);
+        RenderSettings.ambientGroundColor = new Color(0.26f, 0.24f, 0.22f);
+        RenderSettings.ambientLight = new Color(0.46f, 0.48f, 0.54f);
+        RenderSettings.ambientIntensity = 0.85f;
+        RenderSettings.reflectionIntensity = 1.20f;
+        RenderSettings.reflectionBounces = 3;
+        RenderSettings.defaultReflectionResolution = QualityReflectionProbeResolution;
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.ExponentialSquared;
+        RenderSettings.fogDensity = 0.00045f;
+        RenderSettings.fogColor = new Color(0.24f, 0.27f, 0.32f);
+
+        foreach (Camera camera in Object.FindObjectsByType<Camera>(FindObjectsInactive.Exclude))
+        {
+            camera.allowHDR = true;
+            camera.allowMSAA = false;
+            camera.useOcclusionCulling = true;
+            camera.renderingPath = RenderingPath.DeferredShading;
+            EnsureDeferredPostAntialiasing(camera, true);
             EditorUtility.SetDirty(camera);
         }
     }
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.0f, 0.74f, 0.92f);
-        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.56f, 0.72f);
-        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.52f, 0.68f);
-        SetMaterialSurface("DoorTeal_Target", 0.82f, 0.84f, 0.95f);
-        SetMaterialSurface("FloorTile_Target", 0.06f, 0.78f, 0.92f);
-        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.46f, 0.62f);
-        SetMaterialSurface("DarkMetalTrim_Target", 0.88f, 0.82f, 0.94f);
-        SetMaterialSurface("PrisonCellDoor_Target", 0.72f, 0.74f, 0.86f);
+        SetMaterialSurface("BlueWall_Target", 0.02f, 0.88f, 1.0f);
+        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.66f, 0.82f);
+        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.62f, 0.78f);
+        SetMaterialSurface("DoorTeal_Target", 0.88f, 0.90f, 1.0f);
+        SetMaterialSurface("FloorTile_Target", 0.08f, 0.88f, 1.0f);
+        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.56f, 0.72f);
+        SetMaterialSurface("DarkMetalTrim_Target", 0.55f, 0.78f, 0.95f);
+        SetMaterialSurface("PrisonCellDoor_Target", 0.32f, 0.62f, 0.85f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
         WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
+        TuneReferenceMaterialDetails();
 
-        SetEmission("Assets/Materials/Mat_Lamp_Glow.mat", WarmLamp * 3.2f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmBulb.mat", WarmLamp * 3.4f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", CoolLamp * 2.55f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_StairLampBulb.mat", WarmLamp * 2.85f);
+        SetEmission("Assets/Materials/Mat_Lamp_Glow.mat", WarmLamp * 4.4f);
+        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmBulb.mat", WarmLamp * 4.7f);
+        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", CoolLamp * 3.75f);
+        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_StairLampBulb.mat", WarmLamp * 4.0f);
+    }
+
+    private static void TuneReferenceMaterialDetails()
+    {
+        TuneTargetMaterial(
+            "BlueWall_Target",
+            new Color(1.58f, 1.70f, 2.28f, 1f),
+            new Color(0.08f, 0.12f, 0.30f, 1f),
+            1.14f,
+            0.42f,
+            0.026f);
+
+        TuneTargetMaterial(
+            "WhiteStoneWall_Target",
+            new Color(1.12f, 1.08f, 1.0f, 1f),
+            new Color(0.20f, 0.19f, 0.17f, 1f),
+            0.82f,
+            0.42f,
+            0.018f);
+
+        TuneTargetMaterial(
+            "WhiteStoneWall_Dark_Target",
+            new Color(0.92f, 0.88f, 0.78f, 1f),
+            new Color(0.12f, 0.11f, 0.095f, 1f),
+            0.78f,
+            0.46f,
+            0.016f);
+
+        TuneTargetMaterial(
+            "DoorTeal_Target",
+            new Color(1.08f, 1.20f, 1.24f, 1f),
+            new Color(0.04f, 0.13f, 0.15f, 1f),
+            1.08f,
+            0.38f,
+            0.020f);
+
+        TuneTargetMaterial(
+            "FloorTile_Target",
+            new Color(0.86f, 0.84f, 0.78f, 1f),
+            Color.black,
+            1.06f,
+            0.42f,
+            0.020f);
+
+        TuneTargetMaterial(
+            "CeilingPanel_Target",
+            new Color(1.42f, 1.45f, 1.36f, 1f),
+            new Color(0.27f, 0.29f, 0.33f, 1f),
+            0.88f,
+            0.20f,
+            0.010f);
+
+        TuneTargetMaterial(
+            "DarkMetalTrim_Target",
+            new Color(1.65f, 1.70f, 1.78f, 1f),
+            new Color(0.18f, 0.20f, 0.24f, 1f),
+            1.0f,
+            0.38f,
+            0.012f);
+
+        TuneTargetMaterial(
+            "PrisonCellDoor_Target",
+            new Color(1.82f, 1.88f, 1.94f, 1f),
+            new Color(0.20f, 0.22f, 0.26f, 1f),
+            0.72f,
+            0.34f,
+            0f);
+    }
+
+    private static void TuneTargetMaterial(
+        string materialName,
+        Color colorTint,
+        Color emissionTint,
+        float bumpScale,
+        float occlusionStrength,
+        float parallax)
+    {
+        Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/{materialName}.mat");
+        if (material == null)
+        {
+            return;
+        }
+
+        SetColor(material, "_Color", colorTint);
+        SetColor(material, "_BaseColor", colorTint);
+        SetColor(material, "_EmissionColor", emissionTint);
+        SetFloat(material, "_BumpScale", bumpScale);
+        SetFloat(material, "_OcclusionStrength", occlusionStrength);
+        SetFloat(material, "_Parallax", parallax);
+        SetFloat(material, "_GlossyReflections", 1f);
+        SetFloat(material, "_SpecularHighlights", 1f);
+
+        if (emissionTint.maxColorComponent > 0f)
+        {
+            material.EnableKeyword("_EMISSION");
+        }
+        else
+        {
+            material.DisableKeyword("_EMISSION");
+        }
+
+        if (parallax > 0f && material.HasProperty("_ParallaxMap") && material.GetTexture("_ParallaxMap") != null)
+        {
+            material.EnableKeyword("_PARALLAXMAP");
+        }
+
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        EditorUtility.SetDirty(material);
     }
 
     private static void ApplyRendererLightingFlags(Transform generatedRoot)
     {
+        GameObject dynamicLightingRoot = GameObject.Find(RootName);
+        Transform dynamicLightingTransform = dynamicLightingRoot != null ? dynamicLightingRoot.transform : null;
+
         foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
         {
             if (generatedRoot != null && renderer.transform.IsChildOf(generatedRoot))
             {
+                continue;
+            }
+
+            if (dynamicLightingTransform != null && renderer.transform.IsChildOf(dynamicLightingTransform))
+            {
+                renderer.receiveShadows = false;
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+                renderer.shadowCastingMode = ShadowCastingMode.Off;
+                EditorUtility.SetDirty(renderer);
                 continue;
             }
 
@@ -277,6 +917,7 @@ public static class WolfDynamicLightingSetup
         Material warmWallReflectionMaterial,
         Material coolWallReflectionMaterial,
         bool createRealtimeLight,
+        bool createSpecularAccent,
         bool createFlicker)
     {
         GameObject rig = CreateChild(parent, $"Dynamic Lamp {index:00} - {anchor.Name}");
@@ -312,9 +953,9 @@ public static class WolfDynamicLightingSetup
         Light point = pointObject.AddComponent<Light>();
         point.type = LightType.Point;
         point.color = Color.Lerp(anchor.Color, Color.white, 0.38f);
-        point.intensity = anchor.BaseIntensity * 0.82f;
-        point.range = anchor.Range * 1.08f;
-        point.bounceIntensity = 1.2f;
+        point.intensity = anchor.BaseIntensity * 1.04f;
+        point.range = anchor.Range * 1.18f;
+        point.bounceIntensity = 1.55f;
         point.shadows = LightShadows.Soft;
         point.shadowStrength = anchor.IsChandelier ? 0.58f : 0.44f;
         point.shadowBias = 0.035f;
@@ -329,12 +970,27 @@ public static class WolfDynamicLightingSetup
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
         ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, anchor.IsChandelier ? 0.36f : 0.28f);
-        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.30f : 0.22f);
-        ceilingScatter.range = anchor.IsChandelier ? 5.4f : 3.8f;
-        ceilingScatter.bounceIntensity = 0.9f;
+        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.46f : 0.34f);
+        ceilingScatter.range = anchor.IsChandelier ? 6.5f : 4.8f;
+        ceilingScatter.bounceIntensity = 1.2f;
         ceilingScatter.shadows = LightShadows.None;
         ceilingScatter.renderMode = LightRenderMode.ForcePixel;
         ceilingScatter.lightmapBakeType = LightmapBakeType.Realtime;
+
+        if (createSpecularAccent)
+        {
+            GameObject specularObject = CreateChild(rig.transform, "specular accent");
+            specularObject.transform.localPosition = Vector3.down * (anchor.IsChandelier ? 0.20f : 0.12f);
+            Light specular = specularObject.AddComponent<Light>();
+            specular.type = LightType.Point;
+            specular.color = Color.Lerp(anchor.Color, Color.white, anchor.IsChandelier ? 0.68f : 0.74f);
+            specular.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.11f : 0.10f);
+            specular.range = anchor.IsChandelier ? 13.5f : 11.5f;
+            specular.bounceIntensity = 0f;
+            specular.shadows = LightShadows.None;
+            specular.renderMode = LightRenderMode.ForcePixel;
+            specular.lightmapBakeType = LightmapBakeType.Realtime;
+        }
 
         if (createFlicker)
         {
@@ -356,7 +1012,7 @@ public static class WolfDynamicLightingSetup
         spill.transform.localPosition = Vector3.up * (anchor.IsChandelier ? 0.36f : 0.075f);
         spill.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
-        float diameter = anchor.IsChandelier ? 5.8f : 3.6f;
+        float diameter = anchor.IsChandelier ? 7.2f : 4.8f;
         spill.transform.localScale = new Vector3(diameter, diameter, 1f);
 
         Renderer renderer = spill.GetComponent<Renderer>();
@@ -392,8 +1048,8 @@ public static class WolfDynamicLightingSetup
             normal = Vector3.up;
         }
 
-        float wide = anchor.IsChandelier ? 7.2f : 5.2f;
-        float longAxis = anchor.IsChandelier ? 8.2f : 6.0f;
+        float wide = anchor.IsChandelier ? 6.2f : 4.8f;
+        float longAxis = anchor.IsChandelier ? 7.2f : 5.4f;
         Material material = anchor.IsChandelier ? warmFloorReflectionMaterial : coolFloorReflectionMaterial;
         CreateSurfaceReflectionQuad(parent, "floor lamp reflection", position, normal, material, wide, longAxis);
     }
@@ -422,8 +1078,8 @@ public static class WolfDynamicLightingSetup
             if (TryFindSceneSurface(origin, direction, maxDistance, SurfaceTarget.Wall, out RaycastHit hit))
             {
                 Vector3 position = hit.point + hit.normal * 0.024f;
-                float width = anchor.IsChandelier ? 4.4f : 3.35f;
-                float height = anchor.IsChandelier ? 2.25f : 1.75f;
+                float width = anchor.IsChandelier ? 4.2f : 3.4f;
+                float height = anchor.IsChandelier ? 2.2f : 1.8f;
                 CreateSurfaceReflectionQuad(parent, "wall lamp reflection", position, hit.normal, material, width, height);
             }
         }
@@ -523,14 +1179,42 @@ public static class WolfDynamicLightingSetup
             "cool ambient key",
             new Vector3(62f, -28f, 0f),
             new Color(0.72f, 0.83f, 1f),
-            0.72f);
+            0.55f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "warm ceiling bounce",
             new Vector3(78f, 128f, 0f),
             new Color(1f, 0.82f, 0.58f),
-            0.34f);
+            0.28f);
+
+        CreateDirectionalFill(
+            fillGroup.transform,
+            "side fill north",
+            new Vector3(38f, 60f, 0f),
+            new Color(0.86f, 0.90f, 1f),
+            0.18f);
+
+        CreateDirectionalFill(
+            fillGroup.transform,
+            "side fill south",
+            new Vector3(38f, -120f, 0f),
+            new Color(1f, 0.92f, 0.82f),
+            0.16f);
+
+        CreateDirectionalFill(
+            fillGroup.transform,
+            "cool specular key",
+            new Vector3(54f, -36f, 0f),
+            new Color(0.74f, 0.88f, 1f),
+            0.06f);
+
+        CreateDirectionalFill(
+            fillGroup.transform,
+            "warm specular lift",
+            new Vector3(74f, 138f, 0f),
+            new Color(1f, 0.84f, 0.64f),
+            0.025f);
     }
 
     private static void CreateDirectionalFill(Transform parent, string name, Vector3 eulerAngles, Color color, float intensity)
@@ -566,7 +1250,7 @@ public static class WolfDynamicLightingSetup
         probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
         probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
         probe.resolution = QualityReflectionProbeResolution;
-        probe.intensity = 1.12f;
+        probe.intensity = 1.55f;
         probe.boxProjection = true;
         probe.size = size;
         probe.center = Vector3.zero;
@@ -595,7 +1279,7 @@ public static class WolfDynamicLightingSetup
             probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
             probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
             probe.resolution = Mathf.Max(probe.resolution, QualityReflectionProbeResolution);
-            probe.intensity = Mathf.Max(probe.intensity, 1.05f);
+            probe.intensity = Mathf.Max(probe.intensity, 1.55f);
             probe.boxProjection = true;
             probe.shadowDistance = 42f;
             EditorUtility.SetDirty(probe);
@@ -609,7 +1293,7 @@ public static class WolfDynamicLightingSetup
 
         foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
         {
-            if (renderer.transform.IsChildOf(generatedRoot))
+            if (generatedRoot != null && renderer.transform.IsChildOf(generatedRoot))
             {
                 continue;
             }
@@ -636,9 +1320,9 @@ public static class WolfDynamicLightingSetup
             shader = Shader.Find("Universal Render Pipeline/Lit");
         }
         Material material = LoadOrCreateMaterial(LampGlowMaterialPath, shader);
-        SetColor(material, "_Color", new Color(1.0f, 0.78f, 0.38f, 1f));
-        SetEmission(material, WarmLamp * 3.8f);
-        SetFloat(material, "_Glossiness", 0.48f);
+        SetColor(material, "_Color", new Color(1.0f, 0.82f, 0.46f, 1f));
+        SetEmission(material, WarmLamp * 5.2f);
+        SetFloat(material, "_Glossiness", 0.62f);
         SetFloat(material, "_Metallic", 0.0f);
         EditorUtility.SetDirty(material);
         return material;
@@ -694,7 +1378,7 @@ public static class WolfDynamicLightingSetup
         SetColor(material, "_EmissionColor", lightColor * emissionScale);
         SetFloat(material, "_Mode", 3f);
         SetFloat(material, "_SrcBlend", (float)BlendMode.SrcAlpha);
-        SetFloat(material, "_DstBlend", (float)BlendMode.One);
+        SetFloat(material, "_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
         SetFloat(material, "_ZWrite", 0f);
         SetFloat(material, "_Glossiness", floorReflection ? 0.92f : 0.76f);
         SetFloat(material, "_GlossMapScale", 1f);
@@ -713,12 +1397,6 @@ public static class WolfDynamicLightingSetup
 
     private static Texture2D LoadOrCreateCeilingSpillTexture()
     {
-        Texture2D existing = AssetDatabase.LoadAssetAtPath<Texture2D>(CeilingSpillTexturePath);
-        if (existing != null)
-        {
-            return existing;
-        }
-
         const int size = 128;
         Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, true);
         Color[] pixels = new Color[size * size];
@@ -732,7 +1410,8 @@ public static class WolfDynamicLightingSetup
                 float distance = Vector2.Distance(new Vector2(x, y), center) / radius;
                 float falloff = Mathf.Clamp01(1f - distance);
                 falloff = Mathf.SmoothStep(0f, 1f, falloff);
-                float alpha = Mathf.Pow(falloff, 2.35f);
+                falloff = Mathf.SmoothStep(0f, 1f, falloff);
+                float alpha = Mathf.Pow(falloff, 1.35f);
                 pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
             }
         }
@@ -773,27 +1452,16 @@ public static class WolfDynamicLightingSetup
             {
                 float nx = (x - center.x) / center.x;
                 float ny = (y - center.y) / center.y;
-                float radial = Mathf.Clamp01(1f - Mathf.Sqrt(nx * nx + ny * ny));
+                float radius = Mathf.Sqrt(nx * nx + ny * ny);
+                float radial = Mathf.Clamp01(1f - radius);
+                radial = Mathf.SmoothStep(0f, 1f, radial);
                 radial = Mathf.SmoothStep(0f, 1f, radial);
                 float borderDistance = 1f - Mathf.Max(Mathf.Abs(nx), Mathf.Abs(ny));
-                float edgeFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / 0.18f));
+                float edgeFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / 0.28f));
 
-                float streak;
-                if (floorReflection)
-                {
-                    float horizontal = Mathf.Clamp01(1f - Mathf.Abs(nx));
-                    float vertical = Mathf.Exp(-Mathf.Abs(ny) * 5.4f);
-                    streak = Mathf.Pow(horizontal, 0.7f) * vertical;
-                }
-                else
-                {
-                    float core = Mathf.Exp(-Mathf.Abs(nx) * 4.2f);
-                    float verticalFade = Mathf.Pow(Mathf.Clamp01(1f - Mathf.Abs(ny)), 0.55f);
-                    float fallDown = Mathf.Clamp01(1f - Mathf.Max(0f, -ny) * 0.75f);
-                    streak = core * verticalFade * fallDown;
-                }
-
-                float alpha = Mathf.Clamp01(Mathf.Pow(radial, floorReflection ? 1.75f : 2.1f) * 0.72f + streak * 0.42f) * edgeFade;
+                float broadReflection = floorReflection ? 0.30f : 0.26f;
+                float falloffPower = floorReflection ? 2.10f : 2.35f;
+                float alpha = Mathf.Clamp01(Mathf.Pow(radial, falloffPower) * broadReflection) * edgeFade;
                 pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
             }
         }
@@ -981,7 +1649,7 @@ public static class WolfDynamicLightingSetup
     private static void ApplyQualityLightingProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, 24, QualityAntiAliasingSamples, false, false, false);
+        ConfigureRuntimeLightingSettings(settings, 24, 0, false, false, false, RenderingPath.DeferredShading);
         settings.Apply();
 
         QualitySettings.pixelLightCount = 24;
@@ -999,8 +1667,10 @@ public static class WolfDynamicLightingSetup
         foreach (Camera camera in Object.FindObjectsByType<Camera>(FindObjectsInactive.Exclude))
         {
             camera.allowHDR = true;
-            camera.allowMSAA = true;
+            camera.allowMSAA = false;
             camera.useOcclusionCulling = true;
+            camera.renderingPath = RenderingPath.DeferredShading;
+            EnsureDeferredPostAntialiasing(camera, true);
             EditorUtility.SetDirty(camera);
         }
 
@@ -1014,7 +1684,8 @@ public static class WolfDynamicLightingSetup
         int antiAliasingSamples,
         bool disableRealtimeReflectionProbes,
         bool disableRealtimeShadows,
-        bool disableCameraHdr)
+        bool disableCameraHdr,
+        RenderingPath cameraRenderingPath = RenderingPath.Forward)
     {
         SerializedObject serialized = new SerializedObject(settings);
         SetSerializedInt(serialized, "targetFrameRate", 60);
@@ -1025,8 +1696,13 @@ public static class WolfDynamicLightingSetup
         SetSerializedBool(serialized, "disableRealtimeReflectionProbes", disableRealtimeReflectionProbes);
         SetSerializedBool(serialized, "disableRealtimeShadows", disableRealtimeShadows);
         SetSerializedBool(serialized, "forceAnisotropicTextures", true);
-        SetSerializedBool(serialized, "enableCameraMsaa", true);
+        SetSerializedBool(serialized, "enableCameraMsaa", cameraRenderingPath != RenderingPath.DeferredShading);
         SetSerializedBool(serialized, "disableCameraHdr", disableCameraHdr);
+        SetSerializedInt(serialized, "cameraRenderingPath", (int)cameraRenderingPath);
+        SetSerializedBool(serialized, "enableDeferredPostAntialiasing", cameraRenderingPath == RenderingPath.DeferredShading);
+        SetSerializedFloat(serialized, "postAntialiasingSubpixelBlending", 0.72f);
+        SetSerializedFloat(serialized, "postAntialiasingEdgeThreshold", 0.11f);
+        SetSerializedFloat(serialized, "postAntialiasingEdgeThresholdMin", 0.0312f);
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
@@ -1048,6 +1724,39 @@ public static class WolfDynamicLightingSetup
         }
     }
 
+    private static void SetSerializedFloat(SerializedObject serialized, string propertyName, float value)
+    {
+        SerializedProperty property = serialized.FindProperty(propertyName);
+        if (property != null)
+        {
+            property.floatValue = value;
+        }
+    }
+
+    private static void EnsureDeferredPostAntialiasing(Camera camera, bool enabled)
+    {
+        WolfDeferredPostAntiAliasing postAntialiasing = camera.GetComponent<WolfDeferredPostAntiAliasing>();
+        if (!enabled)
+        {
+            if (postAntialiasing != null)
+            {
+                postAntialiasing.enabled = false;
+                EditorUtility.SetDirty(postAntialiasing);
+            }
+
+            return;
+        }
+
+        if (postAntialiasing == null)
+        {
+            postAntialiasing = camera.gameObject.AddComponent<WolfDeferredPostAntiAliasing>();
+        }
+
+        postAntialiasing.Configure(0.72f, 0.11f, 0.0312f);
+        postAntialiasing.enabled = true;
+        EditorUtility.SetDirty(postAntialiasing);
+    }
+
     private static WolfPerformanceSettings FindOrCreatePerformanceSettings()
     {
         WolfPerformanceSettings[] existingSettings = Object.FindObjectsByType<WolfPerformanceSettings>(FindObjectsInactive.Include);
@@ -1059,6 +1768,25 @@ public static class WolfDynamicLightingSetup
 
         GameObject settingsObject = new GameObject(PerformanceRootName);
         return settingsObject.AddComponent<WolfPerformanceSettings>();
+    }
+
+    private readonly struct BeautifulLightingSummary
+    {
+        public BeautifulLightingSummary(int staticRenderers, int bakedLights, int lightProbes)
+        {
+            StaticRenderers = staticRenderers;
+            BakedLights = bakedLights;
+            LightProbes = lightProbes;
+        }
+
+        private int StaticRenderers { get; }
+        private int BakedLights { get; }
+        private int LightProbes { get; }
+
+        public override string ToString()
+        {
+            return $"staticRenderers={StaticRenderers}, bakedLights={BakedLights}, lightProbes={LightProbes}";
+        }
     }
 
     private enum SurfaceTarget
