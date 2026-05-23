@@ -20,6 +20,8 @@ public static class WolfTargetRoomTextureApplier
         AssetDatabase.Refresh();
 
         var blueWall = LoadMaterial("BlueWall_Target");
+        var whiteStoneWall = LoadMaterial("WhiteStoneWall_Target");
+        var whiteStoneWallDark = LoadMaterial("WhiteStoneWall_Dark_Target");
         var doorTeal = LoadMaterial("DoorTeal_Target");
         var floorTile = LoadMaterial("FloorTile_Target");
         var ceilingPanel = LoadMaterial("CeilingPanel_Target");
@@ -27,15 +29,28 @@ public static class WolfTargetRoomTextureApplier
         var prisonCellDoor = LoadMaterial("PrisonCellDoor_Target");
 
         ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.58f);
+        ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.34f);
+        ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.34f);
         ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.70f, 0.72f);
         ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.04f, 0.62f);
-        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.20f, 0.38f);
+        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.0f, 0.26f);
+        WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
+        WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
+        WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
         ConfigureMaterial(darkMetal, new Vector2(4f, 4f), 0.85f, 0.68f);
         ConfigureMaterial(prisonCellDoor, new Vector2(1f, 1f), 0.60f, 0.58f);
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        ApplyResult result = ApplyStructuralTargetMaterials(blueWall, doorTeal, floorTile, ceilingPanel, darkMetal, prisonCellDoor);
+        ApplyResult result = ApplyStructuralTargetMaterials(
+            blueWall,
+            whiteStoneWall,
+            whiteStoneWallDark,
+            doorTeal,
+            floorTile,
+            ceilingPanel,
+            darkMetal,
+            prisonCellDoor);
 
         EditorSceneManager.MarkSceneDirty(scene);
         EditorSceneManager.SaveScene(scene);
@@ -44,7 +59,7 @@ public static class WolfTargetRoomTextureApplier
 
         Debug.Log(
             $"[WolfTargetRoomTextureApplier] Applied target look to {ScenePath}. " +
-            $"Wall slots: {result.WallSlots}, door slots: {result.DoorSlots}, " +
+            $"Wall slots: {result.WallSlots}, white stone slots: {result.WhiteStoneWallSlots}, door slots: {result.DoorSlots}, " +
             $"floor/stair slots: {result.FloorSlots}, ceiling slots: {result.CeilingSlots}, " +
             $"dark metal/trim slots: {result.DarkMetalSlots}, prison cell slots: {result.PrisonCellSlots}, " +
             $"restored wall slots: {result.RestoredWallSlots}, " +
@@ -65,6 +80,8 @@ public static class WolfTargetRoomTextureApplier
 
     private static ApplyResult ApplyStructuralTargetMaterials(
         Material blueWall,
+        Material whiteStoneWall,
+        Material whiteStoneWallDark,
         Material doorTeal,
         Material floorTile,
         Material ceilingPanel,
@@ -115,6 +132,8 @@ public static class WolfTargetRoomTextureApplier
                     current.name,
                     i,
                     blueWall,
+                    whiteStoneWall,
+                    whiteStoneWallDark,
                     doorTeal,
                     floorTile,
                     ceilingPanel,
@@ -149,6 +168,8 @@ public static class WolfTargetRoomTextureApplier
         string materialName,
         int materialIndex,
         Material blueWall,
+        Material whiteStoneWall,
+        Material whiteStoneWallDark,
         Material doorTeal,
         Material floorTile,
         Material ceilingPanel,
@@ -162,6 +183,12 @@ public static class WolfTargetRoomTextureApplier
             {
                 materialTarget = MaterialTarget.PrisonCell;
                 return prisonCellDoor;
+            }
+
+            if (ShouldUseTargetWhiteStoneWall(wallValue))
+            {
+                materialTarget = MaterialTarget.WhiteStoneWall;
+                return materialIndex < 2 ? whiteStoneWallDark : whiteStoneWall;
             }
 
             if (ShouldUseTargetBlueWall(wallValue))
@@ -235,6 +262,11 @@ public static class WolfTargetRoomTextureApplier
     private static bool ShouldUseTargetBlueWall(int wallValue)
     {
         return wallValue == 8 || wallValue == 9;
+    }
+
+    private static bool ShouldUseTargetWhiteStoneWall(int wallValue)
+    {
+        return wallValue == 1 || wallValue == 2;
     }
 
     private static bool ShouldUsePrisonCellDoor(int wallValue)
@@ -398,6 +430,8 @@ public static class WolfTargetRoomTextureApplier
         SetTextureScale(material, "_BumpMap", scale);
         SetTextureScale(material, "_MetallicGlossMap", scale);
         SetTextureScale(material, "_OcclusionMap", scale);
+        SetTextureScale(material, "_ParallaxMap", scale);
+        SetTextureScale(material, "_EmissionMap", scale);
 
         SetFloat(material, "_Metallic", metallic);
         SetFloat(material, "_Smoothness", smoothness);
@@ -430,6 +464,7 @@ public static class WolfTargetRoomTextureApplier
     {
         None,
         Wall,
+        WhiteStoneWall,
         Door,
         Floor,
         Ceiling,
@@ -441,6 +476,7 @@ public static class WolfTargetRoomTextureApplier
     private struct ApplyResult
     {
         public int WallSlots;
+        public int WhiteStoneWallSlots;
         public int DoorSlots;
         public int FloorSlots;
         public int CeilingSlots;
@@ -455,6 +491,9 @@ public static class WolfTargetRoomTextureApplier
             {
                 case MaterialTarget.Wall:
                     WallSlots++;
+                    break;
+                case MaterialTarget.WhiteStoneWall:
+                    WhiteStoneWallSlots++;
                     break;
                 case MaterialTarget.Door:
                     DoorSlots++;

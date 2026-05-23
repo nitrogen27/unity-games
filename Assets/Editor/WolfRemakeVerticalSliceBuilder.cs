@@ -252,6 +252,7 @@ namespace HelloWorldRoom.Editor
             serializedHud.FindProperty("faceTexture").objectReferenceValue = textures.Face;
             serializedHud.FindProperty("weaponTexture").objectReferenceValue = textures.Weapon;
             serializedHud.FindProperty("keyTexture").objectReferenceValue = textures.Key;
+            serializedHud.FindProperty("showFps").boolValue = true;
             serializedHud.ApplyModifiedPropertiesWithoutUndo();
         }
 

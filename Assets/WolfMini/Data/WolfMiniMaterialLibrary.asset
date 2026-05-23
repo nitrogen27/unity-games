@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f1ec0edd3187cb45b6ce6b8b9ad6916, type: 3}
+  m_Name: WolfMiniMaterialLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Core.WolfMaterialLibrary
+  atlasTexture: {fileID: 0}
+  upperWallValue: 8
+  lowerWallValue: 8
+  doorTileIndex: 98
+  lockedDoorTileIndex: 100
+  elevatorTileIndex: 102
+  blueWallMaterial: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+  darkerBlueWallMaterial: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+  blueWallColor: {r: 0.09411765, g: 0.16470589, b: 0.5176471, a: 1}
+  darkerBlueWallColor: {r: 0.043137256, g: 0.08627451, b: 0.30588236, a: 1}
+  grayFloorColor: {r: 0.32156864, g: 0.32156864, b: 0.32156864, a: 1}
+  grayCeilingColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+  tealDoorColor: {r: 0, g: 0.49411765, b: 0.5176471, a: 1}
+  woodTrimColor: {r: 0.40784314, g: 0.22352941, b: 0.101960786, a: 1}

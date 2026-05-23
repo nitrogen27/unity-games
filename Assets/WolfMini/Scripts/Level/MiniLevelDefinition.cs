@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using WolfMini.Core;
 using UnityEngine;
 
 namespace WolfMini.Level
@@ -8,6 +9,7 @@ namespace WolfMini.Level
     public sealed class MiniLevelDefinition : ScriptableObject
     {
         public string levelName = "WolfMini Two Floor Demo";
+        public WolfMaterialLibrary materialLibrary;
         public List<FloorSpec> floors = new List<FloorSpec>();
         public List<DoorSpec> doors = new List<DoorSpec>();
         public List<StairSpec> stairs = new List<StairSpec>();

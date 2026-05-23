@@ -30,3 +30,15 @@ WolfMini is a small Unity first-person Wolfenstein3D-style demo scene. The goal 
 ## Working Boundaries
 
 Future work should keep the demo small, readable, and handmade. Scene or code changes should preserve the constants above and avoid broad asset churn or unrelated refactors. Documentation-only work must not touch gameplay code, scenes, assets, materials, textures, project settings, or scripts.
+
+## HDRP/RTX Migration Readiness
+
+This project is not migrated to HDRP yet. Readiness work should keep WolfMini runtime-compatible with the current pipeline while making future material swaps explicit and low-risk.
+
+- Keep `WolfMaterialLibrary` as the material indirection point for runtime-generated WolfMini geometry.
+- Preserve fallback order for walls: atlas texture first, assigned Material asset second, generated solid color last.
+- Keep the default blue wall type at wall value `8`; do not change cell size `2`, wall height `2`, eye height `0.9`, floor elevations `0` and `-3`, or HUD `640x80`.
+- Use concrete Material assets for future HDRP/RTX-ready surfaces before changing renderer pipeline settings.
+- Keep pixelated retro presentation intact when adding PBR/HDRP texture sets; texture filtering and authored scale should stay deliberate.
+- Do not migrate or rewrite `WolfTargetMaterialSetup.cs` as part of WolfMini readiness work.
+- Before a real HDRP migration, duplicate or version material assets, verify shader property mappings, then validate the generated WolfMini scene in editor play mode.

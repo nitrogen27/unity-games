@@ -35,6 +35,12 @@ namespace WolfMini.Level
             set => buildOnStart = value;
         }
 
+        private WolfMaterialLibrary ActiveMaterialLibrary => materialLibrary != null
+            ? materialLibrary
+            : levelDefinition != null
+                ? levelDefinition.materialLibrary
+                : null;
+
         private WolfAtlasMaterialCache FallbackMaterials
         {
             get
@@ -414,9 +420,10 @@ namespace WolfMini.Level
 
         private Material GetWallMaterial(int wallValue, bool darkSide)
         {
-            if (materialLibrary != null)
+            WolfMaterialLibrary activeMaterialLibrary = ActiveMaterialLibrary;
+            if (activeMaterialLibrary != null)
             {
-                return materialLibrary.GetWallMaterial(wallValue, darkSide);
+                return activeMaterialLibrary.GetWallMaterial(wallValue, darkSide);
             }
 
             Color color = darkSide ? new Color32(11, 22, 78, 255) : new Color32(24, 42, 132, 255);
@@ -425,9 +432,10 @@ namespace WolfMini.Level
 
         private Material GetFloorMaterial(FloorSpec floor)
         {
-            if (materialLibrary != null)
+            WolfMaterialLibrary activeMaterialLibrary = ActiveMaterialLibrary;
+            if (activeMaterialLibrary != null)
             {
-                return materialLibrary.GetFloorMaterial();
+                return activeMaterialLibrary.GetFloorMaterial();
             }
 
             return FallbackMaterials.GetSolidMaterial($"{floor.id}_Floor", floor.floorColor);
@@ -435,9 +443,10 @@ namespace WolfMini.Level
 
         private Material GetCeilingMaterial(FloorSpec floor)
         {
-            if (materialLibrary != null)
+            WolfMaterialLibrary activeMaterialLibrary = ActiveMaterialLibrary;
+            if (activeMaterialLibrary != null)
             {
-                return materialLibrary.GetCeilingMaterial();
+                return activeMaterialLibrary.GetCeilingMaterial();
             }
 
             return FallbackMaterials.GetSolidMaterial($"{floor.id}_Ceiling", floor.ceilingColor);
@@ -445,8 +454,9 @@ namespace WolfMini.Level
 
         private Material GetWoodTrimMaterial()
         {
-            return materialLibrary != null
-                ? materialLibrary.GetWoodTrimMaterial()
+            WolfMaterialLibrary activeMaterialLibrary = ActiveMaterialLibrary;
+            return activeMaterialLibrary != null
+                ? activeMaterialLibrary.GetWoodTrimMaterial()
                 : FallbackMaterials.GetSolidMaterial("WoodTrim", new Color32(104, 57, 26, 255));
         }
 

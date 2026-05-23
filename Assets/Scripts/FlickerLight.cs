@@ -10,9 +10,11 @@ namespace HelloWorldRoom
         [SerializeField] private float minInterval = 0.04f;
         [SerializeField] private float maxInterval = 0.18f;
         [SerializeField] private float smoothing = 0.5f;
+        [SerializeField] private float updateInterval = 0.08f;
 
         private Light targetLight;
         private float nextChangeTime;
+        private float nextUpdateTime;
         private float currentTarget;
 
         private void Awake()
@@ -23,16 +25,25 @@ namespace HelloWorldRoom
 
         private void Update()
         {
-            if (Time.time >= nextChangeTime)
+            float now = Time.time;
+            if (now < nextUpdateTime)
             {
-                currentTarget = Random.Range(minIntensity, maxIntensity);
-                nextChangeTime = Time.time + Random.Range(minInterval, maxInterval);
+                return;
             }
 
+            nextUpdateTime = now + Mathf.Max(0.02f, updateInterval);
+
+            if (now >= nextChangeTime)
+            {
+                currentTarget = Random.Range(minIntensity, maxIntensity);
+                nextChangeTime = now + Random.Range(minInterval, maxInterval);
+            }
+
+            float frameScale = Mathf.Max(updateInterval, Time.deltaTime) * 60f;
             targetLight.intensity = Mathf.Lerp(
                 targetLight.intensity,
                 currentTarget,
-                1f - Mathf.Pow(1f - smoothing, Time.deltaTime * 60f));
+                1f - Mathf.Pow(1f - smoothing, frameScale));
         }
     }
 }

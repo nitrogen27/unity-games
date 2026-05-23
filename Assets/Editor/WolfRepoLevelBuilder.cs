@@ -130,6 +130,7 @@ namespace HelloWorldRoom.Editor
             CreatePlayer(level, materials);
             CreateHud(assets);
             CreateLights();
+            CreatePerformanceSettings();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
@@ -185,6 +186,7 @@ namespace HelloWorldRoom.Editor
             CreateHud(assets);
             CreateLights();
             CreateRemakeLights();
+            CreatePerformanceSettings();
 
             EditorSceneManager.SaveScene(scene, VerticalRemakeScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(VerticalRemakeScenePath, true) };
@@ -450,6 +452,7 @@ namespace HelloWorldRoom.Editor
             playerLight.color = new Color(1f, 0.93f, 0.82f);
             playerLight.intensity = 0.35f;
             playerLight.range = 10f;
+            ConfigureGeneratedLight(playerLight, 0.15f);
 
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("playerCamera").objectReferenceValue = camera;
@@ -469,6 +472,7 @@ namespace HelloWorldRoom.Editor
             serializedHud.FindProperty("faceTexture").objectReferenceValue = assets.Bj;
             serializedHud.FindProperty("weaponTexture").objectReferenceValue = assets.Attack;
             serializedHud.FindProperty("keyTexture").objectReferenceValue = assets.HudKeys;
+            serializedHud.FindProperty("showFps").boolValue = true;
             serializedHud.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -479,7 +483,15 @@ namespace HelloWorldRoom.Editor
             light.type = LightType.Directional;
             light.color = Color.white;
             light.intensity = 0.30f;
+            ConfigureGeneratedLight(light, 0.2f);
             directional.transform.rotation = Quaternion.Euler(55f, -45f, 0f);
+        }
+
+        private static void CreatePerformanceSettings()
+        {
+            GameObject settingsObject = new GameObject("Wolf Performance Settings");
+            WolfPerformanceSettings settings = settingsObject.AddComponent<WolfPerformanceSettings>();
+            settings.Apply();
         }
 
         private static void CreateRemakeLights()
@@ -516,6 +528,7 @@ namespace HelloWorldRoom.Editor
             light.color = color;
             light.intensity = intensity;
             light.range = range;
+            ConfigureGeneratedLight(light, 0.2f);
         }
 
         private static void BuildVerticalRemakeLayers(WolfRepoLevel level, WolfRepoMaterials materials, Transform parent)
@@ -1037,6 +1050,7 @@ namespace HelloWorldRoom.Editor
             light.color = new Color(1.00f, 0.86f, 0.55f);
             light.intensity = 3.0f;
             light.range = 12f;
+            ConfigureGeneratedLight(light, 0.2f);
         }
 
         private static GameObject CreateMeshBox(string name, Vector3 position, Mesh mesh, Material[] materials, Transform parent)
@@ -1145,6 +1159,15 @@ namespace HelloWorldRoom.Editor
             light.color = warm ? new Color(1f, 0.87f, 0.61f) : new Color(0.62f, 1f, 0.56f);
             light.intensity = warm ? 0.55f : 0.65f;
             light.range = warm ? 7f : 8f;
+            ConfigureGeneratedLight(light, 0.15f);
+        }
+
+        private static void ConfigureGeneratedLight(Light light, float bounceIntensity)
+        {
+            light.bounceIntensity = bounceIntensity;
+            light.shadows = LightShadows.None;
+            light.renderMode = LightRenderMode.Auto;
+            light.lightmapBakeType = LightmapBakeType.Realtime;
         }
 
         private static void CreateExitMarker(WolfStaticData staticData, Transform parent)

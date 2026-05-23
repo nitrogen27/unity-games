@@ -10,36 +10,36 @@ public static class WolfTargetMaterialSetup
     private const string StoneWallTextureRoot = "Assets/Textures/WolfStoneWallWhiteLarge";
     private const string MaterialRoot = "Assets/Materials/WolfTargetLook";
     private const string WolfRepoMaterialRoot = "Assets/Materials/WolfRepo";
+    private const string WhiteStoneWallTargetName = "WhiteStoneWall_Target";
+    private const string WhiteStoneWallDarkTargetName = "WhiteStoneWall_Dark_Target";
+    private const int SurfaceTextureAnisoLevel = 8;
 
     [MenuItem("Tools/Wolf Target Look/Setup Generated Materials")]
     public static void SetupGeneratedMaterials()
     {
         Directory.CreateDirectory(MaterialRoot);
 
-        SetupTextureImport($"{TextureRoot}/BlueWall/BlueWall_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
-        SetupTextureImport($"{TextureRoot}/BlueWall/BlueWall_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
-        SetupTextureImport($"{TextureRoot}/BlueWall/BlueWall_Target_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
-        SetupTextureImport($"{TextureRoot}/BlueWall/BlueWall_Target_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupBlueWallTargetTextureImports();
 
-        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
-        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
-        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
-        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupWhiteStoneWallTextureImports();
 
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Clamp);
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Clamp);
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_AO.png", TextureImporterType.Default, false, TextureWrapMode.Clamp);
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Clamp);
+        SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_Height.png", TextureImporterType.Default, false, TextureWrapMode.Clamp);
 
         SetupTextureImport($"{TextureRoot}/FloorTile/FloorTile_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/FloorTile/FloorTile_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/FloorTile/FloorTile_Target_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/FloorTile/FloorTile_Target_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{TextureRoot}/FloorTile/FloorTile_Target_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
 
         SetupTextureImport($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
 
         SetupTextureImport($"{TextureRoot}/DarkMetalTrim/DarkMetalTrim_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
         SetupTextureImport($"{TextureRoot}/DarkMetalTrim/DarkMetalTrim_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
@@ -50,16 +50,8 @@ public static class WolfTargetMaterialSetup
 
         AssetDatabase.Refresh();
 
-        CreateMaterial(
-            "BlueWall_Target",
-            $"{TextureRoot}/BlueWall/BlueWall_Target_Albedo.png",
-            $"{TextureRoot}/BlueWall/BlueWall_Target_Normal.png",
-            $"{TextureRoot}/BlueWall/BlueWall_Target_MetallicSmoothness.png",
-            $"{TextureRoot}/BlueWall/BlueWall_Target_AO.png",
-            0.0f,
-            0.58f
-        );
-        ApplyBlueWallTargetBrightness();
+        CreateBlueWallTargetMaterial();
+        CreateWhiteStoneWallTargetMaterials();
 
         CreateMaterial(
             "DoorTeal_Target",
@@ -67,9 +59,10 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_Normal.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_MetallicSmoothness.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_AO.png",
-            0.70f,
-            0.72f
+            0.82f,
+            0.84f
         );
+        ConfigureDoorTargetMaterial();
 
         CreateMaterial(
             "FloorTile_Target",
@@ -77,9 +70,10 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/FloorTile/FloorTile_Target_Normal.png",
             $"{TextureRoot}/FloorTile/FloorTile_Target_MetallicSmoothness.png",
             $"{TextureRoot}/FloorTile/FloorTile_Target_AO.png",
-            0.04f,
-            0.62f
+            0.06f,
+            0.78f
         );
+        ConfigureFloorTileMaterial();
 
         CreateMaterial(
             "CeilingPanel_Target",
@@ -87,9 +81,10 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Normal.png",
             $"{TextureRoot}/CeilingPanel/CeilingPanel_Target_MetallicSmoothness.png",
             $"{TextureRoot}/CeilingPanel/CeilingPanel_Target_AO.png",
-            0.20f,
-            0.38f
+            0.0f,
+            0.46f
         );
+        ConfigureCeilingPanelVisibility();
 
         CreateMaterial(
             "DarkMetalTrim_Target",
@@ -116,6 +111,50 @@ public static class WolfTargetMaterialSetup
         Debug.Log("Wolf Target Look materials created/updated.");
     }
 
+    [MenuItem("Tools/Wolf Target Look/Setup Blue Wall Target Material")]
+    public static void SetupBlueWallTargetMaterial()
+    {
+        Directory.CreateDirectory(MaterialRoot);
+        SetupBlueWallTargetTextureImports();
+        AssetDatabase.Refresh();
+        CreateBlueWallTargetMaterial();
+
+        Debug.Log("BlueWall_Target material created/updated.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Setup White Stone Wall Target Material")]
+    public static void SetupWhiteStoneWallTargetMaterial()
+    {
+        Directory.CreateDirectory(MaterialRoot);
+        SetupWhiteStoneWallTextureImports();
+        AssetDatabase.Refresh();
+        CreateWhiteStoneWallTargetMaterials();
+        CreateWhiteStoneWallTileMaterials();
+
+        Debug.Log("White stone wall target materials created/updated.");
+    }
+
+    private static void SetupBlueWallTargetTextureImports()
+    {
+        string root = $"{TextureRoot}/BlueWall";
+
+        SetupTextureImport($"{root}/BlueWall_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_Metallic.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{root}/BlueWall_Target_Roughness.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+    }
+
+    private static void SetupWhiteStoneWallTextureImports()
+    {
+        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Repeat);
+        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+        SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+    }
+
     private static void SetupTextureImport(string path, TextureImporterType type, bool srgb, TextureWrapMode wrapMode)
     {
         var importer = AssetImporter.GetAtPath(path) as TextureImporter;
@@ -130,52 +169,13 @@ public static class WolfTargetMaterialSetup
         importer.wrapMode = wrapMode;
         importer.mipmapEnabled = true;
         importer.filterMode = FilterMode.Trilinear;
+        importer.anisoLevel = SurfaceTextureAnisoLevel;
+        importer.alphaIsTransparency = false;
         importer.textureCompression = TextureImporterCompression.CompressedHQ;
         importer.SaveAndReimport();
     }
 
-    private static void ApplyBlueWallTargetBrightness()
-    {
-        string materialPath = $"{MaterialRoot}/BlueWall_Target.mat";
-        Material mat = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
-        if (mat == null)
-        {
-            Debug.LogWarning($"Missing material: {materialPath}");
-            return;
-        }
-
-        Texture2D albedo = LoadTexture($"{TextureRoot}/BlueWall/BlueWall_Target_Albedo.png");
-
-        SetTextureIfHas(mat, "_EmissionMap", albedo);
-        mat.EnableKeyword("_EMISSION");
-
-        SetColorIfHas(mat, "_Color", new Color(1.36f, 1.44f, 1.92f, 1f));
-        SetColorIfHas(mat, "_BaseColor", new Color(1.36f, 1.44f, 1.92f, 1f));
-        SetColorIfHas(mat, "_EmissionColor", new Color(0.04f, 0.06f, 0.20f, 1f));
-        SetFloatIfHas(mat, "_Smoothness", 0.40f);
-        SetFloatIfHas(mat, "_Glossiness", 0.40f);
-        SetFloatIfHas(mat, "_BumpScale", 0.65f);
-        SetFloatIfHas(mat, "_OcclusionStrength", 0.45f);
-        mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-
-        EditorUtility.SetDirty(mat);
-        AssetDatabase.SaveAssets();
-    }
-
-    private static void CreateWhiteStoneWallTileMaterials()
-    {
-        Color lightTint = new Color(1.68f, 1.64f, 1.55f, 1f);
-        Color darkTint = new Color(1.28f, 1.24f, 1.16f, 1f);
-        Color lightEmission = new Color(0.24f, 0.23f, 0.21f, 1f);
-        Color darkEmission = new Color(0.16f, 0.15f, 0.14f, 1f);
-
-        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_000", lightTint, lightEmission);
-        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_001", darkTint, darkEmission);
-        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_002", lightTint, lightEmission);
-        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_003", darkTint, darkEmission);
-    }
-
-    private static void CreateWhiteStoneWallTileMaterial(string materialName, Color tint, Color emissionTint)
+    private static void CreateBlueWallTargetMaterial()
     {
         Shader shader = Shader.Find("Standard");
         if (shader == null)
@@ -184,7 +184,106 @@ public static class WolfTargetMaterialSetup
             return;
         }
 
+        string materialPath = $"{MaterialRoot}/BlueWall_Target.mat";
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, materialPath);
+        }
+        else
+        {
+            mat.shader = shader;
+        }
+
+        string root = $"{TextureRoot}/BlueWall";
+        Texture2D albedo = LoadTexture($"{root}/BlueWall_Target_Albedo.png");
+        Texture2D normal = LoadTexture($"{root}/BlueWall_Target_Normal.png");
+        Texture2D occlusion = LoadTexture($"{root}/BlueWall_Target_AO.png");
+        Texture2D metallicSmoothness = LoadTexture($"{root}/BlueWall_Target_MetallicSmoothness.png");
+        Texture2D height = LoadTexture($"{root}/BlueWall_Target_Height.png");
+
+        SetTextureIfHas(mat, "_MainTex", albedo);
+        SetTextureIfHas(mat, "_BumpMap", normal);
+        SetTextureIfHas(mat, "_OcclusionMap", occlusion);
+        SetTextureIfHas(mat, "_MetallicGlossMap", metallicSmoothness);
+        SetTextureIfHas(mat, "_ParallaxMap", height);
+        SetTextureIfHas(mat, "_EmissionMap", albedo);
+
+        SetColorIfHas(mat, "_Color", new Color(1.36f, 1.44f, 1.92f, 1f));
+        SetColorIfHas(mat, "_EmissionColor", new Color(0.04f, 0.06f, 0.20f, 1f));
+        SetFloatIfHas(mat, "_Mode", 0.0f);
+        SetFloatIfHas(mat, "_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
+        SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
+        SetFloatIfHas(mat, "_ZWrite", 1.0f);
+        SetFloatIfHas(mat, "_Metallic", 0.0f);
+        SetFloatIfHas(mat, "_Smoothness", 0.74f);
+        SetFloatIfHas(mat, "_Glossiness", 0.74f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.92f);
+        SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
+        SetFloatIfHas(mat, "_BumpScale", 0.82f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.68f);
+        SetFloatIfHas(mat, "_Parallax", 0.018f);
+        SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
+
+        SetKeyword(mat, "_NORMALMAP", normal != null);
+        SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
+        SetKeyword(mat, "_PARALLAXMAP", height != null);
+        SetKeyword(mat, "_EMISSION", albedo != null);
+        mat.DisableKeyword("_METALLICSPECGLOSSMAP");
+        mat.DisableKeyword("_SPECGLOSSMAP");
+
+        mat.renderQueue = -1;
+        mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        mat.mainTextureScale = Vector2.one;
+        mat.mainTextureOffset = Vector2.zero;
+
+        EditorUtility.SetDirty(mat);
+        AssetDatabase.SaveAssets();
+    }
+
+    private static void CreateWhiteStoneWallTileMaterials()
+    {
+        Color lightTint = new Color(1.0f, 0.98f, 0.92f, 1f);
+        Color darkTint = new Color(0.78f, 0.74f, 0.66f, 1f);
+        Color lightEmission = new Color(0.16f, 0.15f, 0.13f, 1f);
+        Color darkEmission = new Color(0.08f, 0.075f, 0.065f, 1f);
+
+        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_000", lightTint, lightEmission);
+        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_001", darkTint, darkEmission);
+        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_002", lightTint, lightEmission);
+        CreateWhiteStoneWallTileMaterial("Mat_WolfRepo_WallTile_003", darkTint, darkEmission);
+    }
+
+    private static void CreateWhiteStoneWallTargetMaterials()
+    {
+        CreateWhiteStoneMaterial(
+            $"{MaterialRoot}/{WhiteStoneWallTargetName}.mat",
+            new Color(1.0f, 0.98f, 0.92f, 1f),
+            new Color(0.16f, 0.15f, 0.13f, 1f));
+
+        CreateWhiteStoneMaterial(
+            $"{MaterialRoot}/{WhiteStoneWallDarkTargetName}.mat",
+            new Color(0.78f, 0.74f, 0.66f, 1f),
+            new Color(0.08f, 0.075f, 0.065f, 1f));
+    }
+
+    private static void CreateWhiteStoneWallTileMaterial(string materialName, Color tint, Color emissionTint)
+    {
         string materialPath = $"{WolfRepoMaterialRoot}/{materialName}.mat";
+        CreateWhiteStoneMaterial(materialPath, tint, emissionTint);
+    }
+
+    private static void CreateWhiteStoneMaterial(string materialPath, Color tint, Color emissionTint)
+    {
+        Shader shader = Shader.Find("Standard");
+        if (shader == null)
+        {
+            Debug.LogError("No Standard shader found.");
+            return;
+        }
+
         Material mat = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
         if (mat == null)
         {
@@ -209,26 +308,35 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(mat, "_ParallaxMap", height);
         SetTextureIfHas(mat, "_EmissionMap", albedo);
 
-        mat.EnableKeyword("_NORMALMAP");
-        mat.EnableKeyword("_EMISSION");
-        mat.DisableKeyword("_METALLICGLOSSMAP");
+        SetKeyword(mat, "_NORMALMAP", normal != null);
+        SetKeyword(mat, "_PARALLAXMAP", height != null);
+        SetKeyword(mat, "_EMISSION", albedo != null);
+        SetKeyword(mat, "_METALLICGLOSSMAP", false);
         mat.DisableKeyword("_METALLICSPECGLOSSMAP");
+        mat.DisableKeyword("_SPECGLOSSMAP");
 
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.28f);
-        SetFloatIfHas(mat, "_Glossiness", 0.28f);
+        SetFloatIfHas(mat, "_Smoothness", 0.54f);
+        SetFloatIfHas(mat, "_Glossiness", 0.54f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.72f);
+        SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.7f);
-        SetFloatIfHas(mat, "_OcclusionStrength", 0.45f);
-        SetFloatIfHas(mat, "_Parallax", 0.01f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.54f);
+        SetFloatIfHas(mat, "_Parallax", 0.014f);
         SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
         SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
         SetColorIfHas(mat, "_Color", tint);
         SetColorIfHas(mat, "_BaseColor", tint);
         SetColorIfHas(mat, "_EmissionColor", emissionTint);
         mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        mat.renderQueue = -1;
 
-        mat.mainTextureScale = Vector2.one;
-        mat.mainTextureOffset = Vector2.zero;
+        SetTextureScaleAndOffsetIfHas(mat, "_BaseMap", Vector2.one, Vector2.zero);
+        SetTextureScaleAndOffsetIfHas(mat, "_MainTex", Vector2.one, Vector2.zero);
+        SetTextureScaleAndOffsetIfHas(mat, "_BumpMap", Vector2.one, Vector2.zero);
+        SetTextureScaleAndOffsetIfHas(mat, "_OcclusionMap", Vector2.one, Vector2.zero);
+        SetTextureScaleAndOffsetIfHas(mat, "_ParallaxMap", Vector2.one, Vector2.zero);
+        SetTextureScaleAndOffsetIfHas(mat, "_EmissionMap", Vector2.one, Vector2.zero);
 
         EditorUtility.SetDirty(mat);
         AssetDatabase.SaveAssets();
@@ -282,10 +390,7 @@ public static class WolfTargetMaterialSetup
         }
 
         SetTextureIfHas(mat, "_MetallicGlossMap", metallicSmoothness);
-        if (metallicSmoothness != null)
-        {
-            mat.EnableKeyword("_METALLICSPECGLOSSMAP");
-        }
+        ConfigureMetallicGlossMapKeyword(mat, metallicSmoothness != null);
 
         SetTextureIfHas(mat, "_OcclusionMap", occlusion);
 
@@ -301,6 +406,120 @@ public static class WolfTargetMaterialSetup
         AssetDatabase.SaveAssets();
     }
 
+    public static void ConfigureCeilingPanelVisibility()
+    {
+        Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/CeilingPanel_Target.mat");
+        if (material == null)
+        {
+            return;
+        }
+
+        ApplyCeilingPanelVisibility(material);
+        EditorUtility.SetDirty(material);
+        AssetDatabase.SaveAssets();
+    }
+
+    public static void ConfigureDoorTargetMaterial()
+    {
+        Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/DoorTeal_Target.mat");
+        if (material == null)
+        {
+            return;
+        }
+
+        Texture albedo = GetMainTexture(material);
+        Texture height = LoadTexture($"{TextureRoot}/DoorTeal/DoorTeal_Target_Height.png");
+
+        SetColorIfHas(material, "_Color", new Color(0.92f, 1.05f, 1.08f, 1f));
+        SetColorIfHas(material, "_BaseColor", new Color(0.92f, 1.05f, 1.08f, 1f));
+        SetColorIfHas(material, "_EmissionColor", new Color(0.012f, 0.035f, 0.04f, 1f));
+        SetTextureIfHas(material, "_EmissionMap", albedo);
+        SetTextureIfHas(material, "_ParallaxMap", height);
+        SetFloatIfHas(material, "_Metallic", 0.82f);
+        SetFloatIfHas(material, "_Smoothness", 0.84f);
+        SetFloatIfHas(material, "_Glossiness", 0.84f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.95f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.62f);
+        SetFloatIfHas(material, "_BumpScale", 0.92f);
+        SetFloatIfHas(material, "_Parallax", 0.014f);
+        SetFloatIfHas(material, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
+        SetKeyword(material, "_EMISSION", true);
+        SetKeyword(material, "_PARALLAXMAP", height != null);
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        EditorUtility.SetDirty(material);
+        AssetDatabase.SaveAssets();
+    }
+
+    public static void ConfigureFloorTileMaterial()
+    {
+        Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/FloorTile_Target.mat");
+        if (material == null)
+        {
+            return;
+        }
+
+        Texture albedo = GetMainTexture(material);
+        Texture height = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Height.png");
+
+        SetColorIfHas(material, "_Color", new Color(1.12f, 1.08f, 1.0f, 1f));
+        SetColorIfHas(material, "_BaseColor", new Color(1.12f, 1.08f, 1.0f, 1f));
+        SetColorIfHas(material, "_EmissionColor", new Color(0.025f, 0.024f, 0.022f, 1f));
+        SetTextureIfHas(material, "_EmissionMap", albedo);
+        SetTextureIfHas(material, "_ParallaxMap", height);
+        SetFloatIfHas(material, "_Metallic", 0.06f);
+        SetFloatIfHas(material, "_Smoothness", 0.78f);
+        SetFloatIfHas(material, "_Glossiness", 0.78f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.92f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.48f);
+        SetFloatIfHas(material, "_BumpScale", 0.86f);
+        SetFloatIfHas(material, "_Parallax", 0.014f);
+        SetFloatIfHas(material, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
+        SetKeyword(material, "_EMISSION", true);
+        SetKeyword(material, "_PARALLAXMAP", height != null);
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        EditorUtility.SetDirty(material);
+        AssetDatabase.SaveAssets();
+    }
+
+    private static void ApplyCeilingPanelVisibility(Material material)
+    {
+        Texture albedo = GetMainTexture(material);
+        Texture height = LoadTexture($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Height.png");
+
+        Color ceilingTint = new Color(1.32f, 1.36f, 1.28f, 1f);
+        Color visibilityEmission = new Color(0.21f, 0.22f, 0.25f, 1f);
+
+        SetColorIfHas(material, "_Color", ceilingTint);
+        SetColorIfHas(material, "_BaseColor", ceilingTint);
+        SetColorIfHas(material, "_EmissionColor", visibilityEmission);
+        SetTextureIfHas(material, "_EmissionMap", albedo);
+        SetTextureIfHas(material, "_ParallaxMap", height);
+        SetFloatIfHas(material, "_Metallic", 0.0f);
+        SetFloatIfHas(material, "_Smoothness", 0.46f);
+        SetFloatIfHas(material, "_Glossiness", 0.46f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.62f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.26f);
+        SetFloatIfHas(material, "_BumpScale", 0.70f);
+        SetFloatIfHas(material, "_Parallax", 0.008f);
+        SetFloatIfHas(material, "_GlossyReflections", 0.92f);
+        SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
+        SetKeyword(material, "_EMISSION", true);
+        SetKeyword(material, "_PARALLAXMAP", height != null);
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+    }
+
+    private static Texture GetMainTexture(Material material)
+    {
+        if (material.HasProperty("_MainTex"))
+        {
+            return material.GetTexture("_MainTex");
+        }
+
+        return material.HasProperty("_BaseMap") ? material.GetTexture("_BaseMap") : null;
+    }
+
     private static Texture2D LoadTexture(string path)
     {
         return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Texture2D>(path);
@@ -312,6 +531,38 @@ public static class WolfTargetMaterialSetup
         {
             mat.SetTexture(name, tex);
         }
+    }
+
+    private static void SetTextureScaleAndOffsetIfHas(Material mat, string name, Vector2 scale, Vector2 offset)
+    {
+        if (mat.HasProperty(name))
+        {
+            mat.SetTextureScale(name, scale);
+            mat.SetTextureOffset(name, offset);
+        }
+    }
+
+    private static void SetKeyword(Material mat, string keyword, bool enabled)
+    {
+        if (enabled)
+        {
+            mat.EnableKeyword(keyword);
+        }
+        else
+        {
+            mat.DisableKeyword(keyword);
+        }
+    }
+
+    private static void ConfigureMetallicGlossMapKeyword(Material mat, bool enabled)
+    {
+        string shaderName = mat.shader != null ? mat.shader.name : string.Empty;
+        bool isUrpLit = shaderName.Contains("Universal Render Pipeline");
+        string activeKeyword = isUrpLit ? "_METALLICSPECGLOSSMAP" : "_METALLICGLOSSMAP";
+        string inactiveKeyword = isUrpLit ? "_METALLICGLOSSMAP" : "_METALLICSPECGLOSSMAP";
+
+        SetKeyword(mat, activeKeyword, enabled);
+        mat.DisableKeyword(inactiveKeyword);
     }
 
     private static void SetFloatIfHas(Material mat, string name, float value)

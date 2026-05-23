@@ -599,6 +599,7 @@ namespace HelloWorldRoom.Editor
             serializedHud.FindProperty("lives").intValue = 4;
             serializedHud.FindProperty("health").intValue = 100;
             serializedHud.FindProperty("ammo").intValue = 32;
+            serializedHud.FindProperty("showFps").boolValue = true;
             serializedHud.ApplyModifiedPropertiesWithoutUndo();
         }
 

@@ -10,6 +10,7 @@ namespace WolfMini.EditorTools
     public static class WolfMiniDemoLevelMenu
     {
         private const string DataPath = "Assets/WolfMini/Data/DemoTwoFloorLevel.asset";
+        private const string MaterialLibraryPath = "Assets/WolfMini/Data/WolfMiniMaterialLibrary.asset";
         private const string ScenePath = "Assets/WolfMini/Scenes/DemoTwoFloorBlockout.unity";
 
         [MenuItem("WolfMini/Create Demo Two Floor Level")]
@@ -40,12 +41,17 @@ namespace WolfMini.EditorTools
         [MenuItem("WolfMini/Create Demo Two Floor Blockout Scene")]
         public static void CreateDemoTwoFloorBlockoutScene()
         {
-            MiniLevelDefinition assetLevel = CreateOrUpdateDemoTwoFloorLevel();
-            MiniLevelDefinition buildLevel = ScriptableObject.CreateInstance<MiniLevelDefinition>();
-            PopulateLevel(buildLevel);
+            CreateOrUpdateDemoTwoFloorLevel();
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "DemoTwoFloorBlockout";
+
+            MiniLevelDefinition assetLevel = AssetDatabase.LoadAssetAtPath<MiniLevelDefinition>(DataPath);
+            if (assetLevel == null)
+            {
+                Debug.LogError($"[WolfMini] Could not load demo level asset from {DataPath}");
+                return;
+            }
 
             RenderSettings.ambientLight = new Color(0.42f, 0.42f, 0.42f);
             RenderSettings.fog = false;
@@ -53,9 +59,8 @@ namespace WolfMini.EditorTools
             GameObject builderObject = new GameObject("WolfMini LevelBuilder");
             LevelBuilder builder = builderObject.AddComponent<LevelBuilder>();
             builder.BuildOnStart = false;
-            builder.Build(buildLevel);
-            builder.LevelDefinition = assetLevel;
-            Object.DestroyImmediate(buildLevel);
+            builder.Build(assetLevel);
+            builder.BuildOnStart = true;
             EditorUtility.SetDirty(builder);
 
             CreateOverviewCamera();
@@ -70,6 +75,10 @@ namespace WolfMini.EditorTools
         private static void PopulateLevel(MiniLevelDefinition level)
         {
             level.levelName = "WolfMini Two Floor Demo";
+            if (level.materialLibrary == null)
+            {
+                level.materialLibrary = AssetDatabase.LoadAssetAtPath<WolfMaterialLibrary>(MaterialLibraryPath);
+            }
             level.floors.Clear();
             level.doors.Clear();
             level.stairs.Clear();

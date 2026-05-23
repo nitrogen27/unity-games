@@ -5,8 +5,9 @@ namespace WolfMini.Core
     [CreateAssetMenu(fileName = "WolfMaterialLibrary", menuName = "WolfMini/Rendering/Material Library")]
     public sealed class WolfMaterialLibrary : ScriptableObject
     {
-        public const int DefaultUpperWallValue = 8;
-        public const int DefaultLowerWallValue = 8;
+        public const int DefaultBlueWallValue = 8;
+        public const int DefaultUpperWallValue = DefaultBlueWallValue;
+        public const int DefaultLowerWallValue = DefaultBlueWallValue;
         public const int DefaultDoorTileIndex = 98;
         public const int DefaultLockedDoorTileIndex = 100;
         public const int DefaultElevatorTileIndex = 102;
@@ -24,6 +25,10 @@ namespace WolfMini.Core
         [SerializeField] private int doorTileIndex = DefaultDoorTileIndex;
         [SerializeField] private int lockedDoorTileIndex = DefaultLockedDoorTileIndex;
         [SerializeField] private int elevatorTileIndex = DefaultElevatorTileIndex;
+
+        [Header("Material Asset Overrides")]
+        [SerializeField] private Material blueWallMaterial;
+        [SerializeField] private Material darkerBlueWallMaterial;
 
         [Header("Solid Fallbacks")]
         [SerializeField] private Color blueWallColor = DefaultBlueWall;
@@ -80,6 +85,18 @@ namespace WolfMini.Core
 
         public bool HasAtlasTexture => atlasTexture != null;
 
+        public Material BlueWallMaterial
+        {
+            get => blueWallMaterial;
+            set => blueWallMaterial = value;
+        }
+
+        public Material DarkerBlueWallMaterial
+        {
+            get => darkerBlueWallMaterial;
+            set => darkerBlueWallMaterial = value;
+        }
+
         public static (int lightIdx, int darkIdx) GetWallTileIndices(int wallValue)
         {
             int lightIdx = (wallValue - 1) * 2;
@@ -120,7 +137,11 @@ namespace WolfMini.Core
         public Material GetWallMaterial(int wallValue, bool darkSide = false)
         {
             (int lightIdx, int darkIdx) = GetWallTileIndices(wallValue);
-            return GetAtlasOrFallback(darkSide ? darkIdx : lightIdx, darkSide ? "DarkerBlueWall" : "BlueWall", darkSide ? darkerBlueWallColor : blueWallColor);
+            return GetAtlasOrMaterialOrFallback(
+                darkSide ? darkIdx : lightIdx,
+                GetWallMaterialOverride(wallValue, darkSide),
+                darkSide ? "DarkerBlueWall" : "BlueWall",
+                darkSide ? darkerBlueWallColor : blueWallColor);
         }
 
         public Material GetDoorMaterial()
@@ -181,14 +202,39 @@ namespace WolfMini.Core
             }
         }
 
-        private Material GetAtlasOrFallback(int tileIndex, string fallbackName, Color fallbackColor)
+        private Material GetAtlasOrMaterialOrFallback(int tileIndex, Material materialOverride, string fallbackName, Color fallbackColor)
         {
             if (atlasTexture != null)
             {
                 return Cache.GetTileMaterial(tileIndex);
             }
 
+            if (materialOverride != null)
+            {
+                return materialOverride;
+            }
+
             return Cache.GetSolidMaterial(fallbackName, fallbackColor);
+        }
+
+        private Material GetAtlasOrFallback(int tileIndex, string fallbackName, Color fallbackColor)
+        {
+            return GetAtlasOrMaterialOrFallback(tileIndex, null, fallbackName, fallbackColor);
+        }
+
+        private Material GetWallMaterialOverride(int wallValue, bool darkSide)
+        {
+            if (wallValue != DefaultBlueWallValue)
+            {
+                return null;
+            }
+
+            if (darkSide && darkerBlueWallMaterial != null)
+            {
+                return darkerBlueWallMaterial;
+            }
+
+            return blueWallMaterial;
         }
 
         private void OnValidate()

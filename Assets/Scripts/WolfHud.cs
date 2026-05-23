@@ -15,11 +15,46 @@ namespace HelloWorldRoom
         [SerializeField] private int ammo = 8;
         [SerializeField] private string demoText = "DEMO";
         [SerializeField] private bool showHint;
+        [SerializeField] private bool showFps = true;
+        [SerializeField] private float fpsRefreshInterval = 0.25f;
+        [SerializeField] private int lowFpsThreshold = 30;
 
         private GUIStyle labelStyle;
         private GUIStyle valueStyle;
+        private GUIStyle fpsStyle;
+        private float fpsElapsedTime;
+        private int fpsFrameCount;
+        private int currentFps;
+        private string fpsText = "FPS --";
 
         private void Awake()
+        {
+            EnsureStyles();
+        }
+
+        private void Update()
+        {
+            if (!showFps)
+            {
+                return;
+            }
+
+            fpsElapsedTime += Time.unscaledDeltaTime;
+            fpsFrameCount++;
+
+            float refreshInterval = Mathf.Max(0.05f, fpsRefreshInterval);
+            if (fpsElapsedTime < refreshInterval)
+            {
+                return;
+            }
+
+            currentFps = Mathf.RoundToInt(fpsFrameCount / Mathf.Max(0.0001f, fpsElapsedTime));
+            fpsText = $"FPS {currentFps:0}";
+            fpsElapsedTime = 0f;
+            fpsFrameCount = 0;
+        }
+
+        private void EnsureStyles()
         {
             labelStyle = new GUIStyle
             {
@@ -31,12 +66,27 @@ namespace HelloWorldRoom
             {
                 normal = { textColor = Color.white }
             };
+            fpsStyle = new GUIStyle(labelStyle)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                normal = { textColor = Color.white }
+            };
         }
 
         private void OnGUI()
         {
+            if (labelStyle == null)
+            {
+                EnsureStyles();
+            }
+
             DrawWeapon();
             DrawStatusBar();
+            if (showFps)
+            {
+                DrawFps();
+            }
+
             if (showHint)
             {
                 DrawHint();
@@ -120,6 +170,32 @@ namespace HelloWorldRoom
             Rect valueRect = new Rect(column * cellWidth, valueY, cellWidth, 42f);
             GUI.Label(labelRect, label, labelStyle);
             GUI.Label(valueRect, value, valueStyle);
+        }
+
+        private void DrawFps()
+        {
+            float scale = Mathf.Clamp(Screen.height / 540f, 1f, 2f);
+            float width = 96f * scale;
+            float height = 28f * scale;
+            float margin = 10f * scale;
+            Rect rect = new Rect(Screen.width - width - margin, margin, width, height);
+
+            fpsStyle.fontSize = Mathf.RoundToInt(Mathf.Clamp(14f * scale, 14f, 24f));
+            fpsStyle.normal.textColor = currentFps > 0 && currentFps < lowFpsThreshold
+                ? new Color(1f, 0.62f, 0.36f, 1f)
+                : Color.white;
+
+            GUI.color = new Color(0.02f, 0.025f, 0.035f, 0.76f);
+            GUI.DrawTexture(rect, Texture2D.whiteTexture);
+
+            GUI.color = new Color(0.42f, 0.48f, 0.62f, 0.92f);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 2f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(rect.x, rect.yMax - 2f, rect.width, 2f), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(rect.x, rect.y, 2f, rect.height), Texture2D.whiteTexture);
+            GUI.DrawTexture(new Rect(rect.xMax - 2f, rect.y, 2f, rect.height), Texture2D.whiteTexture);
+
+            GUI.color = Color.white;
+            GUI.Label(rect, fpsText, fpsStyle);
         }
 
         private void DrawHint()

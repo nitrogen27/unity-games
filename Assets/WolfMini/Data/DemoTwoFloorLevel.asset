@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: DemoTwoFloorLevel
   m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Level.MiniLevelDefinition
   levelName: WolfMini Two Floor Demo
+  materialLibrary: {fileID: 11400000, guid: e30cd184d7e84b87a17af1546c421614, type: 2}
   floors:
   - id: Upper
     y: 0
