@@ -17,6 +17,7 @@ public static class WolfDynamicLightingSetup
     private const string BakedReflectionProbeRoot = "Assets/Scenes/WolfRepoLevel1_BakedReflectionProbes";
     private const string MaterialRoot = "Assets/Materials/WolfTargetLook";
     private const string LampGlowMaterialPath = MaterialRoot + "/DynamicLampGlow.mat";
+    private const string GeneratedLampCapMaterialPath = MaterialRoot + "/GeneratedCeilingLampCap.mat";
     private const string CeilingSpillTexturePath = MaterialRoot + "/CeilingLampSpillFalloff.png";
     private const string FloorReflectionTexturePath = MaterialRoot + "/LampFloorReflectionFalloff.png";
     private const string WallReflectionTexturePath = MaterialRoot + "/LampWallReflectionFalloff.png";
@@ -32,6 +33,9 @@ public static class WolfDynamicLightingSetup
     private const int PerformanceAntiAliasingSamples = 2;
     private const int QualityAntiAliasingSamples = 4;
     private const int QualityReflectionProbeResolution = 128;
+    private const int FloorLightingLayer = 6;
+    private const int FloorLightingMask = 1 << FloorLightingLayer;
+    private const int NonFloorLightingMask = ~FloorLightingMask;
     private const float LightProbeSpacing = 5.5f;
     private const float UpperProbeHeight = 0.9f;
     private const float LowerProbeHeight = -2.1f;
@@ -41,7 +45,7 @@ public static class WolfDynamicLightingSetup
     private const float BakedChandelierScatterIntensity = 0.85f;
 
     private static readonly Color WarmLamp = new Color(1.0f, 0.72f, 0.36f);
-    private static readonly Color CoolLamp = new Color(0.32f, 0.88f, 1.0f);
+    private static readonly Color CoolLamp = new Color(1.0f, 0.84f, 0.62f);
     private static bool waitingForBeautifulBake;
     private static double nextBeautifulBakeLogTime;
 
@@ -58,6 +62,7 @@ public static class WolfDynamicLightingSetup
         Directory.CreateDirectory(MaterialRoot);
 
         Material glowMaterial = CreateGlowMaterial();
+        Material generatedLampCapMaterial = CreateGeneratedLampCapMaterial();
         Material warmCeilingSpillMaterial = null;
         Material coolCeilingSpillMaterial = null;
         Material warmFloorReflectionMaterial = null;
@@ -72,7 +77,6 @@ public static class WolfDynamicLightingSetup
 
         GameObject root = new GameObject(RootName);
         GameObject lampGroup = CreateChild(root.transform, "Lamp Sources");
-        GameObject probeGroup = CreateChild(root.transform, "Reflection Probes");
 
         ApplySceneLightingSettings();
         EnhanceReflectiveMaterials();
@@ -94,6 +98,7 @@ public static class WolfDynamicLightingSetup
                 i,
                 lampGroup.transform,
                 glowMaterial,
+                generatedLampCapMaterial,
                 warmCeilingSpillMaterial,
                 coolCeilingSpillMaterial,
                 warmFloorReflectionMaterial,
@@ -105,6 +110,7 @@ public static class WolfDynamicLightingSetup
                 hasFlicker))
             {
                 realtimeLampCount++;
+
                 if (hasSpecularAccent)
                 {
                     specularAccentCount++;
@@ -112,10 +118,6 @@ public static class WolfDynamicLightingSetup
             }
         }
 
-        Bounds sceneBounds = CalculateSceneBounds(root.transform);
-        CreateDiffuseRoomFill(root.transform, sceneBounds);
-        CreateReflectionProbes(probeGroup.transform, sceneBounds);
-        ConfigureReflectionProbesForQuality();
         ApplyQualityLightingProfileToOpenScene();
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -123,7 +125,7 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} lamp glows, {realtimeLampCount} realtime point lights, {specularAccentCount} no-shadow specular accents, disabled {disabledAuthoredFixtureLights} duplicate authored fixture lights, and added performance reflection probes to {ScenePath}.");
+        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} green lamp glows, {realtimeLampCount} green lamp ceiling-scatter rigs, {specularAccentCount} no-shadow specular accents, and disabled {disabledAuthoredFixtureLights} non-green authored lights in {ScenePath}.");
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Quality Lighting Settings")]
@@ -594,10 +596,10 @@ public static class WolfDynamicLightingSetup
     private static void ApplyBeautifulRuntimeProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights, 0, true, true, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, true, true, false, RenderingPath.DeferredShading);
         settings.Apply();
 
-        QualitySettings.pixelLightCount = MaxRealtimeLampLights;
+        QualitySettings.pixelLightCount = MaxRealtimeLampLights * 13;
         QualitySettings.realtimeReflectionProbes = false;
         QualitySettings.shadows = ShadowQuality.Disable;
         QualitySettings.shadowResolution = ShadowResolution.High;
@@ -709,13 +711,13 @@ public static class WolfDynamicLightingSetup
 
     private static void ApplySceneLightingSettings()
     {
-        RenderSettings.ambientMode = AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = new Color(0.78f, 0.84f, 0.94f);
-        RenderSettings.ambientEquatorColor = new Color(0.66f, 0.70f, 0.78f);
-        RenderSettings.ambientGroundColor = new Color(0.52f, 0.52f, 0.56f);
-        RenderSettings.ambientLight = new Color(0.72f, 0.76f, 0.84f);
-        RenderSettings.ambientIntensity = 1.18f;
-        RenderSettings.reflectionIntensity = 0.35f;
+        RenderSettings.ambientMode = AmbientMode.Flat;
+        RenderSettings.ambientSkyColor = Color.black;
+        RenderSettings.ambientEquatorColor = Color.black;
+        RenderSettings.ambientGroundColor = Color.black;
+        RenderSettings.ambientLight = Color.black;
+        RenderSettings.ambientIntensity = 0.0f;
+        RenderSettings.reflectionIntensity = 0.0f;
         RenderSettings.reflectionBounces = 1;
         RenderSettings.defaultReflectionResolution = QualityReflectionProbeResolution;
         RenderSettings.fog = true;
@@ -740,7 +742,7 @@ public static class WolfDynamicLightingSetup
         SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DoorTeal_Target", 0.46f, 0.48f, 0.56f, 0.48f, 0.52f);
-        SetMaterialSurface("FloorTile_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("FloorTile_Target", 0.0f, 0.16f, 0.0f, 0.15f, 0.25f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
         SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.30f, 0.38f, 0.34f, 0.40f);
@@ -751,7 +753,7 @@ public static class WolfDynamicLightingSetup
 
         SetEmission("Assets/Materials/Mat_Lamp_Glow.mat", WarmLamp * 4.4f);
         SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmBulb.mat", WarmLamp * 4.7f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", CoolLamp * 3.75f);
+        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", CoolLamp * 6.0f);
         SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_StairLampBulb.mat", WarmLamp * 4.0f);
     }
 
@@ -799,13 +801,13 @@ public static class WolfDynamicLightingSetup
 
         TuneTargetMaterial(
             "FloorTile_Target",
-            new Color(1.18f, 1.16f, 1.10f, 1f),
-            new Color(0.18f, 0.18f, 0.18f, 1f),
-            0.18f,
+            new Color(1.55f, 1.55f, 1.48f, 1f),
+            new Color(0.95f, 0.95f, 0.90f, 1f),
+            0.12f,
             0.0f,
             0f,
-            0.0f,
-            0.0f);
+            0.15f,
+            0.25f);
 
         TuneTargetMaterial(
             "CeilingPanel_Target",
@@ -907,20 +909,65 @@ public static class WolfDynamicLightingSetup
                 continue;
             }
 
-            renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
-            renderer.receiveShadows = false;
             renderer.lightmapIndex = -1;
             renderer.realtimeLightmapIndex = -1;
             renderer.lightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
             renderer.realtimeLightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
 
-            if (renderer is MeshRenderer)
+            string objectName = renderer.gameObject.name;
+            bool isFloor = IsFloorObject(objectName);
+            bool isLargeStructuralSurface = IsLargeStructuralSurface(objectName);
+
+            if (isFloor)
             {
-                renderer.shadowCastingMode = ShadowCastingMode.Off;
+                renderer.gameObject.layer = FloorLightingLayer;
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+                renderer.receiveShadows = true;
+                if (renderer is MeshRenderer)
+                {
+                    renderer.shadowCastingMode = ShadowCastingMode.Off;
+                }
+            }
+            else if (isLargeStructuralSurface)
+            {
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+                renderer.receiveShadows = false;
+                if (renderer is MeshRenderer)
+                {
+                    renderer.shadowCastingMode = ShadowCastingMode.Off;
+                }
+            }
+            else
+            {
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+                renderer.receiveShadows = true;
+                if (renderer is MeshRenderer)
+                {
+                    renderer.shadowCastingMode = ShadowCastingMode.On;
+                }
             }
 
             EditorUtility.SetDirty(renderer);
         }
+    }
+
+    private static bool IsFloorObject(string objectName)
+    {
+        return objectName == "Floor" ||
+            objectName.StartsWith("Floor ", System.StringComparison.Ordinal) ||
+            objectName.Contains("_Floor_", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Floor", System.StringComparison.Ordinal);
+    }
+
+    private static bool IsLargeStructuralSurface(string objectName)
+    {
+        return objectName == "Ceiling" ||
+            objectName.StartsWith("Ceiling ", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Ceiling", System.StringComparison.Ordinal) ||
+            objectName.StartsWith("Wall ", System.StringComparison.Ordinal) ||
+            objectName.StartsWith("WolfRepoWallCell_", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Wall", System.StringComparison.Ordinal) ||
+            objectName.Contains("Header", System.StringComparison.Ordinal);
     }
 
     private static void ClearBakedLightingData()
@@ -951,13 +998,7 @@ public static class WolfDynamicLightingSetup
         int disabledCount = 0;
         foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude))
         {
-            string objectName = light.gameObject.name;
-            bool duplicateFixtureLight =
-                objectName.StartsWith("ceilLight light ", System.StringComparison.Ordinal) ||
-                objectName.StartsWith("chandelier light ", System.StringComparison.Ordinal) ||
-                objectName.StartsWith("Chandelier Light", System.StringComparison.Ordinal);
-
-            if (!duplicateFixtureLight || !light.enabled)
+            if (!light.enabled)
             {
                 continue;
             }
@@ -976,18 +1017,32 @@ public static class WolfDynamicLightingSetup
         foreach (Transform transform in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude))
         {
             string objectName = transform.gameObject.name;
-            if (objectName.StartsWith("chandelier bulb ", System.StringComparison.Ordinal))
+            if (objectName.StartsWith("ceilLight cap ", System.StringComparison.Ordinal))
             {
-                anchors.Add(new LampAnchor(objectName, transform.position, WarmLamp, 1.25f, 15.5f, true));
-            }
-            else if (objectName.StartsWith("ceilLight cap ", System.StringComparison.Ordinal))
-            {
-                anchors.Add(new LampAnchor(objectName, transform.position + Vector3.down * 0.05f, CoolLamp, 1.08f, 14.5f, false));
+                anchors.Add(new LampAnchor(objectName, transform.position + Vector3.down * 0.05f, CoolLamp, 1.55f, 15.5f, false));
             }
         }
 
+        AddStartRoomLampAnchor(anchors);
         anchors.Sort((left, right) => string.Compare(left.Name, right.Name, System.StringComparison.Ordinal));
         return anchors;
+    }
+
+    private static void AddStartRoomLampAnchor(List<LampAnchor> anchors)
+    {
+        Vector3 startLampPosition = new Vector3(59.0f, 1.86f, 13.0f);
+        Vector2 startXZ = new Vector2(startLampPosition.x, startLampPosition.z);
+
+        for (int i = 0; i < anchors.Count; i++)
+        {
+            Vector2 anchorXZ = new Vector2(anchors[i].Position.x, anchors[i].Position.z);
+            if ((anchorXZ - startXZ).sqrMagnitude < 6.25f)
+            {
+                return;
+            }
+        }
+
+        anchors.Add(new LampAnchor("start room generated ceilLight cap", startLampPosition, CoolLamp, 1.75f, 15.5f, false, true));
     }
 
     private static bool CreateLampRig(
@@ -995,6 +1050,7 @@ public static class WolfDynamicLightingSetup
         int index,
         Transform parent,
         Material glowMaterial,
+        Material generatedLampCapMaterial,
         Material warmCeilingSpillMaterial,
         Material coolCeilingSpillMaterial,
         Material warmFloorReflectionMaterial,
@@ -1007,6 +1063,11 @@ public static class WolfDynamicLightingSetup
     {
         GameObject rig = CreateChild(parent, $"Dynamic Lamp {index:00} - {anchor.Name}");
         rig.transform.position = anchor.Position;
+
+        if (anchor.CreateFixtureMesh)
+        {
+            CreateGeneratedCeilingLampFixture(rig.transform, generatedLampCapMaterial);
+        }
 
         GameObject glow = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         glow.name = "emissive bulb";
@@ -1030,14 +1091,15 @@ public static class WolfDynamicLightingSetup
         }
 
         GameObject pointObject = CreateChild(rig.transform, "point bounce");
-        pointObject.transform.localPosition = Vector3.down * 0.08f;
+        pointObject.transform.localPosition = Vector3.down * 0.06f;
         Light point = pointObject.AddComponent<Light>();
         point.type = LightType.Point;
-        point.color = Color.Lerp(anchor.Color, Color.white, 0.38f);
-        point.intensity = anchor.BaseIntensity * 0.32f;
-        point.range = anchor.Range * 1.05f;
+        point.color = Color.Lerp(anchor.Color, Color.white, 0.34f);
+        point.intensity = anchor.BaseIntensity * 0.34f;
+        point.range = 14.5f;
         point.bounceIntensity = 0.0f;
         point.shadows = LightShadows.None;
+        point.cullingMask = NonFloorLightingMask;
         point.shadowStrength = 0f;
         point.shadowBias = 0.035f;
         point.shadowNormalBias = 0.24f;
@@ -1046,17 +1108,38 @@ public static class WolfDynamicLightingSetup
         point.renderMode = LightRenderMode.ForcePixel;
         point.lightmapBakeType = LightmapBakeType.Realtime;
 
+        GameObject ceilingBounceObject = CreateChild(rig.transform, "ceiling bounce");
+        ceilingBounceObject.transform.localPosition = Vector3.down * 0.16f;
+        Light ceilingBounce = ceilingBounceObject.AddComponent<Light>();
+        ceilingBounce.type = LightType.Point;
+        ceilingBounce.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
+        ceilingBounce.intensity = anchor.BaseIntensity * 0.36f;
+        ceilingBounce.range = 10.5f;
+        ceilingBounce.bounceIntensity = 0.0f;
+        ceilingBounce.shadows = LightShadows.None;
+        ceilingBounce.cullingMask = NonFloorLightingMask;
+        ceilingBounce.renderMode = LightRenderMode.ForcePixel;
+        ceilingBounce.lightmapBakeType = LightmapBakeType.Realtime;
+
         GameObject ceilingScatterObject = CreateChild(rig.transform, "ceiling scatter");
-        ceilingScatterObject.transform.localPosition = Vector3.up * (anchor.IsChandelier ? 0.34f : 0.07f);
+        ceilingScatterObject.transform.localPosition = Vector3.down * 0.02f;
+        ceilingScatterObject.transform.localRotation = Quaternion.LookRotation(Vector3.down);
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
-        ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, anchor.IsChandelier ? 0.36f : 0.28f);
-        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.08f : 0.055f);
-        ceilingScatter.range = anchor.IsChandelier ? 4.6f : 3.4f;
+        ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
+        ceilingScatter.intensity = anchor.BaseIntensity * 0.36f;
+        ceilingScatter.range = 15.5f;
+        ceilingScatter.spotAngle = 30f;
         ceilingScatter.bounceIntensity = 0.0f;
         ceilingScatter.shadows = LightShadows.None;
+        ceilingScatter.cullingMask = NonFloorLightingMask;
         ceilingScatter.renderMode = LightRenderMode.ForcePixel;
         ceilingScatter.lightmapBakeType = LightmapBakeType.Realtime;
+
+        CreateCeilingGlowLight(rig.transform, anchor);
+        CreateCeilingDiffuserLights(rig.transform, anchor);
+        CreateWallScatterLights(rig.transform, anchor);
+        CreateFloorSoftFillLight(rig.transform, anchor);
 
         if (createSpecularAccent)
         {
@@ -1079,6 +1162,114 @@ public static class WolfDynamicLightingSetup
         }
 
         return true;
+    }
+
+    private static void CreateCeilingGlowLight(Transform parent, LampAnchor anchor)
+    {
+        GameObject glowObject = CreateChild(parent, "ceiling glow");
+        glowObject.transform.localPosition = Vector3.down * 0.20f;
+        glowObject.transform.localRotation = Quaternion.LookRotation(Vector3.up);
+
+        Light glow = glowObject.AddComponent<Light>();
+        glow.type = LightType.Spot;
+        glow.color = Color.Lerp(anchor.Color, Color.white, 0.54f);
+        glow.intensity = anchor.BaseIntensity * 0.78f;
+        glow.range = 5.5f;
+        glow.spotAngle = 145f;
+        glow.bounceIntensity = 0.0f;
+        glow.shadows = LightShadows.None;
+        glow.cullingMask = NonFloorLightingMask;
+        glow.renderMode = LightRenderMode.ForcePixel;
+        glow.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static void CreateCeilingDiffuserLights(Transform parent, LampAnchor anchor)
+    {
+        CreateCeilingDiffuserLight(parent, anchor, "ceiling diffuser north", Vector3.forward);
+        CreateCeilingDiffuserLight(parent, anchor, "ceiling diffuser south", Vector3.back);
+        CreateCeilingDiffuserLight(parent, anchor, "ceiling diffuser east", Vector3.right);
+        CreateCeilingDiffuserLight(parent, anchor, "ceiling diffuser west", Vector3.left);
+    }
+
+    private static void CreateCeilingDiffuserLight(Transform parent, LampAnchor anchor, string name, Vector3 horizontalOffset)
+    {
+        GameObject diffuserObject = CreateChild(parent, name);
+        diffuserObject.transform.localPosition = horizontalOffset * 1.35f + Vector3.down * 0.14f;
+
+        Light diffuser = diffuserObject.AddComponent<Light>();
+        diffuser.type = LightType.Point;
+        diffuser.color = Color.Lerp(anchor.Color, Color.white, 0.48f);
+        diffuser.intensity = anchor.BaseIntensity * 0.32f;
+        diffuser.range = 15.5f;
+        diffuser.bounceIntensity = 0.0f;
+        diffuser.shadows = LightShadows.None;
+        diffuser.cullingMask = NonFloorLightingMask;
+        diffuser.renderMode = LightRenderMode.ForcePixel;
+        diffuser.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static void CreateWallScatterLights(Transform parent, LampAnchor anchor)
+    {
+        CreateWallScatterLight(parent, anchor, "wall scatter north", Vector3.forward);
+        CreateWallScatterLight(parent, anchor, "wall scatter south", Vector3.back);
+        CreateWallScatterLight(parent, anchor, "wall scatter east", Vector3.right);
+        CreateWallScatterLight(parent, anchor, "wall scatter west", Vector3.left);
+    }
+
+    private static void CreateWallScatterLight(Transform parent, LampAnchor anchor, string name, Vector3 horizontalDirection)
+    {
+        GameObject scatterObject = CreateChild(parent, name);
+        scatterObject.transform.localPosition = horizontalDirection * 1.85f + Vector3.down * 0.18f;
+
+        Light scatter = scatterObject.AddComponent<Light>();
+        scatter.type = LightType.Point;
+        scatter.color = Color.Lerp(anchor.Color, Color.white, 0.50f);
+        scatter.intensity = anchor.BaseIntensity * 0.30f;
+        scatter.range = 13.5f;
+        scatter.spotAngle = 30f;
+        scatter.bounceIntensity = 0.0f;
+        scatter.shadows = LightShadows.None;
+        scatter.cullingMask = NonFloorLightingMask;
+        scatter.renderMode = LightRenderMode.ForcePixel;
+        scatter.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static void CreateFloorSoftFillLight(Transform parent, LampAnchor anchor)
+    {
+        GameObject floorFillObject = CreateChild(parent, "floor soft fill");
+        floorFillObject.transform.localPosition = Vector3.down * 0.22f;
+
+        Light floorFill = floorFillObject.AddComponent<Light>();
+        floorFill.type = LightType.Point;
+        floorFill.color = Color.Lerp(anchor.Color, Color.white, 0.44f);
+        floorFill.intensity = anchor.BaseIntensity * 0.38f;
+        floorFill.range = 24.0f;
+        floorFill.bounceIntensity = 0.0f;
+        floorFill.shadows = LightShadows.None;
+        floorFill.cullingMask = FloorLightingMask;
+        floorFill.renderMode = LightRenderMode.ForcePixel;
+        floorFill.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static void CreateGeneratedCeilingLampFixture(Transform parent, Material capMaterial)
+    {
+        GameObject cap = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        cap.name = "generated ceiling lamp cap";
+        cap.transform.SetParent(parent, false);
+        cap.transform.localPosition = Vector3.up * 0.08f;
+        cap.transform.localScale = new Vector3(0.46f, 0.045f, 0.46f);
+
+        Renderer capRenderer = cap.GetComponent<Renderer>();
+        capRenderer.sharedMaterial = capMaterial;
+        capRenderer.receiveShadows = false;
+        capRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+        capRenderer.shadowCastingMode = ShadowCastingMode.Off;
+
+        Collider capCollider = cap.GetComponent<Collider>();
+        if (capCollider != null)
+        {
+            Object.DestroyImmediate(capCollider);
+        }
     }
 
     private static void CreateCeilingLightSpill(
@@ -1252,66 +1443,6 @@ public static class WolfDynamicLightingSetup
         }
     }
 
-    private static void CreateDiffuseRoomFill(Transform parent, Bounds sceneBounds)
-    {
-        GameObject fillGroup = CreateChild(parent, "Diffuse Room Fill");
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "cool ambient key",
-            new Vector3(62f, -28f, 0f),
-            new Color(0.72f, 0.83f, 1f),
-            0.22f);
-
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "warm ceiling bounce",
-            new Vector3(78f, 128f, 0f),
-            new Color(1f, 0.82f, 0.58f),
-            0.11f);
-
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "side fill north",
-            new Vector3(38f, 60f, 0f),
-            new Color(0.86f, 0.90f, 1f),
-            0.065f);
-
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "side fill south",
-            new Vector3(38f, -120f, 0f),
-            new Color(1f, 0.92f, 0.82f),
-            0.055f);
-
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "cool specular key",
-            new Vector3(54f, -36f, 0f),
-            new Color(0.74f, 0.88f, 1f),
-            0.0f);
-
-        CreateDirectionalFill(
-            fillGroup.transform,
-            "warm specular lift",
-            new Vector3(74f, 138f, 0f),
-            new Color(1f, 0.84f, 0.64f),
-            0.0f);
-    }
-
-    private static void CreateDirectionalFill(Transform parent, string name, Vector3 eulerAngles, Color color, float intensity)
-    {
-        GameObject lightObject = CreateChild(parent, name);
-        lightObject.transform.rotation = Quaternion.Euler(eulerAngles);
-        Light light = lightObject.AddComponent<Light>();
-        light.type = LightType.Directional;
-        light.color = color;
-        light.intensity = intensity;
-        light.bounceIntensity = 0f;
-        light.shadows = LightShadows.None;
-        light.renderMode = LightRenderMode.Auto;
-        light.lightmapBakeType = LightmapBakeType.Realtime;
-    }
-
     private static void CreateReflectionProbes(Transform parent, Bounds sceneBounds)
     {
         Vector3 size = sceneBounds.size;
@@ -1331,7 +1462,7 @@ public static class WolfDynamicLightingSetup
         probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
         probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
         probe.resolution = QualityReflectionProbeResolution;
-        probe.intensity = 1.55f;
+        probe.intensity = 1.0f;
         probe.boxProjection = true;
         probe.size = size;
         probe.center = Vector3.zero;
@@ -1360,7 +1491,7 @@ public static class WolfDynamicLightingSetup
             probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
             probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
             probe.resolution = Mathf.Max(probe.resolution, QualityReflectionProbeResolution);
-            probe.intensity = Mathf.Max(probe.intensity, 1.55f);
+            probe.intensity = 1.0f;
             probe.boxProjection = true;
             probe.shadowDistance = 42f;
             EditorUtility.SetDirty(probe);
@@ -1401,10 +1532,29 @@ public static class WolfDynamicLightingSetup
             shader = Shader.Find("Universal Render Pipeline/Lit");
         }
         Material material = LoadOrCreateMaterial(LampGlowMaterialPath, shader);
-        SetColor(material, "_Color", new Color(1.0f, 0.82f, 0.46f, 1f));
-        SetEmission(material, WarmLamp * 5.2f);
+        SetColor(material, "_Color", new Color(1.0f, 0.88f, 0.68f, 1f));
+        SetEmission(material, CoolLamp * 8.5f);
         SetFloat(material, "_Glossiness", 0.62f);
         SetFloat(material, "_Metallic", 0.0f);
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static Material CreateGeneratedLampCapMaterial()
+    {
+        Shader shader = Shader.Find("Standard");
+        if (shader == null)
+        {
+            shader = Shader.Find("Universal Render Pipeline/Lit");
+        }
+
+        Material material = LoadOrCreateMaterial(GeneratedLampCapMaterialPath, shader);
+        SetColor(material, "_Color", new Color(0.05f, 0.20f, 0.13f, 1f));
+        SetFloat(material, "_Metallic", 0.12f);
+        SetFloat(material, "_Glossiness", 0.44f);
+        SetFloat(material, "_GlossMapScale", 0.44f);
+        material.DisableKeyword("_EMISSION");
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
         return material;
     }
@@ -1739,10 +1889,10 @@ public static class WolfDynamicLightingSetup
     private static void ApplyQualityLightingProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights, 0, true, true, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, true, true, false, RenderingPath.DeferredShading);
         settings.Apply();
 
-        QualitySettings.pixelLightCount = MaxRealtimeLampLights;
+        QualitySettings.pixelLightCount = MaxRealtimeLampLights * 13;
         QualitySettings.realtimeReflectionProbes = false;
         QualitySettings.shadows = ShadowQuality.Disable;
         QualitySettings.shadowResolution = ShadowResolution.High;
@@ -1887,7 +2037,7 @@ public static class WolfDynamicLightingSetup
 
     private readonly struct LampAnchor
     {
-        public LampAnchor(string name, Vector3 position, Color color, float baseIntensity, float range, bool isChandelier)
+        public LampAnchor(string name, Vector3 position, Color color, float baseIntensity, float range, bool isChandelier, bool createFixtureMesh = false)
         {
             Name = name;
             Position = position;
@@ -1895,6 +2045,7 @@ public static class WolfDynamicLightingSetup
             BaseIntensity = baseIntensity;
             Range = range;
             IsChandelier = isChandelier;
+            CreateFixtureMesh = createFixtureMesh;
         }
 
         public string Name { get; }
@@ -1903,6 +2054,7 @@ public static class WolfDynamicLightingSetup
         public float BaseIntensity { get; }
         public float Range { get; }
         public bool IsChandelier { get; }
+        public bool CreateFixtureMesh { get; }
     }
 }
 #endif

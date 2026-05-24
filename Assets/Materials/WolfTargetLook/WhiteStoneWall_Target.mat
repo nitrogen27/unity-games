@@ -15,7 +15,6 @@ Material:
   - _EMISSION
   - _GLOSSYREFLECTIONS_OFF
   - _NORMALMAP
-  - _PARALLAXMAP
   - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 0

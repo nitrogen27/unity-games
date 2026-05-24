@@ -13,10 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _EMISSION
-  - _GLOSSYREFLECTIONS_OFF
-  - _METALLICGLOSSMAP
   - _NORMALMAP
-  - _SPECULARHIGHLIGHTS_OFF
   m_InvalidKeywords: []
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
@@ -53,11 +50,11 @@ Material:
         m_Scale: {x: 32, y: 32}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
-        m_Texture: {fileID: 2800000, guid: b7e34c10d8b5f49f69557758ff2b5301, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 32, y: 32}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
-        m_Texture: {fileID: 2800000, guid: a0aca678f9c0d46cea3c936f7a635107, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 32, y: 32}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
@@ -66,24 +63,24 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BumpScale: 0.18
+    - _BumpScale: 0.12
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _GlossMapScale: 0.08
-    - _Glossiness: 0.08
-    - _GlossyReflections: 0
+    - _GlossMapScale: 0
+    - _Glossiness: 0.16
+    - _GlossyReflections: 0.15
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 0
     - _Parallax: 0
     - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 0.25
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 1.18, g: 1.16, b: 1.1, a: 1}
-    - _EmissionColor: {r: 0.18, g: 0.18, b: 0.18, a: 1}
+    - _Color: {r: 1.55, g: 1.55, b: 1.48, a: 1}
+    - _EmissionColor: {r: 0.95, g: 0.95, b: 0.9, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
