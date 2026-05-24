@@ -28,17 +28,17 @@ public static class WolfTargetRoomTextureApplier
         var darkMetal = LoadMaterial("DarkMetalTrim_Target");
         var prisonCellDoor = LoadMaterial("PrisonCellDoor_Target");
 
-        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.58f);
-        ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.34f);
-        ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.34f);
-        ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.70f, 0.72f);
-        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.04f, 0.62f);
-        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.0f, 0.26f);
+        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.10f, 0.08f, 0.20f, 0.0f, 0.0f, 0.0f);
+        ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.10f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
+        ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.10f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
+        ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.46f, 0.48f, 0.56f, 0.72f, 0.24f, 0.48f, 0.52f);
+        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.0f, 0.08f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
+        ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.0f, 0.08f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
         WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
-        ConfigureMaterial(darkMetal, new Vector2(4f, 4f), 0.85f, 0.68f);
-        ConfigureMaterial(prisonCellDoor, new Vector2(1f, 1f), 0.60f, 0.58f);
+        ConfigureMaterial(darkMetal, new Vector2(4f, 4f), 0.34f, 0.38f, 0.48f, 0.64f, 0.22f, 0.40f, 0.46f);
+        ConfigureMaterial(prisonCellDoor, new Vector2(1f, 1f), 0.18f, 0.30f, 0.38f, 0.52f, 0.22f, 0.34f, 0.40f);
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
@@ -188,7 +188,7 @@ public static class WolfTargetRoomTextureApplier
             if (ShouldUseTargetWhiteStoneWall(wallValue))
             {
                 materialTarget = MaterialTarget.WhiteStoneWall;
-                return materialIndex < 2 ? whiteStoneWallDark : whiteStoneWall;
+                return whiteStoneWall;
             }
 
             if (ShouldUseTargetBlueWall(wallValue))
@@ -277,9 +277,7 @@ public static class WolfTargetRoomTextureApplier
     private static Material LoadOriginalWallSideMaterial(int wallValue, int materialIndex)
     {
         int lightTileIndex = (wallValue - 1) * 2;
-        int darkTileIndex = lightTileIndex + 1;
-        int tileIndex = materialIndex < 2 ? darkTileIndex : lightTileIndex;
-        return LoadOriginalWallMaterial(tileIndex);
+        return LoadOriginalWallMaterial(lightTileIndex);
     }
 
     private static Material LoadOriginalWallMaterial(int tileIndex)
@@ -423,7 +421,16 @@ public static class WolfTargetRoomTextureApplier
         return value.StartsWith(token, System.StringComparison.Ordinal);
     }
 
-    private static void ConfigureMaterial(Material material, Vector2 scale, float metallic, float smoothness)
+    private static void ConfigureMaterial(
+        Material material,
+        Vector2 scale,
+        float metallic,
+        float smoothness,
+        float glossMapScale,
+        float bumpScale,
+        float occlusionStrength,
+        float glossyReflections,
+        float specularHighlights)
     {
         SetTextureScale(material, "_BaseMap", scale);
         SetTextureScale(material, "_MainTex", scale);
@@ -436,10 +443,12 @@ public static class WolfTargetRoomTextureApplier
         SetFloat(material, "_Metallic", metallic);
         SetFloat(material, "_Smoothness", smoothness);
         SetFloat(material, "_Glossiness", smoothness);
-        SetFloat(material, "_BumpScale", 1.0f);
-        SetFloat(material, "_OcclusionStrength", 1.0f);
-        SetFloat(material, "_GlossyReflections", 1.0f);
-        SetFloat(material, "_SpecularHighlights", 1.0f);
+        SetFloat(material, "_GlossMapScale", glossMapScale);
+        SetFloat(material, "_BumpScale", bumpScale);
+        SetFloat(material, "_OcclusionStrength", occlusionStrength);
+        SetFloat(material, "_Parallax", 0.0f);
+        SetFloat(material, "_GlossyReflections", glossyReflections);
+        SetFloat(material, "_SpecularHighlights", specularHighlights);
 
         EditorUtility.SetDirty(material);
     }

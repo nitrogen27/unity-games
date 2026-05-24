@@ -27,18 +27,18 @@ public static class WolfDynamicLightingSetup
     private const string WarmWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionWarm.mat";
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
     private const int MaxRealtimeLampLights = 34;
-    private const int MaxFlickeringLampLights = 4;
-    private const int MaxRealtimeSpecularAccentLights = 10;
+    private const int MaxFlickeringLampLights = 0;
+    private const int MaxRealtimeSpecularAccentLights = 0;
     private const int PerformanceAntiAliasingSamples = 2;
     private const int QualityAntiAliasingSamples = 4;
-    private const int QualityReflectionProbeResolution = 256;
+    private const int QualityReflectionProbeResolution = 128;
     private const float LightProbeSpacing = 5.5f;
     private const float UpperProbeHeight = 0.9f;
     private const float LowerProbeHeight = -2.1f;
-    private const float BakedPointIntensity = 4.00f;
-    private const float BakedChandelierPointIntensity = 4.60f;
-    private const float BakedCeilingScatterIntensity = 2.15f;
-    private const float BakedChandelierScatterIntensity = 2.50f;
+    private const float BakedPointIntensity = 1.70f;
+    private const float BakedChandelierPointIntensity = 2.00f;
+    private const float BakedCeilingScatterIntensity = 0.70f;
+    private const float BakedChandelierScatterIntensity = 0.85f;
 
     private static readonly Color WarmLamp = new Color(1.0f, 0.72f, 0.36f);
     private static readonly Color CoolLamp = new Color(0.32f, 0.88f, 1.0f);
@@ -58,20 +58,17 @@ public static class WolfDynamicLightingSetup
         Directory.CreateDirectory(MaterialRoot);
 
         Material glowMaterial = CreateGlowMaterial();
-        Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(WarmCeilingSpillMaterialPath, WarmLamp, 1.65f, 0.42f);
-        Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(CoolCeilingSpillMaterialPath, CoolLamp, 1.5f, 0.38f);
-        Material warmFloorReflectionMaterial = CreateSurfaceReflectionMaterial(WarmFloorReflectionMaterialPath, FloorReflectionTexturePath, WarmLamp, 0.30f, 0.075f, true);
-        Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(CoolFloorReflectionMaterialPath, FloorReflectionTexturePath, CoolLamp, 0.27f, 0.065f, true);
-        Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(WarmWallReflectionMaterialPath, WallReflectionTexturePath, WarmLamp, 0.26f, 0.070f, false);
-        Material coolWallReflectionMaterial = CreateSurfaceReflectionMaterial(CoolWallReflectionMaterialPath, WallReflectionTexturePath, CoolLamp, 0.24f, 0.060f, false);
+        Material warmCeilingSpillMaterial = null;
+        Material coolCeilingSpillMaterial = null;
+        Material warmFloorReflectionMaterial = null;
+        Material coolFloorReflectionMaterial = null;
+        Material warmWallReflectionMaterial = null;
+        Material coolWallReflectionMaterial = null;
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
 
-        GameObject existingRoot = GameObject.Find(RootName);
-        if (existingRoot != null)
-        {
-            Object.DestroyImmediate(existingRoot);
-        }
+        ClearBakedLightingData();
+        DestroyExistingDynamicLightingRoots();
 
         GameObject root = new GameObject(RootName);
         GameObject lampGroup = CreateChild(root.transform, "Lamp Sources");
@@ -140,6 +137,7 @@ public static class WolfDynamicLightingSetup
 
         AssetDatabase.Refresh();
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        ClearBakedLightingData();
         ApplySceneLightingSettings();
         ApplyRendererLightingFlags(null);
         ConfigureReflectionProbesForQuality();
@@ -286,12 +284,14 @@ public static class WolfDynamicLightingSetup
                 continue;
             }
 
-            if (renderer is MeshRenderer)
+            if (renderer is MeshRenderer meshRenderer)
             {
                 flags |= staticFlags;
                 GameObjectUtility.SetStaticEditorFlags(go, flags);
                 renderer.receiveShadows = true;
                 renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+                meshRenderer.stitchLightmapSeams = true;
+                meshRenderer.scaleInLightmap = GetStructuralLightmapScale(renderer.gameObject.name);
                 EditorUtility.SetDirty(renderer);
                 EditorUtility.SetDirty(go);
                 staticRendererCount++;
@@ -299,6 +299,40 @@ public static class WolfDynamicLightingSetup
         }
 
         return staticRendererCount;
+    }
+
+    private static float GetStructuralLightmapScale(string objectName)
+    {
+        if (objectName == "Floor" ||
+            objectName == "Ceiling" ||
+            objectName.StartsWith("Wall ", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Floor", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Ceiling", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Wall", System.StringComparison.Ordinal))
+        {
+            return 1.55f;
+        }
+
+        return 0.75f;
+    }
+
+    private static void DestroyExistingDynamicLightingRoots()
+    {
+        List<GameObject> roots = new List<GameObject>();
+        foreach (GameObject gameObject in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include))
+        {
+            if (gameObject != null &&
+                gameObject.name == RootName &&
+                gameObject.transform.parent == null)
+            {
+                roots.Add(gameObject);
+            }
+        }
+
+        foreach (GameObject root in roots)
+        {
+            Object.DestroyImmediate(root);
+        }
     }
 
     private static int ConfigureLightsForBeautifulBake()
@@ -353,10 +387,10 @@ public static class WolfDynamicLightingSetup
         if (objectName == "point bounce")
         {
             light.intensity = isChandelier ? BakedChandelierPointIntensity : BakedPointIntensity;
-            light.range = isChandelier ? 30f : 26f;
-            light.bounceIntensity = 2.35f;
-            light.shadows = LightShadows.Soft;
-            light.shadowStrength = isChandelier ? 0.38f : 0.32f;
+            light.range = isChandelier ? 22f : 18f;
+            light.bounceIntensity = 0.65f;
+            light.shadows = LightShadows.None;
+            light.shadowStrength = 0f;
             light.shadowBias = 0.028f;
             light.shadowNormalBias = 0.18f;
             light.shadowNearPlane = 0.1f;
@@ -368,32 +402,33 @@ public static class WolfDynamicLightingSetup
         {
             light.intensity = isChandelier ? BakedChandelierScatterIntensity : BakedCeilingScatterIntensity;
             light.range = isChandelier ? 11f : 9.5f;
-            light.bounceIntensity = 1.95f;
+            light.bounceIntensity = 0.45f;
             light.shadows = LightShadows.None;
             return;
         }
 
         if (objectName == "cool ambient key")
         {
-            light.intensity = 3.20f;
-            light.bounceIntensity = 1.25f;
+            light.intensity = 0.55f;
+            light.bounceIntensity = 0.25f;
             light.shadows = LightShadows.None;
             return;
         }
 
         if (objectName == "warm ceiling bounce")
         {
-            light.intensity = 1.70f;
-            light.bounceIntensity = 1.15f;
+            light.intensity = 0.28f;
+            light.bounceIntensity = 0.20f;
             light.shadows = LightShadows.None;
             return;
         }
 
         if (light.type == LightType.Point)
         {
-            light.intensity = Mathf.Max(light.intensity, 1.25f);
-            light.range = Mathf.Max(light.range, 18f);
-            light.bounceIntensity = Mathf.Max(light.bounceIntensity, 1.55f);
+            light.intensity = Mathf.Min(Mathf.Max(light.intensity, 0.45f), 1.20f);
+            light.range = Mathf.Min(Mathf.Max(light.range, 10f), 18f);
+            light.bounceIntensity = Mathf.Min(Mathf.Max(light.bounceIntensity, 0.20f), 0.65f);
+            light.shadows = LightShadows.None;
         }
     }
 
@@ -529,18 +564,18 @@ public static class WolfDynamicLightingSetup
         settings.mixedBakeMode = MixedLightingMode.Shadowmask;
         settings.lightmapper = LightingSettings.Lightmapper.ProgressiveGPU;
         settings.directionalityMode = LightmapsMode.CombinedDirectional;
-        settings.lightmapResolution = 22f;
+        settings.lightmapResolution = 32f;
         settings.lightmapMaxSize = 2048;
-        settings.lightmapPadding = 3;
-        settings.lightmapCompression = LightmapCompression.HighQuality;
-        settings.compressLightmaps = true;
-        settings.ao = true;
-        settings.aoMaxDistance = 0.55f;
-        settings.aoExponentDirect = 0.12f;
-        settings.aoExponentIndirect = 0.08f;
-        settings.directSampleCount = 96;
-        settings.indirectSampleCount = 512;
-        settings.environmentSampleCount = 128;
+        settings.lightmapPadding = 8;
+        settings.lightmapCompression = LightmapCompression.None;
+        settings.compressLightmaps = false;
+        settings.ao = false;
+        settings.aoMaxDistance = 0.25f;
+        settings.aoExponentDirect = 0.05f;
+        settings.aoExponentIndirect = 0.04f;
+        settings.directSampleCount = 192;
+        settings.indirectSampleCount = 768;
+        settings.environmentSampleCount = 192;
         settings.maxBounces = 6;
         settings.indirectResolution = 2.5f;
         settings.filteringMode = LightingSettings.FilterMode.Auto;
@@ -559,15 +594,15 @@ public static class WolfDynamicLightingSetup
     private static void ApplyBeautifulRuntimeProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, 12, 0, true, false, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights, 0, true, true, false, RenderingPath.DeferredShading);
         settings.Apply();
 
-        QualitySettings.pixelLightCount = 12;
+        QualitySettings.pixelLightCount = MaxRealtimeLampLights;
         QualitySettings.realtimeReflectionProbes = false;
-        QualitySettings.shadows = ShadowQuality.All;
+        QualitySettings.shadows = ShadowQuality.Disable;
         QualitySettings.shadowResolution = ShadowResolution.High;
         QualitySettings.shadowProjection = ShadowProjection.StableFit;
-        QualitySettings.shadowDistance = 42f;
+        QualitySettings.shadowDistance = 0f;
         QualitySettings.shadowNearPlaneOffset = 2f;
         QualitySettings.antiAliasing = 0;
         QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
@@ -675,13 +710,13 @@ public static class WolfDynamicLightingSetup
     private static void ApplySceneLightingSettings()
     {
         RenderSettings.ambientMode = AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = new Color(0.50f, 0.54f, 0.62f);
-        RenderSettings.ambientEquatorColor = new Color(0.42f, 0.44f, 0.50f);
-        RenderSettings.ambientGroundColor = new Color(0.26f, 0.24f, 0.22f);
-        RenderSettings.ambientLight = new Color(0.46f, 0.48f, 0.54f);
-        RenderSettings.ambientIntensity = 0.85f;
-        RenderSettings.reflectionIntensity = 1.20f;
-        RenderSettings.reflectionBounces = 3;
+        RenderSettings.ambientSkyColor = new Color(0.78f, 0.84f, 0.94f);
+        RenderSettings.ambientEquatorColor = new Color(0.66f, 0.70f, 0.78f);
+        RenderSettings.ambientGroundColor = new Color(0.52f, 0.52f, 0.56f);
+        RenderSettings.ambientLight = new Color(0.72f, 0.76f, 0.84f);
+        RenderSettings.ambientIntensity = 1.18f;
+        RenderSettings.reflectionIntensity = 0.35f;
+        RenderSettings.reflectionBounces = 1;
         RenderSettings.defaultReflectionResolution = QualityReflectionProbeResolution;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.ExponentialSquared;
@@ -701,14 +736,14 @@ public static class WolfDynamicLightingSetup
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.02f, 0.88f, 1.0f);
-        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.66f, 0.82f);
-        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.62f, 0.78f);
-        SetMaterialSurface("DoorTeal_Target", 0.88f, 0.90f, 1.0f);
-        SetMaterialSurface("FloorTile_Target", 0.08f, 0.88f, 1.0f);
-        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.56f, 0.72f);
-        SetMaterialSurface("DarkMetalTrim_Target", 0.55f, 0.78f, 0.95f);
-        SetMaterialSurface("PrisonCellDoor_Target", 0.32f, 0.62f, 0.85f);
+        SetMaterialSurface("BlueWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("DoorTeal_Target", 0.46f, 0.48f, 0.56f, 0.48f, 0.52f);
+        SetMaterialSurface("FloorTile_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
+        SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.30f, 0.38f, 0.34f, 0.40f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
         WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
@@ -724,67 +759,83 @@ public static class WolfDynamicLightingSetup
     {
         TuneTargetMaterial(
             "BlueWall_Target",
-            new Color(1.58f, 1.70f, 2.28f, 1f),
-            new Color(0.08f, 0.12f, 0.30f, 1f),
-            1.14f,
-            0.42f,
-            0.026f);
+            new Color(1.44f, 1.54f, 2.08f, 1f),
+            new Color(0.075f, 0.10f, 0.24f, 1f),
+            0.20f,
+            0.0f,
+            0f,
+            0.0f,
+            0.0f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Target",
-            new Color(1.12f, 1.08f, 1.0f, 1f),
-            new Color(0.20f, 0.19f, 0.17f, 1f),
-            0.82f,
-            0.42f,
-            0.018f);
+            new Color(1.08f, 1.06f, 1.00f, 1f),
+            new Color(0.10f, 0.096f, 0.086f, 1f),
+            0.18f,
+            0.0f,
+            0f,
+            0.0f,
+            0.0f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Dark_Target",
-            new Color(0.92f, 0.88f, 0.78f, 1f),
-            new Color(0.12f, 0.11f, 0.095f, 1f),
-            0.78f,
-            0.46f,
-            0.016f);
+            new Color(1.08f, 1.06f, 1.00f, 1f),
+            new Color(0.10f, 0.096f, 0.086f, 1f),
+            0.18f,
+            0.0f,
+            0f,
+            0.0f,
+            0.0f);
 
         TuneTargetMaterial(
             "DoorTeal_Target",
-            new Color(1.08f, 1.20f, 1.24f, 1f),
-            new Color(0.04f, 0.13f, 0.15f, 1f),
-            1.08f,
-            0.38f,
-            0.020f);
+            new Color(0.94f, 1.06f, 1.10f, 1f),
+            new Color(0.012f, 0.038f, 0.044f, 1f),
+            0.72f,
+            0.24f,
+            0f,
+            0.48f,
+            0.52f);
 
         TuneTargetMaterial(
             "FloorTile_Target",
-            new Color(0.86f, 0.84f, 0.78f, 1f),
-            Color.black,
-            1.06f,
-            0.42f,
-            0.020f);
+            new Color(1.18f, 1.16f, 1.10f, 1f),
+            new Color(0.18f, 0.18f, 0.18f, 1f),
+            0.18f,
+            0.0f,
+            0f,
+            0.0f,
+            0.0f);
 
         TuneTargetMaterial(
             "CeilingPanel_Target",
-            new Color(1.42f, 1.45f, 1.36f, 1f),
-            new Color(0.27f, 0.29f, 0.33f, 1f),
-            0.88f,
-            0.20f,
-            0.010f);
+            new Color(1.28f, 1.32f, 1.26f, 1f),
+            new Color(0.11f, 0.114f, 0.122f, 1f),
+            0.18f,
+            0.0f,
+            0f,
+            0.0f,
+            0.0f);
 
         TuneTargetMaterial(
             "DarkMetalTrim_Target",
-            new Color(1.65f, 1.70f, 1.78f, 1f),
-            new Color(0.18f, 0.20f, 0.24f, 1f),
-            1.0f,
-            0.38f,
-            0.012f);
+            new Color(1.18f, 1.22f, 1.30f, 1f),
+            new Color(0.035f, 0.040f, 0.048f, 1f),
+            0.64f,
+            0.22f,
+            0f,
+            0.40f,
+            0.46f);
 
         TuneTargetMaterial(
             "PrisonCellDoor_Target",
-            new Color(1.82f, 1.88f, 1.94f, 1f),
-            new Color(0.20f, 0.22f, 0.26f, 1f),
-            0.72f,
+            new Color(1.24f, 1.28f, 1.34f, 1f),
+            new Color(0.04f, 0.044f, 0.052f, 1f),
+            0.52f,
+            0.22f,
+            0f,
             0.34f,
-            0f);
+            0.40f);
     }
 
     private static void TuneTargetMaterial(
@@ -793,7 +844,9 @@ public static class WolfDynamicLightingSetup
         Color emissionTint,
         float bumpScale,
         float occlusionStrength,
-        float parallax)
+        float parallax,
+        float glossyReflections,
+        float specularHighlights)
     {
         Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/{materialName}.mat");
         if (material == null)
@@ -807,8 +860,8 @@ public static class WolfDynamicLightingSetup
         SetFloat(material, "_BumpScale", bumpScale);
         SetFloat(material, "_OcclusionStrength", occlusionStrength);
         SetFloat(material, "_Parallax", parallax);
-        SetFloat(material, "_GlossyReflections", 1f);
-        SetFloat(material, "_SpecularHighlights", 1f);
+        SetFloat(material, "_GlossyReflections", glossyReflections);
+        SetFloat(material, "_SpecularHighlights", specularHighlights);
 
         if (emissionTint.maxColorComponent > 0f)
         {
@@ -819,9 +872,14 @@ public static class WolfDynamicLightingSetup
             material.DisableKeyword("_EMISSION");
         }
 
-        if (parallax > 0f && material.HasProperty("_ParallaxMap") && material.GetTexture("_ParallaxMap") != null)
+        bool useParallax = parallax > 0f && material.HasProperty("_ParallaxMap") && material.GetTexture("_ParallaxMap") != null;
+        if (useParallax)
         {
             material.EnableKeyword("_PARALLAXMAP");
+        }
+        else
+        {
+            material.DisableKeyword("_PARALLAXMAP");
         }
 
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
@@ -849,14 +907,41 @@ public static class WolfDynamicLightingSetup
                 continue;
             }
 
-            renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
-            renderer.receiveShadows = true;
+            renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+            renderer.receiveShadows = false;
+            renderer.lightmapIndex = -1;
+            renderer.realtimeLightmapIndex = -1;
+            renderer.lightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
+            renderer.realtimeLightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
 
             if (renderer is MeshRenderer)
             {
-                renderer.shadowCastingMode = ShadowCastingMode.On;
+                renderer.shadowCastingMode = ShadowCastingMode.Off;
             }
 
+            EditorUtility.SetDirty(renderer);
+        }
+    }
+
+    private static void ClearBakedLightingData()
+    {
+        if (Lightmapping.isRunning)
+        {
+            Lightmapping.Cancel();
+        }
+
+        Lightmapping.Clear();
+        Lightmapping.ClearLightingDataAsset();
+        StaticOcclusionCulling.Clear();
+        LightmapSettings.lightmaps = new LightmapData[0];
+        LightmapSettings.lightProbes = null;
+
+        foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include))
+        {
+            renderer.lightmapIndex = -1;
+            renderer.realtimeLightmapIndex = -1;
+            renderer.lightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
+            renderer.realtimeLightmapScaleOffset = new Vector4(1f, 1f, 0f, 0f);
             EditorUtility.SetDirty(renderer);
         }
     }
@@ -939,10 +1024,6 @@ public static class WolfDynamicLightingSetup
             Object.DestroyImmediate(collider);
         }
 
-        CreateCeilingLightSpill(rig.transform, anchor, warmCeilingSpillMaterial, coolCeilingSpillMaterial);
-        CreateFloorLightReflection(rig.transform, anchor, warmFloorReflectionMaterial, coolFloorReflectionMaterial);
-        CreateWallLightReflections(rig.transform, anchor, warmWallReflectionMaterial, coolWallReflectionMaterial);
-
         if (!createRealtimeLight)
         {
             return false;
@@ -953,11 +1034,11 @@ public static class WolfDynamicLightingSetup
         Light point = pointObject.AddComponent<Light>();
         point.type = LightType.Point;
         point.color = Color.Lerp(anchor.Color, Color.white, 0.38f);
-        point.intensity = anchor.BaseIntensity * 1.04f;
-        point.range = anchor.Range * 1.18f;
-        point.bounceIntensity = 1.55f;
-        point.shadows = LightShadows.Soft;
-        point.shadowStrength = anchor.IsChandelier ? 0.58f : 0.44f;
+        point.intensity = anchor.BaseIntensity * 0.32f;
+        point.range = anchor.Range * 1.05f;
+        point.bounceIntensity = 0.0f;
+        point.shadows = LightShadows.None;
+        point.shadowStrength = 0f;
         point.shadowBias = 0.035f;
         point.shadowNormalBias = 0.24f;
         point.shadowNearPlane = 0.12f;
@@ -970,9 +1051,9 @@ public static class WolfDynamicLightingSetup
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
         ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, anchor.IsChandelier ? 0.36f : 0.28f);
-        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.46f : 0.34f);
-        ceilingScatter.range = anchor.IsChandelier ? 6.5f : 4.8f;
-        ceilingScatter.bounceIntensity = 1.2f;
+        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.08f : 0.055f);
+        ceilingScatter.range = anchor.IsChandelier ? 4.6f : 3.4f;
+        ceilingScatter.bounceIntensity = 0.0f;
         ceilingScatter.shadows = LightShadows.None;
         ceilingScatter.renderMode = LightRenderMode.ForcePixel;
         ceilingScatter.lightmapBakeType = LightmapBakeType.Realtime;
@@ -984,8 +1065,8 @@ public static class WolfDynamicLightingSetup
             Light specular = specularObject.AddComponent<Light>();
             specular.type = LightType.Point;
             specular.color = Color.Lerp(anchor.Color, Color.white, anchor.IsChandelier ? 0.68f : 0.74f);
-            specular.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.11f : 0.10f);
-            specular.range = anchor.IsChandelier ? 13.5f : 11.5f;
+            specular.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.045f : 0.035f);
+            specular.range = anchor.IsChandelier ? 9.0f : 7.5f;
             specular.bounceIntensity = 0f;
             specular.shadows = LightShadows.None;
             specular.renderMode = LightRenderMode.ForcePixel;
@@ -994,7 +1075,7 @@ public static class WolfDynamicLightingSetup
 
         if (createFlicker)
         {
-            ConfigureFlicker(pointObject.AddComponent<FlickerLight>(), point.intensity * 0.96f, point.intensity * 1.03f, 0.45f, 0.95f, 0.92f);
+            ConfigureFlicker(pointObject.AddComponent<FlickerLight>(), point.intensity * 0.97f, point.intensity * 1.02f, 0.45f, 0.95f, 0.92f);
         }
 
         return true;
@@ -1179,42 +1260,42 @@ public static class WolfDynamicLightingSetup
             "cool ambient key",
             new Vector3(62f, -28f, 0f),
             new Color(0.72f, 0.83f, 1f),
-            0.55f);
+            0.22f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "warm ceiling bounce",
             new Vector3(78f, 128f, 0f),
             new Color(1f, 0.82f, 0.58f),
-            0.28f);
+            0.11f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "side fill north",
             new Vector3(38f, 60f, 0f),
             new Color(0.86f, 0.90f, 1f),
-            0.18f);
+            0.065f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "side fill south",
             new Vector3(38f, -120f, 0f),
             new Color(1f, 0.92f, 0.82f),
-            0.16f);
+            0.055f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "cool specular key",
             new Vector3(54f, -36f, 0f),
             new Color(0.74f, 0.88f, 1f),
-            0.06f);
+            0.0f);
 
         CreateDirectionalFill(
             fillGroup.transform,
             "warm specular lift",
             new Vector3(74f, 138f, 0f),
             new Color(1f, 0.84f, 0.64f),
-            0.025f);
+            0.0f);
     }
 
     private static void CreateDirectionalFill(Transform parent, string name, Vector3 eulerAngles, Color color, float intensity)
@@ -1225,7 +1306,7 @@ public static class WolfDynamicLightingSetup
         light.type = LightType.Directional;
         light.color = color;
         light.intensity = intensity;
-        light.bounceIntensity = 0.65f;
+        light.bounceIntensity = 0f;
         light.shadows = LightShadows.None;
         light.renderMode = LightRenderMode.Auto;
         light.lightmapBakeType = LightmapBakeType.Realtime;
@@ -1344,12 +1425,15 @@ public static class WolfDynamicLightingSetup
         SetTexture(material, "_EmissionMap", falloff);
         SetColor(material, "_Color", tint);
         SetColor(material, "_EmissionColor", lightColor * emissionScale);
-        SetFloat(material, "_Mode", 3f);
+        SetFloat(material, "_Mode", 2f);
         SetFloat(material, "_SrcBlend", (float)BlendMode.SrcAlpha);
         SetFloat(material, "_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
         SetFloat(material, "_ZWrite", 0f);
         SetFloat(material, "_Glossiness", 0f);
+        SetFloat(material, "_GlossMapScale", 0f);
         SetFloat(material, "_Metallic", 0f);
+        SetFloat(material, "_GlossyReflections", 0f);
+        SetFloat(material, "_SpecularHighlights", 0f);
         material.EnableKeyword("_ALPHABLEND_ON");
         material.EnableKeyword("_EMISSION");
         material.DisableKeyword("_ALPHATEST_ON");
@@ -1373,20 +1457,20 @@ public static class WolfDynamicLightingSetup
         Color tint = new Color(lightColor.r, lightColor.g, lightColor.b, alpha);
 
         SetTexture(material, "_MainTex", falloff);
-        SetTexture(material, "_EmissionMap", falloff);
+        SetTexture(material, "_EmissionMap", null);
         SetColor(material, "_Color", tint);
-        SetColor(material, "_EmissionColor", lightColor * emissionScale);
-        SetFloat(material, "_Mode", 3f);
+        SetColor(material, "_EmissionColor", Color.black);
+        SetFloat(material, "_Mode", 2f);
         SetFloat(material, "_SrcBlend", (float)BlendMode.SrcAlpha);
         SetFloat(material, "_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
         SetFloat(material, "_ZWrite", 0f);
-        SetFloat(material, "_Glossiness", floorReflection ? 0.92f : 0.76f);
-        SetFloat(material, "_GlossMapScale", 1f);
+        SetFloat(material, "_Glossiness", floorReflection ? 0.12f : 0.08f);
+        SetFloat(material, "_GlossMapScale", 0f);
         SetFloat(material, "_Metallic", 0f);
-        SetFloat(material, "_GlossyReflections", 1f);
-        SetFloat(material, "_SpecularHighlights", 1f);
+        SetFloat(material, "_GlossyReflections", 0f);
+        SetFloat(material, "_SpecularHighlights", 0f);
         material.EnableKeyword("_ALPHABLEND_ON");
-        material.EnableKeyword("_EMISSION");
+        material.DisableKeyword("_EMISSION");
         material.DisableKeyword("_ALPHATEST_ON");
         material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
         material.renderQueue = (int)RenderQueue.Transparent;
@@ -1412,7 +1496,7 @@ public static class WolfDynamicLightingSetup
                 falloff = Mathf.SmoothStep(0f, 1f, falloff);
                 falloff = Mathf.SmoothStep(0f, 1f, falloff);
                 float alpha = Mathf.Pow(falloff, 1.35f);
-                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                pixels[y * size + x] = new Color(alpha, alpha, alpha, alpha);
             }
         }
 
@@ -1432,7 +1516,7 @@ public static class WolfDynamicLightingSetup
             importer.filterMode = FilterMode.Trilinear;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.anisoLevel = 4;
-            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.SaveAndReimport();
         }
 
@@ -1462,7 +1546,7 @@ public static class WolfDynamicLightingSetup
                 float broadReflection = floorReflection ? 0.30f : 0.26f;
                 float falloffPower = floorReflection ? 2.10f : 2.35f;
                 float alpha = Mathf.Clamp01(Mathf.Pow(radial, falloffPower) * broadReflection) * edgeFade;
-                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                pixels[y * size + x] = new Color(alpha, alpha, alpha, alpha);
             }
         }
 
@@ -1482,7 +1566,7 @@ public static class WolfDynamicLightingSetup
             importer.filterMode = FilterMode.Trilinear;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.anisoLevel = 8;
-            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.SaveAndReimport();
         }
 
@@ -1510,7 +1594,13 @@ public static class WolfDynamicLightingSetup
         return material;
     }
 
-    private static void SetMaterialSurface(string materialName, float metallic, float smoothness, float glossMapScale)
+    private static void SetMaterialSurface(
+        string materialName,
+        float metallic,
+        float smoothness,
+        float glossMapScale,
+        float glossyReflections,
+        float specularHighlights)
     {
         Material material = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/{materialName}.mat");
         if (material == null)
@@ -1522,8 +1612,8 @@ public static class WolfDynamicLightingSetup
         SetFloat(material, "_Smoothness", smoothness);
         SetFloat(material, "_Glossiness", smoothness);
         SetFloat(material, "_GlossMapScale", glossMapScale);
-        SetFloat(material, "_GlossyReflections", 1f);
-        SetFloat(material, "_SpecularHighlights", 1f);
+        SetFloat(material, "_GlossyReflections", glossyReflections);
+        SetFloat(material, "_SpecularHighlights", specularHighlights);
         EditorUtility.SetDirty(material);
     }
 
@@ -1649,15 +1739,15 @@ public static class WolfDynamicLightingSetup
     private static void ApplyQualityLightingProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, 24, 0, false, false, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights, 0, true, true, false, RenderingPath.DeferredShading);
         settings.Apply();
 
-        QualitySettings.pixelLightCount = 24;
-        QualitySettings.realtimeReflectionProbes = true;
-        QualitySettings.shadows = ShadowQuality.All;
+        QualitySettings.pixelLightCount = MaxRealtimeLampLights;
+        QualitySettings.realtimeReflectionProbes = false;
+        QualitySettings.shadows = ShadowQuality.Disable;
         QualitySettings.shadowResolution = ShadowResolution.High;
         QualitySettings.shadowProjection = ShadowProjection.StableFit;
-        QualitySettings.shadowDistance = 42f;
+        QualitySettings.shadowDistance = 0f;
         QualitySettings.shadowNearPlaneOffset = 2f;
         QualitySettings.antiAliasing = QualityAntiAliasingSamples;
         QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;

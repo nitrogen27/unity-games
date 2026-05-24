@@ -13,7 +13,7 @@ namespace WolfMini.Core
         public const int DefaultElevatorTileIndex = 102;
 
         private static readonly Color DefaultBlueWall = new Color32(24, 42, 132, 255);
-        private static readonly Color DefaultDarkerBlueWall = new Color32(11, 22, 78, 255);
+        private static readonly Color DefaultDarkerBlueWall = DefaultBlueWall;
         private static readonly Color DefaultGrayFloor = new Color32(82, 82, 82, 255);
         private static readonly Color DefaultGrayCeiling = new Color32(112, 112, 112, 255);
         private static readonly Color DefaultTealDoor = new Color32(0, 126, 132, 255);
@@ -120,8 +120,8 @@ namespace WolfMini.Core
 
         public AtlasTile GetWallTile(int wallValue, bool darkSide = false)
         {
-            (int lightIdx, int darkIdx) = GetWallTileIndices(wallValue);
-            return AtlasTile.FromIndex(darkSide ? darkIdx : lightIdx);
+            (int lightIdx, _) = GetWallTileIndices(wallValue);
+            return AtlasTile.FromIndex(lightIdx);
         }
 
         public Material GetUpperWallMaterial(bool darkSide = false)
@@ -136,12 +136,12 @@ namespace WolfMini.Core
 
         public Material GetWallMaterial(int wallValue, bool darkSide = false)
         {
-            (int lightIdx, int darkIdx) = GetWallTileIndices(wallValue);
+            (int lightIdx, _) = GetWallTileIndices(wallValue);
             return GetAtlasOrMaterialOrFallback(
-                darkSide ? darkIdx : lightIdx,
-                GetWallMaterialOverride(wallValue, darkSide),
-                darkSide ? "DarkerBlueWall" : "BlueWall",
-                darkSide ? darkerBlueWallColor : blueWallColor);
+                lightIdx,
+                GetWallMaterialOverride(wallValue),
+                "BlueWall",
+                blueWallColor);
         }
 
         public Material GetDoorMaterial()
@@ -222,19 +222,14 @@ namespace WolfMini.Core
             return GetAtlasOrMaterialOrFallback(tileIndex, null, fallbackName, fallbackColor);
         }
 
-        private Material GetWallMaterialOverride(int wallValue, bool darkSide)
+        private Material GetWallMaterialOverride(int wallValue)
         {
             if (wallValue != DefaultBlueWallValue)
             {
                 return null;
             }
 
-            if (darkSide && darkerBlueWallMaterial != null)
-            {
-                return darkerBlueWallMaterial;
-            }
-
-            return blueWallMaterial;
+            return blueWallMaterial != null ? blueWallMaterial : darkerBlueWallMaterial;
         }
 
         private void OnValidate()

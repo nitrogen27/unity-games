@@ -1778,14 +1778,12 @@ namespace HelloWorldRoom.Editor
                 }
 
                 int lightIdx = (wallValue - 1) * 2;
-                int darkIdx = lightIdx + 1;
                 Material light = GetWallTileMaterial(lightIdx);
-                Material dark = GetWallTileMaterial(darkIdx);
                 // Submesh order matches three.js BoxGeometry: [+x, -x, +y, -y, +z, -z]
-                // = [East, West, Top, Bottom, North, South]. Wolf3D convention:
-                // dark on E/W (vertical pillars), light on top/bottom/N/S — same as
-                // the three.js port (`[darkMat, darkMat, lightMat, lightMat, lightMat, lightMat]`).
-                Material[] materials = { dark, dark, light, light, light, light };
+                // = [East, West, Top, Bottom, North, South]. Use the light tile
+                // on every side so authored lighting, not dark texture variants,
+                // controls wall contrast.
+                Material[] materials = { light, light, light, light, light, light };
                 wallMaterials[wallValue] = materials;
                 return materials;
             }

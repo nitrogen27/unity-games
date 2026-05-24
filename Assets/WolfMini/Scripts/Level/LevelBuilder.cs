@@ -198,8 +198,7 @@ namespace WolfMini.Level
 
         private void BuildWalls(Transform parent, FloorSpec floor, Dictionary<Vector2Int, CellFlags> cells)
         {
-            Material lightWall = GetWallMaterial(floor.wallValue, false);
-            Material darkWall = GetWallMaterial(floor.wallValue, true);
+            Material wallMaterial = GetWallMaterial(floor.wallValue, false);
             Vector2Int[] directions =
             {
                 new Vector2Int(0, 1),
@@ -219,9 +218,7 @@ namespace WolfMini.Level
                         continue;
                     }
 
-                    bool eastWestEdge = direction.x != 0;
-                    Material material = eastWestEdge ? darkWall : lightWall;
-                    CreateWall(parent, $"{floor.id}_Wall_{cell.x}_{cell.y}_{i}", floor.y, cell, direction, material);
+                    CreateWall(parent, $"{floor.id}_Wall_{cell.x}_{cell.y}_{i}", floor.y, cell, direction, wallMaterial);
                 }
             }
         }
@@ -426,8 +423,7 @@ namespace WolfMini.Level
                 return activeMaterialLibrary.GetWallMaterial(wallValue, darkSide);
             }
 
-            Color color = darkSide ? new Color32(11, 22, 78, 255) : new Color32(24, 42, 132, 255);
-            return FallbackMaterials.GetSolidMaterial(darkSide ? "DarkerBlueWall" : "BlueWall", color);
+            return FallbackMaterials.GetSolidMaterial("BlueWall", new Color32(24, 42, 132, 255));
         }
 
         private Material GetFloorMaterial(FloorSpec floor)
