@@ -464,6 +464,7 @@ public static class WolfTargetMaterialSetup
 
         Texture albedo = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Albedo.png");
         Texture normal = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Normal.png");
+        Texture metallicSmoothness = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_MetallicSmoothness.png");
         Texture height = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Height.png");
 
         SetColorIfHas(material, "_Color", new Color(1.22f, 1.22f, 1.17f, 1f));
@@ -472,21 +473,21 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(material, "_BaseMap", albedo);
         SetTextureIfHas(material, "_MainTex", albedo);
         SetTextureIfHas(material, "_BumpMap", normal);
-        SetTextureIfHas(material, "_MetallicGlossMap", null);
+        SetTextureIfHas(material, "_MetallicGlossMap", metallicSmoothness);
         SetTextureIfHas(material, "_OcclusionMap", null);
         SetTextureIfHas(material, "_EmissionMap", null);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.0f);
-        SetFloatIfHas(material, "_Smoothness", 0.16f);
-        SetFloatIfHas(material, "_Glossiness", 0.16f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.0f);
+        SetFloatIfHas(material, "_Smoothness", 0.56f);
+        SetFloatIfHas(material, "_Glossiness", 0.56f);
+        SetFloatIfHas(material, "_GlossMapScale", 1.0f);
         SetFloatIfHas(material, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(material, "_BumpScale", 0.08f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
-        SetFloatIfHas(material, "_GlossyReflections", 0.08f);
-        SetFloatIfHas(material, "_SpecularHighlights", 0.14f);
+        SetFloatIfHas(material, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
         SetKeyword(material, "_NORMALMAP", normal != null);
-        ConfigureMetallicGlossMapKeyword(material, false);
+        ConfigureMetallicGlossMapKeyword(material, metallicSmoothness != null);
         SetKeyword(material, "_EMISSION", false);
         SetKeyword(material, "_PARALLAXMAP", false);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;

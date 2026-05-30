@@ -740,7 +740,7 @@ public static class WolfDynamicLightingSetup
         SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DoorTeal_Target", 0.46f, 0.48f, 0.56f, 0.48f, 0.52f);
-        SetMaterialSurface("FloorTile_Target", 0.0f, 0.16f, 0.0f, 0.08f, 0.14f);
+        SetMaterialSurface("FloorTile_Target", 0.0f, 0.56f, 1.0f, 1.0f, 1.0f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
         SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.30f, 0.38f, 0.34f, 0.40f);
@@ -804,8 +804,8 @@ public static class WolfDynamicLightingSetup
             0.08f,
             0.0f,
             0f,
-            0.08f,
-            0.14f);
+            1.0f,
+            1.0f);
 
         TuneTargetMaterial(
             "CeilingPanel_Target",
@@ -919,7 +919,7 @@ public static class WolfDynamicLightingSetup
             if (isFloor)
             {
                 renderer.gameObject.layer = 0;
-                renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
                 renderer.receiveShadows = true;
                 if (renderer is MeshRenderer)
                 {
@@ -1869,11 +1869,11 @@ public static class WolfDynamicLightingSetup
     private static void ApplyQualityLightingProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, true, true, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, false, true, false, RenderingPath.DeferredShading);
         settings.Apply();
 
         QualitySettings.pixelLightCount = MaxRealtimeLampLights * 13;
-        QualitySettings.realtimeReflectionProbes = false;
+        QualitySettings.realtimeReflectionProbes = true;
         QualitySettings.shadows = ShadowQuality.Disable;
         QualitySettings.shadowResolution = ShadowResolution.High;
         QualitySettings.shadowProjection = ShadowProjection.StableFit;

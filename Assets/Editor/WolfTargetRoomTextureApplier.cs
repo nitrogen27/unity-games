@@ -32,7 +32,7 @@ public static class WolfTargetRoomTextureApplier
         ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.10f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
         ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.10f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
         ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.46f, 0.48f, 0.56f, 0.72f, 0.24f, 0.48f, 0.52f);
-        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.0f, 0.16f, 0.0f, 0.08f, 0.0f, 0.08f, 0.14f);
+        ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.0f, 0.56f, 1.0f, 0.08f, 0.0f, 1.0f, 1.0f);
         ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.0f, 0.08f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
