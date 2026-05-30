@@ -740,7 +740,7 @@ public static class WolfDynamicLightingSetup
         SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DoorTeal_Target", 0.46f, 0.48f, 0.56f, 0.48f, 0.52f);
-        SetMaterialSurface("FloorTile_Target", 0.0f, 0.16f, 0.0f, 0.15f, 0.25f);
+        SetMaterialSurface("FloorTile_Target", 0.0f, 0.16f, 0.0f, 0.08f, 0.14f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
         SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.30f, 0.38f, 0.34f, 0.40f);
@@ -799,13 +799,13 @@ public static class WolfDynamicLightingSetup
 
         TuneTargetMaterial(
             "FloorTile_Target",
-            new Color(1.55f, 1.55f, 1.48f, 1f),
-            new Color(0.95f, 0.95f, 0.90f, 1f),
-            0.12f,
+            new Color(1.22f, 1.22f, 1.17f, 1f),
+            Color.black,
+            0.08f,
             0.0f,
             0f,
-            0.15f,
-            0.25f);
+            0.08f,
+            0.14f);
 
         TuneTargetMaterial(
             "CeilingPanel_Target",
