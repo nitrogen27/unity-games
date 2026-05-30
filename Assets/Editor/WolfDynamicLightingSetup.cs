@@ -11,6 +11,7 @@ public static class WolfDynamicLightingSetup
 {
     private const string ScenePath = "Assets/Scenes/WolfRepoLevel1.unity";
     private const string RootName = "Wolf Dynamic Lighting";
+    private const string GlossReflectionProbeRootName = "Wolf Gloss Reflection Probes";
     private const string PerformanceRootName = "Wolf Performance Settings";
     private const string LightProbeRootName = "Wolf Baked Light Probes";
     private const string BeautifulLightingSettingsPath = "Assets/Settings/WolfRepoLevel1BeautifulBakedLighting.lighting";
@@ -79,6 +80,7 @@ public static class WolfDynamicLightingSetup
         ApplySceneLightingSettings();
         EnhanceReflectiveMaterials();
         ApplyRendererLightingFlags(root.transform);
+        EnsureGlossReflectionProbeCoverage();
         int disabledAuthoredFixtureLights = DisableAuthoredFixtureLights();
 
         List<LampAnchor> anchors = FindLampAnchors();
@@ -140,6 +142,7 @@ public static class WolfDynamicLightingSetup
         ClearBakedLightingData();
         ApplySceneLightingSettings();
         ApplyRendererLightingFlags(null);
+        EnsureGlossReflectionProbeCoverage();
         ConfigureReflectionProbesForQuality();
         ApplyQualityLightingProfileToOpenScene();
 
@@ -149,6 +152,31 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.Refresh();
 
         Debug.Log($"[WolfDynamicLightingSetup] Applied quality lighting profile with realtime shadows and reflections to {ScenePath}.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Apply Gloss Reflection Probe Coverage")]
+    public static void ApplyGlossReflectionProbeCoverage()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("[WolfDynamicLightingSetup] Exit Play Mode before applying reflection probe coverage.");
+            return;
+        }
+
+        AssetDatabase.Refresh();
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        ApplySceneLightingSettings();
+        ApplyRendererLightingFlags(null);
+        int probeCount = EnsureGlossReflectionProbeCoverage();
+        ConfigureReflectionProbesForQuality();
+        ApplyQualityLightingProfileToOpenScene();
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log($"[WolfDynamicLightingSetup] Applied {probeCount} box-projected gloss reflection probes to {ScenePath}.");
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Beautiful Baked Lighting Settings")]
@@ -736,14 +764,14 @@ public static class WolfDynamicLightingSetup
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.0f, 0.42f, 0.72f, 1.0f, 0.85f);
-        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.30f, 0.0f, 0.55f, 0.62f);
-        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.30f, 0.0f, 0.55f, 0.62f);
-        SetMaterialSurface("DoorTeal_Target", 0.46f, 0.56f, 0.68f, 0.72f, 0.78f);
+        SetMaterialSurface("BlueWall_Target", 0.0f, 0.72f, 1.0f, 1.0f, 1.0f);
+        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.54f, 0.0f, 0.90f, 0.90f);
+        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.54f, 0.0f, 0.90f, 0.90f);
+        SetMaterialSurface("DoorTeal_Target", 0.34f, 0.54f, 0.68f, 0.62f, 0.45f);
         SetMaterialSurface("FloorTile_Target", 0.0f, 0.56f, 1.0f, 1.0f, 1.0f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
-        SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.38f, 0.46f, 0.48f, 0.54f);
+        SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.55f, 0.72f, 0.85f, 0.90f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
         WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
@@ -765,7 +793,7 @@ public static class WolfDynamicLightingSetup
             0.0f,
             0f,
             1.0f,
-            0.85f);
+            1.0f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Target",
@@ -774,8 +802,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.55f,
-            0.62f);
+            0.90f,
+            0.90f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Dark_Target",
@@ -784,8 +812,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.55f,
-            0.62f);
+            0.90f,
+            0.90f);
 
         TuneTargetMaterial(
             "DoorTeal_Target",
@@ -794,8 +822,8 @@ public static class WolfDynamicLightingSetup
             0.72f,
             0.24f,
             0f,
-            0.72f,
-            0.78f);
+            0.62f,
+            0.45f);
 
         TuneTargetMaterial(
             "FloorTile_Target",
@@ -834,8 +862,8 @@ public static class WolfDynamicLightingSetup
             0.52f,
             0.22f,
             0f,
-            0.48f,
-            0.54f);
+            0.85f,
+            0.90f);
     }
 
     private static void TuneTargetMaterial(
@@ -1451,6 +1479,62 @@ public static class WolfDynamicLightingSetup
         CreateReflectionProbe(parent, "Lower Floor Quality Reflection Probe", new Vector3(center.x, -1.95f, center.z), probeSize);
     }
 
+    private static int EnsureGlossReflectionProbeCoverage()
+    {
+        GameObject root = GameObject.Find(GlossReflectionProbeRootName);
+        if (root == null)
+        {
+            root = new GameObject(GlossReflectionProbeRootName);
+        }
+
+        root.transform.position = Vector3.zero;
+        root.transform.rotation = Quaternion.identity;
+        root.transform.localScale = Vector3.one;
+
+        Bounds sceneBounds = CalculateSceneBounds(root.transform);
+        Vector3 size = sceneBounds.size;
+        Vector3 center = sceneBounds.center;
+        Vector3 probeSize = new Vector3(
+            Mathf.Max(size.x + 4f, 22f),
+            4.4f,
+            Mathf.Max(size.z + 4f, 22f));
+
+        UpsertGlossReflectionProbe(root.transform, "Upper Floor Gloss Reflection Probe", new Vector3(center.x, 1.05f, center.z), probeSize);
+        UpsertGlossReflectionProbe(root.transform, "Lower Floor Gloss Reflection Probe", new Vector3(center.x, -1.95f, center.z), probeSize);
+
+        EditorUtility.SetDirty(root);
+        return 2;
+    }
+
+    private static void UpsertGlossReflectionProbe(Transform parent, string name, Vector3 position, Vector3 size)
+    {
+        Transform existing = parent.Find(name);
+        GameObject probeObject = existing != null ? existing.gameObject : CreateChild(parent, name);
+        probeObject.transform.position = position;
+        probeObject.transform.rotation = Quaternion.identity;
+        probeObject.transform.localScale = Vector3.one;
+
+        ReflectionProbe probe = probeObject.GetComponent<ReflectionProbe>();
+        if (probe == null)
+        {
+            probe = probeObject.AddComponent<ReflectionProbe>();
+        }
+
+        probe.mode = ReflectionProbeMode.Realtime;
+        probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
+        probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
+        probe.resolution = QualityReflectionProbeResolution;
+        probe.intensity = 1.15f;
+        probe.boxProjection = true;
+        probe.size = size;
+        probe.center = Vector3.zero;
+        probe.shadowDistance = 42f;
+        probe.renderDynamicObjects = false;
+
+        EditorUtility.SetDirty(probe);
+        EditorUtility.SetDirty(probeObject);
+    }
+
     private static void CreateReflectionProbe(Transform parent, string name, Vector3 position, Vector3 size)
     {
         GameObject probeObject = CreateChild(parent, name);
@@ -1460,7 +1544,7 @@ public static class WolfDynamicLightingSetup
         probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
         probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
         probe.resolution = QualityReflectionProbeResolution;
-        probe.intensity = 1.0f;
+        probe.intensity = 1.15f;
         probe.boxProjection = true;
         probe.size = size;
         probe.center = Vector3.zero;
@@ -1489,7 +1573,7 @@ public static class WolfDynamicLightingSetup
             probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
             probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
             probe.resolution = Mathf.Max(probe.resolution, QualityReflectionProbeResolution);
-            probe.intensity = 1.0f;
+            probe.intensity = Mathf.Max(probe.intensity, 1.15f);
             probe.boxProjection = true;
             probe.shadowDistance = 42f;
             EditorUtility.SetDirty(probe);

@@ -19,6 +19,7 @@ public static class WolfTargetMaterialSetup
     {
         Directory.CreateDirectory(MaterialRoot);
 
+        PolishAngleGlossMaps();
         SetupBlueWallTargetTextureImports();
 
         SetupWhiteStoneWallTextureImports();
@@ -59,8 +60,8 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_Normal.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_MetallicSmoothness.png",
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_AO.png",
-            0.46f,
-            0.48f
+            0.34f,
+            0.54f
         );
         ConfigureDoorTargetMaterial();
 
@@ -109,6 +110,30 @@ public static class WolfTargetMaterialSetup
         CreateWhiteStoneWallTileMaterials();
 
         Debug.Log("Wolf Target Look materials created/updated.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Polish Angle Gloss Maps")]
+    public static void PolishAngleGlossMaps()
+    {
+        WriteMetallicSmoothnessFromRoughness(
+            $"{TextureRoot}/BlueWall/BlueWall_Target_Roughness.png",
+            $"{TextureRoot}/BlueWall/BlueWall_Target_Metallic.png",
+            $"{TextureRoot}/BlueWall/BlueWall_Target_MetallicSmoothness.png",
+            0.08f,
+            1.00f,
+            0.60f,
+            0.92f);
+
+        WriteMetallicSmoothnessFromRoughness(
+            $"{TextureRoot}/DoorTeal/DoorTeal_Target_Roughness.png",
+            $"{TextureRoot}/DoorTeal/DoorTeal_Target_Metallic.png",
+            $"{TextureRoot}/DoorTeal/DoorTeal_Target_MetallicSmoothness.png",
+            0.46f,
+            0.58f,
+            0.50f,
+            0.74f);
+
+        AssetDatabase.Refresh();
     }
 
     [MenuItem("Tools/Wolf Target Look/Setup Blue Wall Target Material")]
@@ -222,21 +247,21 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
         SetFloatIfHas(mat, "_ZWrite", 1.0f);
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.42f);
-        SetFloatIfHas(mat, "_Glossiness", 0.42f);
-        SetFloatIfHas(mat, "_GlossMapScale", 0.72f);
+        SetFloatIfHas(mat, "_Smoothness", 0.72f);
+        SetFloatIfHas(mat, "_Glossiness", 0.72f);
+        SetFloatIfHas(mat, "_GlossMapScale", 1.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.20f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
         SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.85f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
 
         SetKeyword(mat, "_NORMALMAP", normal != null);
         SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
         SetKeyword(mat, "_PARALLAXMAP", false);
         SetKeyword(mat, "_EMISSION", albedo != null);
-        ConfigureStandardReflectionKeywords(mat, 1.0f, 0.85f);
+        ConfigureStandardReflectionKeywords(mat, 1.0f, 1.0f);
         mat.DisableKeyword("_METALLICSPECGLOSSMAP");
         mat.DisableKeyword("_SPECGLOSSMAP");
 
@@ -320,16 +345,16 @@ public static class WolfTargetMaterialSetup
         mat.DisableKeyword("_SPECGLOSSMAP");
 
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.30f);
-        SetFloatIfHas(mat, "_Glossiness", 0.30f);
+        SetFloatIfHas(mat, "_Smoothness", 0.54f);
+        SetFloatIfHas(mat, "_Glossiness", 0.54f);
         SetFloatIfHas(mat, "_GlossMapScale", 0.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.18f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.55f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.62f);
-        ConfigureStandardReflectionKeywords(mat, 0.55f, 0.62f);
+        SetFloatIfHas(mat, "_GlossyReflections", 0.90f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.90f);
+        ConfigureStandardReflectionKeywords(mat, 0.90f, 0.90f);
         SetColorIfHas(mat, "_Color", tint);
         SetColorIfHas(mat, "_BaseColor", tint);
         SetColorIfHas(mat, "_EmissionColor", emissionTint);
@@ -441,18 +466,18 @@ public static class WolfTargetMaterialSetup
         SetColorIfHas(material, "_EmissionColor", new Color(0.012f, 0.038f, 0.044f, 1f));
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
-        SetFloatIfHas(material, "_Metallic", 0.46f);
-        SetFloatIfHas(material, "_Smoothness", 0.56f);
-        SetFloatIfHas(material, "_Glossiness", 0.56f);
+        SetFloatIfHas(material, "_Metallic", 0.34f);
+        SetFloatIfHas(material, "_Smoothness", 0.54f);
+        SetFloatIfHas(material, "_Glossiness", 0.54f);
         SetFloatIfHas(material, "_GlossMapScale", 0.68f);
         SetFloatIfHas(material, "_OcclusionStrength", 0.24f);
         SetFloatIfHas(material, "_BumpScale", 0.72f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
-        SetFloatIfHas(material, "_GlossyReflections", 0.72f);
-        SetFloatIfHas(material, "_SpecularHighlights", 0.78f);
+        SetFloatIfHas(material, "_GlossyReflections", 0.62f);
+        SetFloatIfHas(material, "_SpecularHighlights", 0.45f);
         SetKeyword(material, "_EMISSION", true);
         SetKeyword(material, "_PARALLAXMAP", false);
-        ConfigureStandardReflectionKeywords(material, 0.72f, 0.78f);
+        ConfigureStandardReflectionKeywords(material, 0.62f, 0.45f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
         AssetDatabase.SaveAssets();
@@ -541,6 +566,88 @@ public static class WolfTargetMaterialSetup
     private static Texture2D LoadTexture(string path)
     {
         return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+    }
+
+    private static void WriteMetallicSmoothnessFromRoughness(
+        string roughnessPath,
+        string metallicPath,
+        string outputPath,
+        float fallbackMetallic,
+        float metallicScale,
+        float minSmoothness,
+        float maxSmoothness)
+    {
+        Texture2D roughness = LoadPngFromDisk(roughnessPath);
+        Texture2D metallic = LoadPngFromDisk(metallicPath);
+        int width = roughness != null ? roughness.width : metallic != null ? metallic.width : 1024;
+        int height = roughness != null ? roughness.height : metallic != null ? metallic.height : 1024;
+        Color32[] roughnessPixels = roughness != null ? roughness.GetPixels32() : null;
+        Color32[] metallicPixels = metallic != null ? metallic.GetPixels32() : null;
+        Color32[] output = new Color32[width * height];
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Color32 roughnessPixel = roughnessPixels != null
+                    ? SamplePixels(roughnessPixels, roughness.width, roughness.height, x, y, width, height)
+                    : new Color32(64, 64, 64, 255);
+                Color32 metallicPixel = metallicPixels != null
+                    ? SamplePixels(metallicPixels, metallic.width, metallic.height, x, y, width, height)
+                    : new Color32((byte)Mathf.RoundToInt(fallbackMetallic * 255f), 0, 0, 255);
+
+                float roughnessValue = (roughnessPixel.r + roughnessPixel.g + roughnessPixel.b) / (3f * 255f);
+                float sourceSmoothness = Mathf.Clamp01(1f - roughnessValue);
+                float polishedSmoothness = Mathf.Lerp(minSmoothness, maxSmoothness, Mathf.Pow(sourceSmoothness, 0.72f));
+                byte smoothnessByte = (byte)Mathf.RoundToInt(polishedSmoothness * 255f);
+                byte metallicByte = (byte)Mathf.Clamp(Mathf.RoundToInt((metallicPixel.r + metallicPixel.g + metallicPixel.b) / 3f * metallicScale), 0, 255);
+
+                output[y * width + x] = new Color32(metallicByte, 0, 0, smoothnessByte);
+            }
+        }
+
+        Texture2D combined = new Texture2D(width, height, TextureFormat.RGBA32, true, true);
+        combined.SetPixels32(output);
+        combined.Apply(true, false);
+        File.WriteAllBytes(outputPath, combined.EncodeToPNG());
+
+        Object.DestroyImmediate(combined);
+        if (roughness != null)
+        {
+            Object.DestroyImmediate(roughness);
+        }
+        if (metallic != null)
+        {
+            Object.DestroyImmediate(metallic);
+        }
+
+        AssetDatabase.ImportAsset(outputPath, ImportAssetOptions.ForceUpdate);
+    }
+
+    private static Texture2D LoadPngFromDisk(string path)
+    {
+        if (!File.Exists(path))
+        {
+            Debug.LogWarning($"Missing source texture: {path}");
+            return null;
+        }
+
+        Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false, true);
+        if (!texture.LoadImage(File.ReadAllBytes(path), false))
+        {
+            Object.DestroyImmediate(texture);
+            Debug.LogWarning($"Could not decode source texture: {path}");
+            return null;
+        }
+
+        return texture;
+    }
+
+    private static Color32 SamplePixels(Color32[] pixels, int sourceWidth, int sourceHeight, int x, int y, int targetWidth, int targetHeight)
+    {
+        int sx = Mathf.Clamp(Mathf.FloorToInt((x + 0.5f) * sourceWidth / targetWidth), 0, sourceWidth - 1);
+        int sy = Mathf.Clamp(Mathf.FloorToInt((y + 0.5f) * sourceHeight / targetHeight), 0, sourceHeight - 1);
+        return pixels[sy * sourceWidth + sx];
     }
 
     private static void SetTextureIfHas(Material mat, string name, Texture tex)
