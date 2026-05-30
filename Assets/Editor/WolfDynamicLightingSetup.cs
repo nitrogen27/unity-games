@@ -11,6 +11,7 @@ public static class WolfDynamicLightingSetup
 {
     private const string ScenePath = "Assets/Scenes/WolfRepoLevel1.unity";
     private const string RootName = "Wolf Dynamic Lighting";
+    private const string OpeningBlueCheckpointRootName = "Opening Blue Room Lighting Checkpoints";
     private const string GlossReflectionProbeRootName = "Wolf Gloss Reflection Probes";
     private const string PerformanceRootName = "Wolf Performance Settings";
     private const string LightProbeRootName = "Wolf Baked Light Probes";
@@ -28,6 +29,7 @@ public static class WolfDynamicLightingSetup
     private const string CoolFloorReflectionMaterialPath = MaterialRoot + "/LampFloorReflectionCool.mat";
     private const string WarmWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionWarm.mat";
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
+    private const string OpeningBlueWallMaterialPath = MaterialRoot + "/BlueWall_OpeningRooms_Target.mat";
     private const int MaxRealtimeLampLights = 36;
     private const int MaxFlickeringLampLights = 0;
     private const int MaxRealtimeSpecularAccentLights = 0;
@@ -116,6 +118,8 @@ public static class WolfDynamicLightingSetup
         ApplySceneLightingSettings();
         EnhanceReflectiveMaterials();
         ApplyRendererLightingFlags(root.transform);
+        Material openingBlueWallMaterial = CreateOpeningBlueWallMaterial();
+        int openingBlueOverrideCount = ApplyOpeningBlueRoomRendererOverrides(openingBlueWallMaterial);
         EnsureGlossReflectionProbeCoverage();
         int disabledAuthoredFixtureLights = DisableAuthoredFixtureLights();
 
@@ -154,6 +158,7 @@ public static class WolfDynamicLightingSetup
             }
         }
         int largeLocationFillCount = CreateLargeLocationBalanceFills(root.transform);
+        int openingBlueCheckpointCount = CreateOpeningBlueRoomLightingCheckpoints(root.transform);
 
         ApplyQualityLightingProfileToOpenScene();
 
@@ -162,7 +167,7 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} green lamp glows, {realtimeLampCount} green lamp ceiling-scatter rigs, {specularAccentCount} no-shadow specular accents, {largeLocationFillCount} low-light large-location balance fills, and disabled {disabledAuthoredFixtureLights} non-green authored lights in {ScenePath}.");
+        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} green lamp glows, {realtimeLampCount} green lamp ceiling-scatter rigs, {specularAccentCount} no-shadow specular accents, {largeLocationFillCount} low-light large-location balance fills, {openingBlueCheckpointCount} opening-blue-room lighting checkpoints, {openingBlueOverrideCount} opening-blue wall material/shadow overrides, and disabled {disabledAuthoredFixtureLights} non-green authored lights in {ScenePath}.");
     }
 
     private static void ApplyDynamicLightingAfterPlayMode(PlayModeStateChange state)
@@ -998,6 +1003,109 @@ public static class WolfDynamicLightingSetup
         EditorUtility.SetDirty(material);
     }
 
+    private static Material CreateOpeningBlueWallMaterial()
+    {
+        Material source = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/BlueWall_Target.mat");
+        Shader shader = source != null ? source.shader : Shader.Find("Standard");
+        if (shader == null)
+        {
+            shader = Shader.Find("Universal Render Pipeline/Lit");
+        }
+
+        Material material = LoadOrCreateMaterial(OpeningBlueWallMaterialPath, shader);
+        if (source != null)
+        {
+            material.CopyPropertiesFromMaterial(source);
+        }
+
+        SetColor(material, "_Color", new Color(0.92f, 1.02f, 1.38f, 1f));
+        SetColor(material, "_BaseColor", new Color(0.92f, 1.02f, 1.38f, 1f));
+        SetColor(material, "_EmissionColor", new Color(0.020f, 0.032f, 0.090f, 1f));
+        SetFloat(material, "_Metallic", 0.0f);
+        SetFloat(material, "_Smoothness", 0.58f);
+        SetFloat(material, "_Glossiness", 0.58f);
+        SetFloat(material, "_GlossMapScale", 0.86f);
+        SetFloat(material, "_BumpScale", 0.28f);
+        SetFloat(material, "_OcclusionStrength", 0.18f);
+        SetFloat(material, "_Parallax", 0.0f);
+        SetFloat(material, "_GlossyReflections", 0.82f);
+        SetFloat(material, "_SpecularHighlights", 0.70f);
+        ConfigureStandardReflectionKeywords(material, 0.82f, 0.70f);
+        material.EnableKeyword("_EMISSION");
+        material.DisableKeyword("_PARALLAXMAP");
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static int ApplyOpeningBlueRoomRendererOverrides(Material openingBlueWallMaterial)
+    {
+        if (openingBlueWallMaterial == null)
+        {
+            return 0;
+        }
+
+        int overrideCount = 0;
+        foreach (Renderer renderer in Object.FindObjectsByType<Renderer>(FindObjectsInactive.Exclude))
+        {
+            if (!IsOpeningBlueRoomWallRenderer(renderer))
+            {
+                continue;
+            }
+
+            Material[] materials = renderer.sharedMaterials;
+            bool changedMaterial = false;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (IsBlueWallMaterial(materials[i]))
+                {
+                    materials[i] = openingBlueWallMaterial;
+                    changedMaterial = true;
+                }
+            }
+
+            if (!changedMaterial)
+            {
+                continue;
+            }
+
+            renderer.sharedMaterials = materials;
+            renderer.receiveShadows = true;
+            renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+            renderer.shadowCastingMode = ShadowCastingMode.On;
+            EditorUtility.SetDirty(renderer);
+            overrideCount++;
+        }
+
+        return overrideCount;
+    }
+
+    private static bool IsOpeningBlueRoomWallRenderer(Renderer renderer)
+    {
+        if (renderer == null || !IsWallObject(renderer.gameObject.name))
+        {
+            return false;
+        }
+
+        Bounds bounds = renderer.bounds;
+        Vector3 center = bounds.center;
+        return center.x >= 54.0f
+            && center.x <= 84.0f
+            && center.z >= 0.0f
+            && center.z <= 28.0f;
+    }
+
+    private static bool IsBlueWallMaterial(Material material)
+    {
+        if (material == null)
+        {
+            return false;
+        }
+
+        return material.name.StartsWith("BlueWall_Target", System.StringComparison.Ordinal) ||
+            material.name.StartsWith("BlueWall_OpeningRooms_Target", System.StringComparison.Ordinal);
+    }
+
     private static void ApplyRendererLightingFlags(Transform generatedRoot)
     {
         GameObject dynamicLightingRoot = GameObject.Find(RootName);
@@ -1228,10 +1336,11 @@ public static class WolfDynamicLightingSetup
         GameObject pointObject = CreateChild(rig.transform, "point bounce");
         pointObject.transform.localPosition = Vector3.down * 0.06f;
         Light point = pointObject.AddComponent<Light>();
+        bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         point.type = LightType.Point;
         point.color = Color.Lerp(anchor.Color, Color.white, 0.34f);
-        point.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.08f : 0.12f);
-        point.range = anchor.IsChandelier ? 26.0f : 30.0f;
+        point.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.070f : (anchor.IsChandelier ? 0.08f : 0.12f));
+        point.range = isOpeningBlueRoom ? 18.0f : (anchor.IsChandelier ? 26.0f : 30.0f);
         point.bounceIntensity = 0.0f;
         point.shadows = LightShadows.None;
         point.cullingMask = LampLightingMask;
@@ -1248,8 +1357,8 @@ public static class WolfDynamicLightingSetup
         Light ceilingBounce = ceilingBounceObject.AddComponent<Light>();
         ceilingBounce.type = LightType.Point;
         ceilingBounce.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingBounce.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.06f : 0.10f);
-        ceilingBounce.range = anchor.IsChandelier ? 24.0f : 28.0f;
+        ceilingBounce.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.055f : (anchor.IsChandelier ? 0.06f : 0.10f));
+        ceilingBounce.range = isOpeningBlueRoom ? 18.0f : (anchor.IsChandelier ? 24.0f : 28.0f);
         ceilingBounce.bounceIntensity = 0.0f;
         ceilingBounce.shadows = LightShadows.None;
         ceilingBounce.cullingMask = LampLightingMask;
@@ -1262,8 +1371,8 @@ public static class WolfDynamicLightingSetup
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
         ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.055f : 0.10f);
-        ceilingScatter.range = anchor.IsChandelier ? 24.0f : 30.0f;
+        ceilingScatter.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.050f : (anchor.IsChandelier ? 0.055f : 0.10f));
+        ceilingScatter.range = isOpeningBlueRoom ? 20.0f : (anchor.IsChandelier ? 24.0f : 30.0f);
         ceilingScatter.spotAngle = 30f;
         ceilingScatter.bounceIntensity = 0.0f;
         ceilingScatter.shadows = LightShadows.None;
@@ -1275,6 +1384,10 @@ public static class WolfDynamicLightingSetup
         CreateCeilingLightSpill(rig.transform, anchor, warmCeilingSpillMaterial, coolCeilingSpillMaterial);
         CreateCeilingDiffuserLights(rig.transform, anchor);
         CreateWallScatterLights(rig.transform, anchor);
+        if (ShouldCreateOpeningBlueRoomShadowKey(anchor))
+        {
+            CreateOpeningBlueRoomShadowKey(rig.transform, anchor);
+        }
         if (IsLargeStoneRoomAnchor(anchor.Position))
         {
             CreateLargeStoneRoomFillLight(rig.transform, anchor);
@@ -1310,10 +1423,11 @@ public static class WolfDynamicLightingSetup
         glowObject.transform.localRotation = Quaternion.LookRotation(Vector3.up);
 
         Light glow = glowObject.AddComponent<Light>();
+        bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         glow.type = LightType.Spot;
         glow.color = Color.Lerp(anchor.Color, Color.white, 0.54f);
-        glow.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.42f : 0.55f);
-        glow.range = anchor.IsChandelier ? 6.0f : 6.5f;
+        glow.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.44f : (anchor.IsChandelier ? 0.42f : 0.55f));
+        glow.range = isOpeningBlueRoom ? 5.6f : (anchor.IsChandelier ? 6.0f : 6.5f);
         glow.spotAngle = 145f;
         glow.bounceIntensity = 0.0f;
         glow.shadows = LightShadows.None;
@@ -1336,10 +1450,11 @@ public static class WolfDynamicLightingSetup
         diffuserObject.transform.localPosition = horizontalOffset * 1.35f + Vector3.down * 0.14f;
 
         Light diffuser = diffuserObject.AddComponent<Light>();
+        bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         diffuser.type = LightType.Point;
         diffuser.color = Color.Lerp(anchor.Color, Color.white, 0.48f);
-        diffuser.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.04f : 0.07f);
-        diffuser.range = anchor.IsChandelier ? 24.0f : 30.0f;
+        diffuser.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.035f : (anchor.IsChandelier ? 0.04f : 0.07f));
+        diffuser.range = isOpeningBlueRoom ? 18.0f : (anchor.IsChandelier ? 24.0f : 30.0f);
         diffuser.bounceIntensity = 0.0f;
         diffuser.shadows = LightShadows.None;
         diffuser.cullingMask = LampLightingMask;
@@ -1361,16 +1476,60 @@ public static class WolfDynamicLightingSetup
         scatterObject.transform.localPosition = horizontalDirection * 1.85f + Vector3.down * 0.18f;
 
         Light scatter = scatterObject.AddComponent<Light>();
+        bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         scatter.type = LightType.Point;
         scatter.color = Color.Lerp(anchor.Color, Color.white, 0.50f);
-        scatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.035f : 0.07f);
-        scatter.range = anchor.IsChandelier ? 22.0f : 28.0f;
+        scatter.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.032f : (anchor.IsChandelier ? 0.035f : 0.07f));
+        scatter.range = isOpeningBlueRoom ? 16.0f : (anchor.IsChandelier ? 22.0f : 28.0f);
         scatter.spotAngle = 30f;
         scatter.bounceIntensity = 0.0f;
         scatter.shadows = LightShadows.None;
         scatter.cullingMask = LampLightingMask;
         scatter.renderMode = LightRenderMode.ForcePixel;
         scatter.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static bool IsOpeningBlueRoomAnchor(Vector3 position)
+    {
+        return position.x >= 55.0f
+            && position.x <= 83.0f
+            && position.z >= 1.0f
+            && position.z <= 27.0f;
+    }
+
+    private static bool ShouldCreateOpeningBlueRoomShadowKey(LampAnchor anchor)
+    {
+        if (!IsOpeningBlueRoomAnchor(anchor.Position))
+        {
+            return false;
+        }
+
+        return anchor.Name.Contains("start room generated", System.StringComparison.OrdinalIgnoreCase) ||
+            (Mathf.Abs(anchor.Position.x - 69.0f) < 1.0f && Mathf.Abs(anchor.Position.z - 13.0f) < 1.0f);
+    }
+
+    private static void CreateOpeningBlueRoomShadowKey(Transform parent, LampAnchor anchor)
+    {
+        GameObject keyObject = CreateChild(parent, "opening blue soft shadow key");
+        keyObject.transform.localPosition = Vector3.down * 0.18f;
+        keyObject.transform.localRotation = Quaternion.LookRotation(Vector3.down);
+
+        Light key = keyObject.AddComponent<Light>();
+        key.type = LightType.Spot;
+        key.color = Color.Lerp(anchor.Color, Color.white, 0.28f);
+        key.intensity = anchor.BaseIntensity * 0.78f;
+        key.range = 9.0f;
+        key.spotAngle = 86f;
+        key.bounceIntensity = 0.0f;
+        key.shadows = LightShadows.Soft;
+        key.shadowStrength = 0.42f;
+        key.shadowBias = 0.035f;
+        key.shadowNormalBias = 0.38f;
+        key.shadowNearPlane = 0.08f;
+        key.shadowResolution = LightShadowResolution.High;
+        key.cullingMask = LampLightingMask;
+        key.renderMode = LightRenderMode.ForcePixel;
+        key.lightmapBakeType = LightmapBakeType.Realtime;
     }
 
     private static bool IsLargeStoneRoomAnchor(Vector3 position)
@@ -1421,6 +1580,47 @@ public static class WolfDynamicLightingSetup
         }
 
         return LargeLocationBalanceFills.Length;
+    }
+
+    private static int CreateOpeningBlueRoomLightingCheckpoints(Transform parent)
+    {
+        GameObject checkpointRoot = CreateChild(parent, OpeningBlueCheckpointRootName);
+
+        CreateLightingCheckpointCamera(
+            checkpointRoot.transform,
+            "checkpoint 01 - start room",
+            new Vector3(59.0f, 0.90f, 13.0f),
+            new Vector3(69.0f, 1.05f, 13.0f));
+
+        CreateLightingCheckpointCamera(
+            checkpointRoot.transform,
+            "checkpoint 02 - second blue room",
+            new Vector3(69.0f, 0.90f, 9.0f),
+            new Vector3(69.0f, 1.00f, 23.0f));
+
+        CreateLightingCheckpointCamera(
+            checkpointRoot.transform,
+            "checkpoint 03 - blue door view",
+            new Vector3(69.0f, 0.90f, 21.0f),
+            new Vector3(69.0f, 1.00f, 31.0f));
+
+        checkpointRoot.SetActive(false);
+        return 3;
+    }
+
+    private static void CreateLightingCheckpointCamera(Transform parent, string name, Vector3 position, Vector3 lookAt)
+    {
+        GameObject cameraObject = CreateChild(parent, name);
+        cameraObject.transform.position = position;
+        cameraObject.transform.rotation = Quaternion.LookRotation((lookAt - position).normalized, Vector3.up);
+
+        Camera camera = cameraObject.AddComponent<Camera>();
+        camera.enabled = false;
+        camera.fieldOfView = 75f;
+        camera.nearClipPlane = 0.05f;
+        camera.farClipPlane = 80f;
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.backgroundColor = new Color(0.02f, 0.025f, 0.035f);
     }
 
     private static void CreateGeneratedCeilingLampFixture(Transform parent, Material capMaterial)
@@ -1680,14 +1880,16 @@ public static class WolfDynamicLightingSetup
             4.4f,
             Mathf.Max(size.z + 4f, 22f));
 
-        UpsertGlossReflectionProbe(root.transform, "Upper Floor Gloss Reflection Probe", new Vector3(center.x, 1.05f, center.z), probeSize);
-        UpsertGlossReflectionProbe(root.transform, "Lower Floor Gloss Reflection Probe", new Vector3(center.x, -1.95f, center.z), probeSize);
+        UpsertGlossReflectionProbe(root.transform, "Upper Floor Gloss Reflection Probe", new Vector3(center.x, 1.05f, center.z), probeSize, 1.15f);
+        UpsertGlossReflectionProbe(root.transform, "Lower Floor Gloss Reflection Probe", new Vector3(center.x, -1.95f, center.z), probeSize, 1.15f);
+        UpsertGlossReflectionProbe(root.transform, "Opening Blue Rooms Gloss Reflection Probe", new Vector3(69.0f, 1.05f, 13.0f), new Vector3(30.0f, 4.2f, 28.0f), 1.10f);
+        UpsertGlossReflectionProbe(root.transform, "Opening Blue Door Gloss Reflection Probe", new Vector3(69.0f, 1.05f, 25.0f), new Vector3(12.0f, 4.2f, 16.0f), 1.08f);
 
         EditorUtility.SetDirty(root);
-        return 2;
+        return 4;
     }
 
-    private static void UpsertGlossReflectionProbe(Transform parent, string name, Vector3 position, Vector3 size)
+    private static void UpsertGlossReflectionProbe(Transform parent, string name, Vector3 position, Vector3 size, float intensity)
     {
         Transform existing = parent.Find(name);
         GameObject probeObject = existing != null ? existing.gameObject : CreateChild(parent, name);
@@ -1705,7 +1907,7 @@ public static class WolfDynamicLightingSetup
         probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
         probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
         probe.resolution = QualityReflectionProbeResolution;
-        probe.intensity = 1.15f;
+        probe.intensity = intensity;
         probe.boxProjection = true;
         probe.size = size;
         probe.center = Vector3.zero;
@@ -1754,7 +1956,14 @@ public static class WolfDynamicLightingSetup
             probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
             probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.IndividualFaces;
             probe.resolution = Mathf.Max(probe.resolution, QualityReflectionProbeResolution);
-            probe.intensity = Mathf.Max(probe.intensity, 1.15f);
+            if (probe.gameObject.name.StartsWith("Opening Blue", System.StringComparison.Ordinal))
+            {
+                probe.intensity = Mathf.Clamp(probe.intensity, 1.04f, 1.10f);
+            }
+            else
+            {
+                probe.intensity = Mathf.Max(probe.intensity, 1.15f);
+            }
             probe.boxProjection = true;
             probe.shadowDistance = 42f;
             EditorUtility.SetDirty(probe);
@@ -2174,15 +2383,15 @@ public static class WolfDynamicLightingSetup
     private static void ApplyQualityLightingProfileToOpenScene()
     {
         WolfPerformanceSettings settings = FindOrCreatePerformanceSettings();
-        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, false, true, false, RenderingPath.DeferredShading);
+        ConfigureRuntimeLightingSettings(settings, MaxRealtimeLampLights * 13, 0, false, false, false, RenderingPath.DeferredShading);
         settings.Apply();
 
         QualitySettings.pixelLightCount = MaxRealtimeLampLights * 13;
         QualitySettings.realtimeReflectionProbes = true;
-        QualitySettings.shadows = ShadowQuality.Disable;
+        QualitySettings.shadows = ShadowQuality.All;
         QualitySettings.shadowResolution = ShadowResolution.High;
         QualitySettings.shadowProjection = ShadowProjection.StableFit;
-        QualitySettings.shadowDistance = 0f;
+        QualitySettings.shadowDistance = 28f;
         QualitySettings.shadowNearPlaneOffset = 2f;
         QualitySettings.antiAliasing = QualityAntiAliasingSamples;
         QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
