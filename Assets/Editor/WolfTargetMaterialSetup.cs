@@ -121,8 +121,8 @@ public static class WolfTargetMaterialSetup
             $"{TextureRoot}/BlueWall/BlueWall_Target_MetallicSmoothness.png",
             0.08f,
             1.00f,
-            0.60f,
-            0.92f);
+            0.54f,
+            0.82f);
 
         WriteMetallicSmoothnessFromRoughness(
             $"{TextureRoot}/DoorTeal/DoorTeal_Target_Roughness.png",
@@ -247,21 +247,21 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
         SetFloatIfHas(mat, "_ZWrite", 1.0f);
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.72f);
-        SetFloatIfHas(mat, "_Glossiness", 0.72f);
-        SetFloatIfHas(mat, "_GlossMapScale", 1.0f);
+        SetFloatIfHas(mat, "_Smoothness", 0.64f);
+        SetFloatIfHas(mat, "_Glossiness", 0.64f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.82f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.20f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
+        SetFloatIfHas(mat, "_GlossyReflections", 0.88f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.78f);
 
         SetKeyword(mat, "_NORMALMAP", normal != null);
         SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
         SetKeyword(mat, "_PARALLAXMAP", false);
         SetKeyword(mat, "_EMISSION", albedo != null);
-        ConfigureStandardReflectionKeywords(mat, 1.0f, 1.0f);
+        ConfigureStandardReflectionKeywords(mat, 0.88f, 0.78f);
         mat.DisableKeyword("_METALLICSPECGLOSSMAP");
         mat.DisableKeyword("_SPECGLOSSMAP");
 
@@ -345,16 +345,16 @@ public static class WolfTargetMaterialSetup
         mat.DisableKeyword("_SPECGLOSSMAP");
 
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.54f);
-        SetFloatIfHas(mat, "_Glossiness", 0.54f);
+        SetFloatIfHas(mat, "_Smoothness", 0.48f);
+        SetFloatIfHas(mat, "_Glossiness", 0.48f);
         SetFloatIfHas(mat, "_GlossMapScale", 0.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.18f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.90f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.90f);
-        ConfigureStandardReflectionKeywords(mat, 0.90f, 0.90f);
+        SetFloatIfHas(mat, "_GlossyReflections", 0.72f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.70f);
+        ConfigureStandardReflectionKeywords(mat, 0.72f, 0.70f);
         SetColorIfHas(mat, "_Color", tint);
         SetColorIfHas(mat, "_BaseColor", tint);
         SetColorIfHas(mat, "_EmissionColor", emissionTint);

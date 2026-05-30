@@ -764,9 +764,9 @@ public static class WolfDynamicLightingSetup
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.0f, 0.72f, 1.0f, 1.0f, 1.0f);
-        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.54f, 0.0f, 0.90f, 0.90f);
-        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.54f, 0.0f, 0.90f, 0.90f);
+        SetMaterialSurface("BlueWall_Target", 0.0f, 0.64f, 0.82f, 0.88f, 0.78f);
+        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.48f, 0.0f, 0.72f, 0.70f);
+        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.48f, 0.0f, 0.72f, 0.70f);
         SetMaterialSurface("DoorTeal_Target", 0.34f, 0.54f, 0.68f, 0.62f, 0.45f);
         SetMaterialSurface("FloorTile_Target", 0.0f, 0.56f, 1.0f, 1.0f, 1.0f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
@@ -792,8 +792,8 @@ public static class WolfDynamicLightingSetup
             0.20f,
             0.0f,
             0f,
-            1.0f,
-            1.0f);
+            0.88f,
+            0.78f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Target",
@@ -802,8 +802,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.90f,
-            0.90f);
+            0.72f,
+            0.70f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Dark_Target",
@@ -812,8 +812,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.90f,
-            0.90f);
+            0.72f,
+            0.70f);
 
         TuneTargetMaterial(
             "DoorTeal_Target",

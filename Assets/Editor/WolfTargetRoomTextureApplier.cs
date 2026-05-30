@@ -28,9 +28,9 @@ public static class WolfTargetRoomTextureApplier
         var darkMetal = LoadMaterial("DarkMetalTrim_Target");
         var prisonCellDoor = LoadMaterial("PrisonCellDoor_Target");
 
-        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.72f, 1.0f, 0.20f, 0.0f, 1.0f, 1.0f);
-        ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.54f, 0.0f, 0.18f, 0.0f, 0.90f, 0.90f);
-        ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.54f, 0.0f, 0.18f, 0.0f, 0.90f, 0.90f);
+        ConfigureMaterial(blueWall, new Vector2(1f, 1f), 0.0f, 0.64f, 0.82f, 0.20f, 0.0f, 0.88f, 0.78f);
+        ConfigureMaterial(whiteStoneWall, new Vector2(1f, 1f), 0.0f, 0.48f, 0.0f, 0.18f, 0.0f, 0.72f, 0.70f);
+        ConfigureMaterial(whiteStoneWallDark, new Vector2(1f, 1f), 0.0f, 0.48f, 0.0f, 0.18f, 0.0f, 0.72f, 0.70f);
         ConfigureMaterial(doorTeal, new Vector2(1f, 1f), 0.34f, 0.54f, 0.68f, 0.72f, 0.24f, 0.62f, 0.45f);
         ConfigureMaterial(floorTile, new Vector2(32f, 32f), 0.0f, 0.56f, 1.0f, 0.08f, 0.0f, 1.0f, 1.0f);
         ConfigureMaterial(ceilingPanel, new Vector2(16f, 16f), 0.0f, 0.08f, 0.08f, 0.18f, 0.0f, 0.0f, 0.0f);
