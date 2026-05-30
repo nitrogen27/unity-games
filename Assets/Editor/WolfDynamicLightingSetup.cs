@@ -736,14 +736,14 @@ public static class WolfDynamicLightingSetup
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
-        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
-        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.10f, 0.08f, 0.0f, 0.0f);
-        SetMaterialSurface("DoorTeal_Target", 0.46f, 0.48f, 0.56f, 0.48f, 0.52f);
+        SetMaterialSurface("BlueWall_Target", 0.0f, 0.42f, 0.72f, 1.0f, 0.85f);
+        SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.30f, 0.0f, 0.55f, 0.62f);
+        SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.30f, 0.0f, 0.55f, 0.62f);
+        SetMaterialSurface("DoorTeal_Target", 0.46f, 0.56f, 0.68f, 0.72f, 0.78f);
         SetMaterialSurface("FloorTile_Target", 0.0f, 0.56f, 1.0f, 1.0f, 1.0f);
         SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
-        SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.30f, 0.38f, 0.34f, 0.40f);
+        SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.38f, 0.46f, 0.48f, 0.54f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
         WolfTargetMaterialSetup.ConfigureFloorTileMaterial();
         WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
@@ -764,8 +764,8 @@ public static class WolfDynamicLightingSetup
             0.20f,
             0.0f,
             0f,
-            0.0f,
-            0.0f);
+            1.0f,
+            0.85f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Target",
@@ -774,8 +774,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.0f,
-            0.0f);
+            0.55f,
+            0.62f);
 
         TuneTargetMaterial(
             "WhiteStoneWall_Dark_Target",
@@ -784,8 +784,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.0f,
-            0.0f);
+            0.55f,
+            0.62f);
 
         TuneTargetMaterial(
             "DoorTeal_Target",
@@ -794,8 +794,8 @@ public static class WolfDynamicLightingSetup
             0.72f,
             0.24f,
             0f,
-            0.48f,
-            0.52f);
+            0.72f,
+            0.78f);
 
         TuneTargetMaterial(
             "FloorTile_Target",
@@ -834,8 +834,8 @@ public static class WolfDynamicLightingSetup
             0.52f,
             0.22f,
             0f,
-            0.34f,
-            0.40f);
+            0.48f,
+            0.54f);
     }
 
     private static void TuneTargetMaterial(
@@ -862,6 +862,7 @@ public static class WolfDynamicLightingSetup
         SetFloat(material, "_Parallax", parallax);
         SetFloat(material, "_GlossyReflections", glossyReflections);
         SetFloat(material, "_SpecularHighlights", specularHighlights);
+        ConfigureStandardReflectionKeywords(material, glossyReflections, specularHighlights);
 
         if (emissionTint.maxColorComponent > 0f)
         {
@@ -914,6 +915,7 @@ public static class WolfDynamicLightingSetup
 
             string objectName = renderer.gameObject.name;
             bool isFloor = IsFloorObject(objectName);
+            bool isWall = IsWallObject(objectName);
             bool isLargeStructuralSurface = IsLargeStructuralSurface(objectName);
 
             if (isFloor)
@@ -921,6 +923,15 @@ public static class WolfDynamicLightingSetup
                 renderer.gameObject.layer = 0;
                 renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
                 renderer.receiveShadows = true;
+                if (renderer is MeshRenderer)
+                {
+                    renderer.shadowCastingMode = ShadowCastingMode.Off;
+                }
+            }
+            else if (isWall)
+            {
+                renderer.reflectionProbeUsage = ReflectionProbeUsage.Simple;
+                renderer.receiveShadows = false;
                 if (renderer is MeshRenderer)
                 {
                     renderer.shadowCastingMode = ShadowCastingMode.Off;
@@ -961,11 +972,18 @@ public static class WolfDynamicLightingSetup
     {
         return objectName == "Ceiling" ||
             objectName.StartsWith("Ceiling ", System.StringComparison.Ordinal) ||
-            objectName.Contains(" Ceiling", System.StringComparison.Ordinal) ||
-            objectName.StartsWith("Wall ", System.StringComparison.Ordinal) ||
+            objectName.Contains(" Ceiling", System.StringComparison.Ordinal);
+    }
+
+    private static bool IsWallObject(string objectName)
+    {
+        return objectName.StartsWith("Wall ", System.StringComparison.Ordinal) ||
             objectName.StartsWith("WolfRepoWallCell_", System.StringComparison.Ordinal) ||
             objectName.Contains(" Wall", System.StringComparison.Ordinal) ||
-            objectName.Contains("Header", System.StringComparison.Ordinal);
+            objectName.Contains(" Header", System.StringComparison.Ordinal) ||
+            objectName.Contains("Void Blocker", System.StringComparison.Ordinal) ||
+            objectName.Contains("Facade", System.StringComparison.Ordinal) ||
+            objectName.Contains("Pier", System.StringComparison.Ordinal);
     }
 
     private static void ClearBakedLightingData()
@@ -1744,7 +1762,29 @@ public static class WolfDynamicLightingSetup
         SetFloat(material, "_GlossMapScale", glossMapScale);
         SetFloat(material, "_GlossyReflections", glossyReflections);
         SetFloat(material, "_SpecularHighlights", specularHighlights);
+        ConfigureStandardReflectionKeywords(material, glossyReflections, specularHighlights);
         EditorUtility.SetDirty(material);
+    }
+
+    private static void ConfigureStandardReflectionKeywords(Material material, float glossyReflections, float specularHighlights)
+    {
+        if (glossyReflections <= 0f)
+        {
+            material.EnableKeyword("_GLOSSYREFLECTIONS_OFF");
+        }
+        else
+        {
+            material.DisableKeyword("_GLOSSYREFLECTIONS_OFF");
+        }
+
+        if (specularHighlights <= 0f)
+        {
+            material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        }
+        else
+        {
+            material.DisableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        }
     }
 
     private static void SetEmission(string materialPath, Color emission)

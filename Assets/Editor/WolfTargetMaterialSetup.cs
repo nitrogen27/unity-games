@@ -222,20 +222,21 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
         SetFloatIfHas(mat, "_ZWrite", 1.0f);
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.10f);
-        SetFloatIfHas(mat, "_Glossiness", 0.10f);
-        SetFloatIfHas(mat, "_GlossMapScale", 0.08f);
+        SetFloatIfHas(mat, "_Smoothness", 0.42f);
+        SetFloatIfHas(mat, "_Glossiness", 0.42f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.72f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.20f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.0f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.0f);
+        SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.85f);
 
         SetKeyword(mat, "_NORMALMAP", normal != null);
         SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
         SetKeyword(mat, "_PARALLAXMAP", false);
         SetKeyword(mat, "_EMISSION", albedo != null);
+        ConfigureStandardReflectionKeywords(mat, 1.0f, 0.85f);
         mat.DisableKeyword("_METALLICSPECGLOSSMAP");
         mat.DisableKeyword("_SPECGLOSSMAP");
 
@@ -319,15 +320,16 @@ public static class WolfTargetMaterialSetup
         mat.DisableKeyword("_SPECGLOSSMAP");
 
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.10f);
-        SetFloatIfHas(mat, "_Glossiness", 0.10f);
-        SetFloatIfHas(mat, "_GlossMapScale", 0.08f);
+        SetFloatIfHas(mat, "_Smoothness", 0.30f);
+        SetFloatIfHas(mat, "_Glossiness", 0.30f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
         SetFloatIfHas(mat, "_BumpScale", 0.18f);
         SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.0f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.0f);
+        SetFloatIfHas(mat, "_GlossyReflections", 0.55f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.62f);
+        ConfigureStandardReflectionKeywords(mat, 0.55f, 0.62f);
         SetColorIfHas(mat, "_Color", tint);
         SetColorIfHas(mat, "_BaseColor", tint);
         SetColorIfHas(mat, "_EmissionColor", emissionTint);
@@ -404,6 +406,7 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(mat, "_OcclusionStrength", 1.0f);
         SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
         SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
+        ConfigureStandardReflectionKeywords(mat, 1.0f, 1.0f);
 
         EditorUtility.SetDirty(mat);
         AssetDatabase.SaveAssets();
@@ -439,16 +442,17 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.46f);
-        SetFloatIfHas(material, "_Smoothness", 0.48f);
-        SetFloatIfHas(material, "_Glossiness", 0.48f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.56f);
+        SetFloatIfHas(material, "_Smoothness", 0.56f);
+        SetFloatIfHas(material, "_Glossiness", 0.56f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.68f);
         SetFloatIfHas(material, "_OcclusionStrength", 0.24f);
         SetFloatIfHas(material, "_BumpScale", 0.72f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
-        SetFloatIfHas(material, "_GlossyReflections", 0.48f);
-        SetFloatIfHas(material, "_SpecularHighlights", 0.52f);
+        SetFloatIfHas(material, "_GlossyReflections", 0.72f);
+        SetFloatIfHas(material, "_SpecularHighlights", 0.78f);
         SetKeyword(material, "_EMISSION", true);
         SetKeyword(material, "_PARALLAXMAP", false);
+        ConfigureStandardReflectionKeywords(material, 0.72f, 0.78f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
         AssetDatabase.SaveAssets();
@@ -490,6 +494,7 @@ public static class WolfTargetMaterialSetup
         ConfigureMetallicGlossMapKeyword(material, metallicSmoothness != null);
         SetKeyword(material, "_EMISSION", false);
         SetKeyword(material, "_PARALLAXMAP", false);
+        ConfigureStandardReflectionKeywords(material, 1.0f, 1.0f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
         AssetDatabase.SaveAssets();
@@ -519,6 +524,7 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(material, "_SpecularHighlights", 0.0f);
         SetKeyword(material, "_EMISSION", true);
         SetKeyword(material, "_PARALLAXMAP", false);
+        ConfigureStandardReflectionKeywords(material, 0.0f, 0.0f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
     }
 
@@ -575,6 +581,12 @@ public static class WolfTargetMaterialSetup
 
         SetKeyword(mat, activeKeyword, enabled);
         mat.DisableKeyword(inactiveKeyword);
+    }
+
+    private static void ConfigureStandardReflectionKeywords(Material mat, float glossyReflections, float specularHighlights)
+    {
+        SetKeyword(mat, "_GLOSSYREFLECTIONS_OFF", glossyReflections <= 0f);
+        SetKeyword(mat, "_SPECULARHIGHLIGHTS_OFF", specularHighlights <= 0f);
     }
 
     private static void SetFloatIfHas(Material mat, string name, float value)
