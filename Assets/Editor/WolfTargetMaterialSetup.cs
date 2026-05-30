@@ -539,17 +539,17 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(material, "_EmissionMap", albedo);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.0f);
-        SetFloatIfHas(material, "_Smoothness", 0.08f);
-        SetFloatIfHas(material, "_Glossiness", 0.08f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.08f);
+        SetFloatIfHas(material, "_Smoothness", 0.20f);
+        SetFloatIfHas(material, "_Glossiness", 0.20f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.28f);
         SetFloatIfHas(material, "_OcclusionStrength", 0.0f);
         SetFloatIfHas(material, "_BumpScale", 0.18f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
-        SetFloatIfHas(material, "_GlossyReflections", 0.0f);
-        SetFloatIfHas(material, "_SpecularHighlights", 0.0f);
+        SetFloatIfHas(material, "_GlossyReflections", 0.18f);
+        SetFloatIfHas(material, "_SpecularHighlights", 0.30f);
         SetKeyword(material, "_EMISSION", true);
         SetKeyword(material, "_PARALLAXMAP", false);
-        ConfigureStandardReflectionKeywords(material, 0.0f, 0.0f);
+        ConfigureStandardReflectionKeywords(material, 0.18f, 0.30f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
     }
 

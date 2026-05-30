@@ -28,7 +28,7 @@ public static class WolfDynamicLightingSetup
     private const string CoolFloorReflectionMaterialPath = MaterialRoot + "/LampFloorReflectionCool.mat";
     private const string WarmWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionWarm.mat";
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
-    private const int MaxRealtimeLampLights = 34;
+    private const int MaxRealtimeLampLights = 36;
     private const int MaxFlickeringLampLights = 0;
     private const int MaxRealtimeSpecularAccentLights = 0;
     private const int PerformanceAntiAliasingSamples = 2;
@@ -45,6 +45,31 @@ public static class WolfDynamicLightingSetup
 
     private static readonly Color WarmLamp = new Color(1.0f, 0.72f, 0.36f);
     private static readonly Color CoolLamp = new Color(1.0f, 0.84f, 0.62f);
+    private static readonly RoomBalanceFill[] LargeLocationBalanceFills =
+    {
+        new RoomBalanceFill("large location north west", new Vector3(69.0f, 0.98f, 73.0f), 0.16f, 18.0f),
+        new RoomBalanceFill("large location north mid", new Vector3(87.0f, 0.98f, 73.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location north east", new Vector3(105.0f, 0.98f, 73.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location far north east", new Vector3(123.0f, 0.98f, 75.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location center west", new Vector3(69.0f, 0.98f, 93.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location center mid", new Vector3(87.0f, 0.98f, 93.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location center east", new Vector3(105.0f, 0.98f, 93.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location far center east", new Vector3(123.0f, 0.98f, 93.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("dog room north west", new Vector3(109.0f, 0.98f, 39.0f), 0.44f, 22.0f),
+        new RoomBalanceFill("dog room north east", new Vector3(119.0f, 0.98f, 39.0f), 0.42f, 20.0f),
+        new RoomBalanceFill("dog room south west", new Vector3(113.0f, 0.98f, 57.0f), 0.42f, 22.0f),
+        new RoomBalanceFill("dog room south east", new Vector3(121.0f, 0.98f, 63.0f), 0.42f, 22.0f),
+        new RoomBalanceFill("large location trophy west north", new Vector3(13.0f, 0.98f, 99.0f), 0.34f, 22.0f),
+        new RoomBalanceFill("large location trophy west mid", new Vector3(25.0f, 0.98f, 107.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location trophy west aisle", new Vector3(45.0f, 0.98f, 95.0f), 0.34f, 22.0f),
+        new RoomBalanceFill("large location south west", new Vector3(69.0f, 0.98f, 119.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location far southwest", new Vector3(13.0f, 0.98f, 119.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location southwest mid", new Vector3(31.0f, 0.98f, 119.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location south mid", new Vector3(87.0f, 0.98f, 113.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location south east", new Vector3(105.0f, 0.98f, 113.0f), 0.38f, 24.0f),
+        new RoomBalanceFill("large location far south east", new Vector3(123.0f, 0.98f, 113.0f), 0.38f, 24.0f),
+    };
+
     private static bool waitingForBeautifulBake;
     private static double nextBeautifulBakeLogTime;
 
@@ -53,7 +78,10 @@ public static class WolfDynamicLightingSetup
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
         {
-            Debug.LogWarning("[WolfDynamicLightingSetup] Exit Play Mode before applying scene lighting.");
+            Debug.LogWarning("[WolfDynamicLightingSetup] Leaving Play Mode before applying scene lighting.");
+            EditorApplication.playModeStateChanged -= ApplyDynamicLightingAfterPlayMode;
+            EditorApplication.playModeStateChanged += ApplyDynamicLightingAfterPlayMode;
+            EditorApplication.isPlaying = false;
             return;
         }
 
@@ -62,8 +90,16 @@ public static class WolfDynamicLightingSetup
 
         Material glowMaterial = CreateGlowMaterial();
         Material generatedLampCapMaterial = CreateGeneratedLampCapMaterial();
-        Material warmCeilingSpillMaterial = null;
-        Material coolCeilingSpillMaterial = null;
+        Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(
+            WarmCeilingSpillMaterialPath,
+            Color.Lerp(WarmLamp, Color.white, 0.52f),
+            0.050f,
+            0.075f);
+        Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(
+            CoolCeilingSpillMaterialPath,
+            Color.Lerp(CoolLamp, Color.white, 0.58f),
+            0.045f,
+            0.065f);
         Material warmFloorReflectionMaterial = null;
         Material coolFloorReflectionMaterial = null;
         Material warmWallReflectionMaterial = null;
@@ -117,6 +153,7 @@ public static class WolfDynamicLightingSetup
                 }
             }
         }
+        int largeLocationFillCount = CreateLargeLocationBalanceFills(root.transform);
 
         ApplyQualityLightingProfileToOpenScene();
 
@@ -125,7 +162,18 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
 
-        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} green lamp glows, {realtimeLampCount} green lamp ceiling-scatter rigs, {specularAccentCount} no-shadow specular accents, and disabled {disabledAuthoredFixtureLights} non-green authored lights in {ScenePath}.");
+        Debug.Log($"[WolfDynamicLightingSetup] Added {anchors.Count} green lamp glows, {realtimeLampCount} green lamp ceiling-scatter rigs, {specularAccentCount} no-shadow specular accents, {largeLocationFillCount} low-light large-location balance fills, and disabled {disabledAuthoredFixtureLights} non-green authored lights in {ScenePath}.");
+    }
+
+    private static void ApplyDynamicLightingAfterPlayMode(PlayModeStateChange state)
+    {
+        if (state != PlayModeStateChange.EnteredEditMode)
+        {
+            return;
+        }
+
+        EditorApplication.playModeStateChanged -= ApplyDynamicLightingAfterPlayMode;
+        EditorApplication.delayCall += ApplyDynamicLighting;
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Quality Lighting Settings")]
@@ -152,6 +200,41 @@ public static class WolfDynamicLightingSetup
         AssetDatabase.Refresh();
 
         Debug.Log($"[WolfDynamicLightingSetup] Applied quality lighting profile with realtime shadows and reflections to {ScenePath}.");
+    }
+
+    [MenuItem("Tools/Wolf Target Look/Apply Ceiling Realism")]
+    public static void ApplyCeilingRealism()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        {
+            Debug.LogWarning("[WolfDynamicLightingSetup] Exit Play Mode before applying ceiling realism.");
+            return;
+        }
+
+        AssetDatabase.Refresh();
+        Directory.CreateDirectory(MaterialRoot);
+        Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(
+            WarmCeilingSpillMaterialPath,
+            Color.Lerp(WarmLamp, Color.white, 0.52f),
+            0.050f,
+            0.075f);
+        Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(
+            CoolCeilingSpillMaterialPath,
+            Color.Lerp(CoolLamp, Color.white, 0.58f),
+            0.045f,
+            0.065f);
+
+        var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        WolfTargetMaterialSetup.ConfigureCeilingPanelVisibility();
+        ApplyRendererLightingFlags(null);
+        int spillCount = EnsureCeilingLightSpills(warmCeilingSpillMaterial, coolCeilingSpillMaterial);
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        Debug.Log($"[WolfDynamicLightingSetup] Applied semi-matte ceiling material and {spillCount} soft ceiling light spills to {ScenePath}.");
     }
 
     [MenuItem("Tools/Wolf Target Look/Apply Gloss Reflection Probe Coverage")]
@@ -769,7 +852,7 @@ public static class WolfDynamicLightingSetup
         SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.48f, 0.0f, 0.72f, 0.70f);
         SetMaterialSurface("DoorTeal_Target", 0.34f, 0.54f, 0.68f, 0.62f, 0.45f);
         SetMaterialSurface("FloorTile_Target", 0.0f, 0.56f, 1.0f, 1.0f, 1.0f);
-        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.08f, 0.08f, 0.0f, 0.0f);
+        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.20f, 0.28f, 0.18f, 0.30f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
         SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.55f, 0.72f, 0.85f, 0.90f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
@@ -842,8 +925,8 @@ public static class WolfDynamicLightingSetup
             0.18f,
             0.0f,
             0f,
-            0.0f,
-            0.0f);
+            0.18f,
+            0.30f);
 
         TuneTargetMaterial(
             "DarkMetalTrim_Target",
@@ -1063,7 +1146,15 @@ public static class WolfDynamicLightingSetup
             string objectName = transform.gameObject.name;
             if (objectName.StartsWith("ceilLight cap ", System.StringComparison.Ordinal))
             {
-                anchors.Add(new LampAnchor(objectName, transform.position + Vector3.down * 0.05f, CoolLamp, 1.55f, 15.5f, false));
+                Vector3 anchorPosition = transform.position + Vector3.down * 0.05f;
+                float baseIntensity = IsLargeStoneRoomAnchor(anchorPosition) ? 0.86f : 1.55f;
+                anchors.Add(new LampAnchor(objectName, anchorPosition, CoolLamp, baseIntensity, 15.5f, false));
+            }
+            else if (objectName.StartsWith("chandelier cap ", System.StringComparison.Ordinal))
+            {
+                Vector3 anchorPosition = transform.position + Vector3.down * 0.05f;
+                float baseIntensity = IsLargeStoneRoomAnchor(anchorPosition) ? 0.96f : 1.20f;
+                anchors.Add(new LampAnchor(objectName, anchorPosition, WarmLamp, baseIntensity, 16.0f, true));
             }
         }
 
@@ -1139,8 +1230,8 @@ public static class WolfDynamicLightingSetup
         Light point = pointObject.AddComponent<Light>();
         point.type = LightType.Point;
         point.color = Color.Lerp(anchor.Color, Color.white, 0.34f);
-        point.intensity = anchor.BaseIntensity * 0.12f;
-        point.range = 30.0f;
+        point.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.08f : 0.12f);
+        point.range = anchor.IsChandelier ? 26.0f : 30.0f;
         point.bounceIntensity = 0.0f;
         point.shadows = LightShadows.None;
         point.cullingMask = LampLightingMask;
@@ -1157,8 +1248,8 @@ public static class WolfDynamicLightingSetup
         Light ceilingBounce = ceilingBounceObject.AddComponent<Light>();
         ceilingBounce.type = LightType.Point;
         ceilingBounce.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingBounce.intensity = anchor.BaseIntensity * 0.10f;
-        ceilingBounce.range = 28.0f;
+        ceilingBounce.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.06f : 0.10f);
+        ceilingBounce.range = anchor.IsChandelier ? 24.0f : 28.0f;
         ceilingBounce.bounceIntensity = 0.0f;
         ceilingBounce.shadows = LightShadows.None;
         ceilingBounce.cullingMask = LampLightingMask;
@@ -1171,8 +1262,8 @@ public static class WolfDynamicLightingSetup
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
         ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingScatter.intensity = anchor.BaseIntensity * 0.10f;
-        ceilingScatter.range = 30.0f;
+        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.055f : 0.10f);
+        ceilingScatter.range = anchor.IsChandelier ? 24.0f : 30.0f;
         ceilingScatter.spotAngle = 30f;
         ceilingScatter.bounceIntensity = 0.0f;
         ceilingScatter.shadows = LightShadows.None;
@@ -1181,8 +1272,13 @@ public static class WolfDynamicLightingSetup
         ceilingScatter.lightmapBakeType = LightmapBakeType.Realtime;
 
         CreateCeilingGlowLight(rig.transform, anchor);
+        CreateCeilingLightSpill(rig.transform, anchor, warmCeilingSpillMaterial, coolCeilingSpillMaterial);
         CreateCeilingDiffuserLights(rig.transform, anchor);
         CreateWallScatterLights(rig.transform, anchor);
+        if (IsLargeStoneRoomAnchor(anchor.Position))
+        {
+            CreateLargeStoneRoomFillLight(rig.transform, anchor);
+        }
 
         if (createSpecularAccent)
         {
@@ -1216,8 +1312,8 @@ public static class WolfDynamicLightingSetup
         Light glow = glowObject.AddComponent<Light>();
         glow.type = LightType.Spot;
         glow.color = Color.Lerp(anchor.Color, Color.white, 0.54f);
-        glow.intensity = anchor.BaseIntensity * 0.55f;
-        glow.range = 6.5f;
+        glow.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.42f : 0.55f);
+        glow.range = anchor.IsChandelier ? 6.0f : 6.5f;
         glow.spotAngle = 145f;
         glow.bounceIntensity = 0.0f;
         glow.shadows = LightShadows.None;
@@ -1242,8 +1338,8 @@ public static class WolfDynamicLightingSetup
         Light diffuser = diffuserObject.AddComponent<Light>();
         diffuser.type = LightType.Point;
         diffuser.color = Color.Lerp(anchor.Color, Color.white, 0.48f);
-        diffuser.intensity = anchor.BaseIntensity * 0.07f;
-        diffuser.range = 30.0f;
+        diffuser.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.04f : 0.07f);
+        diffuser.range = anchor.IsChandelier ? 24.0f : 30.0f;
         diffuser.bounceIntensity = 0.0f;
         diffuser.shadows = LightShadows.None;
         diffuser.cullingMask = LampLightingMask;
@@ -1267,14 +1363,64 @@ public static class WolfDynamicLightingSetup
         Light scatter = scatterObject.AddComponent<Light>();
         scatter.type = LightType.Point;
         scatter.color = Color.Lerp(anchor.Color, Color.white, 0.50f);
-        scatter.intensity = anchor.BaseIntensity * 0.07f;
-        scatter.range = 28.0f;
+        scatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.035f : 0.07f);
+        scatter.range = anchor.IsChandelier ? 22.0f : 28.0f;
         scatter.spotAngle = 30f;
         scatter.bounceIntensity = 0.0f;
         scatter.shadows = LightShadows.None;
         scatter.cullingMask = LampLightingMask;
         scatter.renderMode = LightRenderMode.ForcePixel;
         scatter.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static bool IsLargeStoneRoomAnchor(Vector3 position)
+    {
+        // Localize the extra brightness to the authored white-stone hall only.
+        return position.x >= 4.0f
+            && position.x <= 52.0f
+            && position.z >= 31.0f
+            && position.z <= 109.0f;
+    }
+
+    private static void CreateLargeStoneRoomFillLight(Transform parent, LampAnchor anchor)
+    {
+        GameObject fillObject = CreateChild(parent, "stone room fill");
+        fillObject.transform.localPosition = Vector3.down * 0.92f;
+
+        Light fill = fillObject.AddComponent<Light>();
+        fill.type = LightType.Point;
+        fill.color = Color.Lerp(anchor.Color, Color.white, 0.64f);
+        fill.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.055f : 0.050f);
+        fill.range = anchor.IsChandelier ? 20.0f : 17.0f;
+        fill.bounceIntensity = 0.0f;
+        fill.shadows = LightShadows.None;
+        fill.cullingMask = LampLightingMask;
+        fill.renderMode = LightRenderMode.ForcePixel;
+        fill.lightmapBakeType = LightmapBakeType.Realtime;
+    }
+
+    private static int CreateLargeLocationBalanceFills(Transform parent)
+    {
+        GameObject fillGroup = CreateChild(parent, "Large Location Balance Fills");
+        for (int i = 0; i < LargeLocationBalanceFills.Length; i++)
+        {
+            RoomBalanceFill balanceFill = LargeLocationBalanceFills[i];
+            GameObject fillObject = CreateChild(fillGroup.transform, $"balance fill {i + 1:00} - {balanceFill.Name}");
+            fillObject.transform.position = balanceFill.Position;
+
+            Light fill = fillObject.AddComponent<Light>();
+            fill.type = LightType.Point;
+            fill.color = Color.Lerp(CoolLamp, Color.white, 0.68f);
+            fill.intensity = balanceFill.Intensity;
+            fill.range = balanceFill.Range;
+            fill.bounceIntensity = 0.0f;
+            fill.shadows = LightShadows.None;
+            fill.cullingMask = LampLightingMask;
+            fill.renderMode = LightRenderMode.ForcePixel;
+            fill.lightmapBakeType = LightmapBakeType.Realtime;
+        }
+
+        return LargeLocationBalanceFills.Length;
     }
 
     private static void CreateGeneratedCeilingLampFixture(Transform parent, Material capMaterial)
@@ -1304,17 +1450,49 @@ public static class WolfDynamicLightingSetup
         Material warmCeilingSpillMaterial,
         Material coolCeilingSpillMaterial)
     {
-        GameObject spill = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        UpsertCeilingLightSpill(
+            parent,
+            anchor.IsChandelier,
+            anchor.IsChandelier ? warmCeilingSpillMaterial : coolCeilingSpillMaterial);
+    }
+
+    private static int EnsureCeilingLightSpills(Material warmCeilingSpillMaterial, Material coolCeilingSpillMaterial)
+    {
+        int spillCount = 0;
+        foreach (Transform transform in Object.FindObjectsByType<Transform>(FindObjectsInactive.Exclude))
+        {
+            if (!transform.gameObject.name.StartsWith("Dynamic Lamp ", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            bool isChandelier = transform.gameObject.name.IndexOf("chandelier", System.StringComparison.OrdinalIgnoreCase) >= 0;
+            UpsertCeilingLightSpill(transform, isChandelier, isChandelier ? warmCeilingSpillMaterial : coolCeilingSpillMaterial);
+            spillCount++;
+        }
+
+        return spillCount;
+    }
+
+    private static void UpsertCeilingLightSpill(Transform parent, bool isChandelier, Material material)
+    {
+        if (material == null)
+        {
+            return;
+        }
+
+        Transform existing = parent.Find("ceiling light spill");
+        GameObject spill = existing != null ? existing.gameObject : GameObject.CreatePrimitive(PrimitiveType.Quad);
         spill.name = "ceiling light spill";
         spill.transform.SetParent(parent, false);
-        spill.transform.localPosition = Vector3.up * (anchor.IsChandelier ? 0.36f : 0.075f);
+        spill.transform.localPosition = Vector3.up * (isChandelier ? 0.36f : 0.075f);
         spill.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
-        float diameter = anchor.IsChandelier ? 7.2f : 4.8f;
+        float diameter = isChandelier ? 6.2f : 4.2f;
         spill.transform.localScale = new Vector3(diameter, diameter, 1f);
 
         Renderer renderer = spill.GetComponent<Renderer>();
-        renderer.sharedMaterial = anchor.IsChandelier ? warmCeilingSpillMaterial : coolCeilingSpillMaterial;
+        renderer.sharedMaterial = material;
         renderer.receiveShadows = false;
         renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
         renderer.shadowCastingMode = ShadowCastingMode.Off;
@@ -1324,6 +1502,9 @@ public static class WolfDynamicLightingSetup
         {
             Object.DestroyImmediate(collider);
         }
+
+        EditorUtility.SetDirty(renderer);
+        EditorUtility.SetDirty(spill);
     }
 
     private static void CreateFloorLightReflection(
@@ -2159,6 +2340,22 @@ public static class WolfDynamicLightingSetup
         public float Range { get; }
         public bool IsChandelier { get; }
         public bool CreateFixtureMesh { get; }
+    }
+
+    private readonly struct RoomBalanceFill
+    {
+        public RoomBalanceFill(string name, Vector3 position, float intensity, float range)
+        {
+            Name = name;
+            Position = position;
+            Intensity = intensity;
+            Range = range;
+        }
+
+        public string Name { get; }
+        public Vector3 Position { get; }
+        public float Intensity { get; }
+        public float Range { get; }
     }
 }
 #endif
