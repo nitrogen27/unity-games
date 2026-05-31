@@ -126,14 +126,14 @@ public static class WolfDynamicLightingSetup
             FloorReflectionTexturePath,
             Color.Lerp(WarmLamp, Color.white, 0.44f),
             0.0f,
-            0.56f,
+            0.78f,
             true);
         Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(
             CoolFloorReflectionMaterialPath,
             FloorReflectionTexturePath,
             Color.Lerp(CoolLamp, Color.white, 0.50f),
             0.0f,
-            0.64f,
+            0.92f,
             true);
         Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(
             WarmWallReflectionMaterialPath,
@@ -1411,7 +1411,7 @@ public static class WolfDynamicLightingSetup
         Light point = pointObject.AddComponent<Light>();
         point.type = LightType.Point;
         point.color = Color.Lerp(anchor.Color, Color.white, 0.34f);
-        point.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.44f : 0.58f);
+        point.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.60f : 0.82f);
         point.range = anchor.IsChandelier ? IsolatedChandelierPrimaryLightRange : IsolatedPrimaryLightRange;
         point.bounceIntensity = 0.0f;
         point.shadows = LightShadows.Soft;
@@ -1429,7 +1429,7 @@ public static class WolfDynamicLightingSetup
         Light ceilingBounce = ceilingBounceObject.AddComponent<Light>();
         ceilingBounce.type = LightType.Point;
         ceilingBounce.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingBounce.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.090f : 0.125f);
+        ceilingBounce.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.150f : 0.205f);
         ceilingBounce.range = anchor.IsChandelier ? IsolatedCeilingBounceRange + 0.5f : IsolatedCeilingBounceRange;
         ceilingBounce.bounceIntensity = 0.0f;
         ceilingBounce.shadows = LightShadows.None;
@@ -1443,7 +1443,7 @@ public static class WolfDynamicLightingSetup
         Light ceilingScatter = ceilingScatterObject.AddComponent<Light>();
         ceilingScatter.type = LightType.Point;
         ceilingScatter.color = Color.Lerp(anchor.Color, Color.white, 0.42f);
-        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.080f : 0.115f);
+        ceilingScatter.intensity = anchor.BaseIntensity * (anchor.IsChandelier ? 0.132f : 0.188f);
         ceilingScatter.range = anchor.IsChandelier ? IsolatedCeilingScatterRange + 0.5f : IsolatedCeilingScatterRange;
         ceilingScatter.spotAngle = 30f;
         ceilingScatter.bounceIntensity = 0.0f;
@@ -1532,8 +1532,8 @@ public static class WolfDynamicLightingSetup
         bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         diffuser.type = LightType.Point;
         diffuser.color = Color.Lerp(anchor.Color, Color.white, 0.48f);
-        diffuser.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.035f : (anchor.IsChandelier ? 0.04f : 0.07f));
-        diffuser.range = anchor.IsChandelier ? IsolatedCeilingDiffuserRange + 0.5f : IsolatedCeilingDiffuserRange;
+        diffuser.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.068f : (anchor.IsChandelier ? 0.075f : 0.120f));
+        diffuser.range = anchor.IsChandelier ? IsolatedCeilingDiffuserRange + 0.9f : IsolatedCeilingDiffuserRange + 0.7f;
         diffuser.bounceIntensity = 0.0f;
         diffuser.shadows = LightShadows.None;
         diffuser.cullingMask = LampLightingMask;
@@ -1558,8 +1558,8 @@ public static class WolfDynamicLightingSetup
         bool isOpeningBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
         scatter.type = LightType.Point;
         scatter.color = Color.Lerp(anchor.Color, Color.white, 0.50f);
-        scatter.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.032f : (anchor.IsChandelier ? 0.035f : 0.07f));
-        scatter.range = anchor.IsChandelier ? IsolatedWallScatterRange + 0.5f : IsolatedWallScatterRange;
+        scatter.intensity = anchor.BaseIntensity * (isOpeningBlueRoom ? 0.062f : (anchor.IsChandelier ? 0.068f : 0.118f));
+        scatter.range = anchor.IsChandelier ? IsolatedWallScatterRange + 0.9f : IsolatedWallScatterRange + 0.7f;
         scatter.spotAngle = 30f;
         scatter.bounceIntensity = 0.0f;
         scatter.shadows = LightShadows.None;
@@ -1842,8 +1842,8 @@ public static class WolfDynamicLightingSetup
         }
 
         bool openingBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
-        float wide = openingBlueRoom ? 9.2f : (anchor.IsChandelier ? 12.6f : 11.2f);
-        float longAxis = openingBlueRoom ? 12.6f : (anchor.IsChandelier ? 16.0f : 14.2f);
+        float wide = openingBlueRoom ? 10.6f : (anchor.IsChandelier ? 13.6f : 12.4f);
+        float longAxis = openingBlueRoom ? 14.8f : (anchor.IsChandelier ? 18.4f : 16.2f);
         Material material = anchor.IsChandelier ? warmFloorReflectionMaterial : coolFloorReflectionMaterial;
         CreateIsolatedFloorReflectionQuad(parent, position, normal, material, wide, longAxis);
     }
@@ -1945,6 +1945,18 @@ public static class WolfDynamicLightingSetup
         float width,
         float height)
     {
+        CreateIsolatedFloorReflectionQuad(parent, "floor lamp reflection", position, normal, material, width, height);
+    }
+
+    private static void CreateIsolatedFloorReflectionQuad(
+        Transform parent,
+        string name,
+        Vector3 position,
+        Vector3 normal,
+        Material material,
+        float width,
+        float height)
+    {
         Vector3 safeNormal = normal.sqrMagnitude > 0.001f ? normal.normalized : Vector3.up;
         Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, safeNormal);
         if (xAxis.sqrMagnitude < 0.001f)
@@ -1971,7 +1983,7 @@ public static class WolfDynamicLightingSetup
             xAxis * ((positiveX - negativeX) * 0.5f) +
             zAxis * ((positiveZ - negativeZ) * 0.5f);
 
-        CreateSurfaceReflectionQuad(parent, "floor lamp reflection", isolatedCenter, safeNormal, zAxis, material, isolatedWidth, isolatedHeight);
+        CreateSurfaceReflectionQuad(parent, name, isolatedCenter, safeNormal, zAxis, material, isolatedWidth, isolatedHeight);
     }
 
     private static float FindReflectionBoundaryExtent(Vector3 center, Vector3 normal, Vector3 direction, float requestedExtent)
@@ -2487,8 +2499,8 @@ public static class WolfDynamicLightingSetup
                 float edgeFadeWidth = floorReflection ? 0.48f : 0.36f;
                 float edgeFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / edgeFadeWidth));
 
-                float broadReflection = floorReflection ? 0.66f : 0.42f;
-                float falloffPower = floorReflection ? 1.25f : 1.82f;
+                float broadReflection = floorReflection ? 0.90f : 0.50f;
+                float falloffPower = floorReflection ? 1.08f : 1.72f;
                 float alpha = Mathf.Clamp01(Mathf.Pow(radial, falloffPower) * broadReflection) * edgeFade;
                 pixels[y * size + x] = new Color(alpha, alpha, alpha, alpha);
             }
