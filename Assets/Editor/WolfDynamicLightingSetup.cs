@@ -21,12 +21,9 @@ public static class WolfDynamicLightingSetup
     private const string LampGlowMaterialPath = MaterialRoot + "/DynamicLampGlow.mat";
     private const string GeneratedLampCapMaterialPath = MaterialRoot + "/GeneratedCeilingLampCap.mat";
     private const string CeilingSpillTexturePath = MaterialRoot + "/CeilingLampSpillFalloff.png";
-    private const string FloorReflectionTexturePath = MaterialRoot + "/LampFloorReflectionFalloff.png";
     private const string WallReflectionTexturePath = MaterialRoot + "/LampWallReflectionFalloff.png";
     private const string WarmCeilingSpillMaterialPath = MaterialRoot + "/CeilingLampSpillWarm.mat";
     private const string CoolCeilingSpillMaterialPath = MaterialRoot + "/CeilingLampSpillCool.mat";
-    private const string WarmFloorReflectionMaterialPath = MaterialRoot + "/LampFloorReflectionWarm.mat";
-    private const string CoolFloorReflectionMaterialPath = MaterialRoot + "/LampFloorReflectionCool.mat";
     private const string WarmWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionWarm.mat";
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
     private const string OpeningBlueWallMaterialPath = MaterialRoot + "/BlueWall_OpeningRooms_Target.mat";
@@ -121,20 +118,6 @@ public static class WolfDynamicLightingSetup
             Color.Lerp(CoolLamp, Color.white, 0.58f),
             0.080f,
             0.110f);
-        Material warmFloorReflectionMaterial = CreateSurfaceReflectionMaterial(
-            WarmFloorReflectionMaterialPath,
-            FloorReflectionTexturePath,
-            Color.Lerp(WarmLamp, Color.white, 0.44f),
-            0.0f,
-            0.78f,
-            true);
-        Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(
-            CoolFloorReflectionMaterialPath,
-            FloorReflectionTexturePath,
-            Color.Lerp(CoolLamp, Color.white, 0.50f),
-            0.0f,
-            0.92f,
-            true);
         Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(
             WarmWallReflectionMaterialPath,
             WallReflectionTexturePath,
@@ -184,8 +167,6 @@ public static class WolfDynamicLightingSetup
                 generatedLampCapMaterial,
                 warmCeilingSpillMaterial,
                 coolCeilingSpillMaterial,
-                warmFloorReflectionMaterial,
-                coolFloorReflectionMaterial,
                 warmWallReflectionMaterial,
                 coolWallReflectionMaterial,
                 hasRealtimeLight,
@@ -1369,8 +1350,6 @@ public static class WolfDynamicLightingSetup
         Material generatedLampCapMaterial,
         Material warmCeilingSpillMaterial,
         Material coolCeilingSpillMaterial,
-        Material warmFloorReflectionMaterial,
-        Material coolFloorReflectionMaterial,
         Material warmWallReflectionMaterial,
         Material coolWallReflectionMaterial,
         bool createRealtimeLight,
@@ -1459,14 +1438,8 @@ public static class WolfDynamicLightingSetup
         CreateLampSurfaceReflections(
             rig.transform,
             anchor,
-            warmFloorReflectionMaterial,
-            coolFloorReflectionMaterial,
             warmWallReflectionMaterial,
             coolWallReflectionMaterial);
-        if (ShouldCreateOpeningBlueRoomShadowKey(anchor))
-        {
-            CreateOpeningBlueRoomShadowKey(rig.transform, anchor);
-        }
         if (IsLargeStoneRoomAnchor(anchor.Position))
         {
             CreateLargeStoneRoomFillLight(rig.transform, anchor);
@@ -1576,7 +1549,7 @@ public static class WolfDynamicLightingSetup
             && position.z <= 27.0f;
     }
 
-    private static bool ShouldCreateOpeningBlueRoomShadowKey(LampAnchor anchor)
+    private static bool ShouldCreateOpeningBlueRoomWallReflection(LampAnchor anchor)
     {
         if (!IsOpeningBlueRoomAnchor(anchor.Position))
         {
@@ -1587,40 +1560,12 @@ public static class WolfDynamicLightingSetup
             (Mathf.Abs(anchor.Position.x - 69.0f) < 1.0f && Mathf.Abs(anchor.Position.z - 13.0f) < 1.0f);
     }
 
-    private static void CreateOpeningBlueRoomShadowKey(Transform parent, LampAnchor anchor)
-    {
-        GameObject keyObject = CreateChild(parent, "opening blue soft shadow key");
-        keyObject.transform.localPosition = Vector3.down * 0.18f;
-        keyObject.transform.localRotation = Quaternion.LookRotation(Vector3.down);
-
-        Light key = keyObject.AddComponent<Light>();
-        key.type = LightType.Spot;
-        key.color = Color.Lerp(anchor.Color, Color.white, 0.28f);
-        key.intensity = anchor.BaseIntensity * 0.78f;
-        key.range = 9.0f;
-        key.spotAngle = 86f;
-        key.bounceIntensity = 0.0f;
-        key.shadows = LightShadows.Soft;
-        key.shadowStrength = 0.42f;
-        key.shadowBias = 0.035f;
-        key.shadowNormalBias = 0.38f;
-        key.shadowNearPlane = 0.08f;
-        key.shadowResolution = LightShadowResolution.High;
-        key.cullingMask = LampLightingMask;
-        key.renderMode = LightRenderMode.ForcePixel;
-        key.lightmapBakeType = LightmapBakeType.Realtime;
-    }
-
     private static void CreateLampSurfaceReflections(
         Transform parent,
         LampAnchor anchor,
-        Material warmFloorReflectionMaterial,
-        Material coolFloorReflectionMaterial,
         Material warmWallReflectionMaterial,
         Material coolWallReflectionMaterial)
     {
-        CreateFloorLightReflection(parent, anchor, warmFloorReflectionMaterial, coolFloorReflectionMaterial);
-
         if (ShouldCreateLampWallReflection(anchor))
         {
             CreateWallLightReflections(parent, anchor, warmWallReflectionMaterial, coolWallReflectionMaterial);
@@ -1630,7 +1575,7 @@ public static class WolfDynamicLightingSetup
     private static bool ShouldCreateLampWallReflection(LampAnchor anchor)
     {
         return !IsOpeningBlueRoomAnchor(anchor.Position) ||
-            ShouldCreateOpeningBlueRoomShadowKey(anchor) ||
+            ShouldCreateOpeningBlueRoomWallReflection(anchor) ||
             (Mathf.Abs(anchor.Position.x - 69.0f) < 1.0f && Mathf.Abs(anchor.Position.z - 5.0f) < 1.0f) ||
             (Mathf.Abs(anchor.Position.x - 69.0f) < 1.0f && Mathf.Abs(anchor.Position.z - 23.0f) < 1.0f);
     }
@@ -1819,33 +1764,6 @@ public static class WolfDynamicLightingSetup
 
         EditorUtility.SetDirty(renderer);
         EditorUtility.SetDirty(spill);
-    }
-
-    private static void CreateFloorLightReflection(
-        Transform parent,
-        LampAnchor anchor,
-        Material warmFloorReflectionMaterial,
-        Material coolFloorReflectionMaterial)
-    {
-        Vector3 position;
-        Vector3 normal;
-        if (TryFindSceneSurface(anchor.Position + Vector3.up * 0.08f, Vector3.down, anchor.IsChandelier ? 8.5f : 6.5f, SurfaceTarget.Floor, out RaycastHit hit))
-        {
-            position = hit.point + hit.normal * 0.018f;
-            normal = hit.normal;
-        }
-        else
-        {
-            float floorY = anchor.Position.y < -1f ? -3f : 0f;
-            position = new Vector3(anchor.Position.x, floorY + 0.018f, anchor.Position.z);
-            normal = Vector3.up;
-        }
-
-        bool openingBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
-        float wide = openingBlueRoom ? 10.6f : (anchor.IsChandelier ? 13.6f : 12.4f);
-        float longAxis = openingBlueRoom ? 14.8f : (anchor.IsChandelier ? 18.4f : 16.2f);
-        Material material = anchor.IsChandelier ? warmFloorReflectionMaterial : coolFloorReflectionMaterial;
-        CreateIsolatedFloorReflectionQuad(parent, position, normal, material, wide, longAxis);
     }
 
     private static void CreateWallLightReflections(
