@@ -63,6 +63,9 @@ public static class WolfDynamicLightingSetup
 
     private static readonly Color WarmLamp = new Color(1.0f, 0.72f, 0.36f);
     private static readonly Color CoolLamp = new Color(1.0f, 0.84f, 0.62f);
+    private static readonly Color TargetBulbColor = new Color(1.0f, 0.88f, 0.62f, 1f);
+    private static readonly Color TargetBulbEmission = new Color(1.0f, 0.74f, 0.42f, 1f);
+    private static readonly Color TargetLampCapColor = new Color(0.16f, 0.145f, 0.125f, 1f);
     private static readonly RoomBalanceFill[] LargeLocationBalanceFills =
     {
         new RoomBalanceFill("large location north west", new Vector3(69.0f, 0.98f, 73.0f), 0.16f, 18.0f),
@@ -111,40 +114,40 @@ public static class WolfDynamicLightingSetup
         Material warmCeilingSpillMaterial = CreateCeilingSpillMaterial(
             WarmCeilingSpillMaterialPath,
             Color.Lerp(WarmLamp, Color.white, 0.52f),
-            0.050f,
-            0.075f);
+            0.090f,
+            0.120f);
         Material coolCeilingSpillMaterial = CreateCeilingSpillMaterial(
             CoolCeilingSpillMaterialPath,
             Color.Lerp(CoolLamp, Color.white, 0.58f),
-            0.045f,
-            0.065f);
+            0.080f,
+            0.110f);
         Material warmFloorReflectionMaterial = CreateSurfaceReflectionMaterial(
             WarmFloorReflectionMaterialPath,
             FloorReflectionTexturePath,
             Color.Lerp(WarmLamp, Color.white, 0.44f),
             0.0f,
-            0.26f,
+            0.56f,
             true);
         Material coolFloorReflectionMaterial = CreateSurfaceReflectionMaterial(
             CoolFloorReflectionMaterialPath,
             FloorReflectionTexturePath,
             Color.Lerp(CoolLamp, Color.white, 0.50f),
             0.0f,
-            0.30f,
+            0.64f,
             true);
         Material warmWallReflectionMaterial = CreateSurfaceReflectionMaterial(
             WarmWallReflectionMaterialPath,
             WallReflectionTexturePath,
             Color.Lerp(WarmLamp, Color.white, 0.44f),
             0.0f,
-            0.120f,
+            0.180f,
             false);
         Material coolWallReflectionMaterial = CreateSurfaceReflectionMaterial(
             CoolWallReflectionMaterialPath,
             WallReflectionTexturePath,
             Color.Lerp(CoolLamp, Color.white, 0.50f),
             0.0f,
-            0.140f,
+            0.200f,
             false);
 
         var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -906,9 +909,39 @@ public static class WolfDynamicLightingSetup
         TuneReferenceMaterialDetails();
 
         SetEmission("Assets/Materials/Mat_Lamp_Glow.mat", WarmLamp * 4.4f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmBulb.mat", WarmLamp * 4.7f);
-        SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", CoolLamp * 6.0f);
+        TuneLampFixtureMaterial("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmBulb.mat", TargetBulbColor, TargetBulbEmission * 6.2f, 0f, 0.56f);
+        TuneLampFixtureMaterial("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenBulb.mat", TargetBulbColor, TargetBulbEmission * 6.8f, 0f, 0.56f);
+        TuneLampFixtureMaterial("Assets/Materials/WolfRepo/Mat_WolfRepo_LampWarmCap.mat", TargetLampCapColor, Color.black, 0.18f, 0.48f);
+        TuneLampFixtureMaterial("Assets/Materials/WolfRepo/Mat_WolfRepo_LampGreenCap.mat", TargetLampCapColor, Color.black, 0.18f, 0.48f);
         SetEmission("Assets/Materials/WolfRepo/Mat_WolfRepo_StairLampBulb.mat", WarmLamp * 4.0f);
+    }
+
+    private static void TuneLampFixtureMaterial(string materialPath, Color color, Color emission, float metallic, float smoothness)
+    {
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(materialPath);
+        if (material == null)
+        {
+            return;
+        }
+
+        SetColor(material, "_Color", color);
+        SetColor(material, "_BaseColor", color);
+        if (emission.maxColorComponent > 0f)
+        {
+            SetEmission(material, emission);
+        }
+        else
+        {
+            material.DisableKeyword("_EMISSION");
+            material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            SetColor(material, "_EmissionColor", Color.black);
+        }
+
+        SetFloat(material, "_Metallic", metallic);
+        SetFloat(material, "_Smoothness", smoothness);
+        SetFloat(material, "_Glossiness", smoothness);
+        SetFloat(material, "_GlossMapScale", smoothness);
+        EditorUtility.SetDirty(material);
     }
 
     private static void TuneReferenceMaterialDetails()
@@ -1679,8 +1712,14 @@ public static class WolfDynamicLightingSetup
             new Vector3(69.0f, 0.90f, 21.0f),
             new Vector3(69.0f, 1.00f, 31.0f));
 
+        CreateLightingCheckpointCamera(
+            checkpointRoot.transform,
+            "checkpoint 04 - four lamp hall",
+            new Vector3(61.0f, 0.90f, 37.0f),
+            new Vector3(105.0f, 1.02f, 43.0f));
+
         checkpointRoot.SetActive(false);
-        return 3;
+        return 4;
     }
 
     private static void CreateLightingCheckpointCamera(Transform parent, string name, Vector3 position, Vector3 lookAt)
@@ -1763,7 +1802,7 @@ public static class WolfDynamicLightingSetup
         spill.transform.localPosition = Vector3.up * (isChandelier ? 0.36f : 0.075f);
         spill.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
-        float diameter = isChandelier ? 6.2f : 4.2f;
+        float diameter = isChandelier ? 8.0f : 6.0f;
         spill.transform.localScale = new Vector3(diameter, diameter, 1f);
 
         Renderer renderer = spill.GetComponent<Renderer>();
@@ -1803,8 +1842,8 @@ public static class WolfDynamicLightingSetup
         }
 
         bool openingBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
-        float wide = openingBlueRoom ? 5.0f : (anchor.IsChandelier ? 7.8f : 6.4f);
-        float longAxis = openingBlueRoom ? 6.0f : (anchor.IsChandelier ? 9.0f : 7.2f);
+        float wide = openingBlueRoom ? 9.2f : (anchor.IsChandelier ? 12.6f : 11.2f);
+        float longAxis = openingBlueRoom ? 12.6f : (anchor.IsChandelier ? 16.0f : 14.2f);
         Material material = anchor.IsChandelier ? warmFloorReflectionMaterial : coolFloorReflectionMaterial;
         CreateIsolatedFloorReflectionQuad(parent, position, normal, material, wide, longAxis);
     }
@@ -1825,7 +1864,7 @@ public static class WolfDynamicLightingSetup
         };
 
         bool openingBlueRoom = IsOpeningBlueRoomAnchor(anchor.Position);
-        float maxDistance = openingBlueRoom ? 5.8f : (anchor.IsChandelier ? 8.5f : 7.2f);
+        float maxDistance = openingBlueRoom ? 6.8f : (anchor.IsChandelier ? 9.6f : 8.4f);
         Material material = anchor.IsChandelier ? warmWallReflectionMaterial : coolWallReflectionMaterial;
 
         for (int i = 0; i < directions.Length; i++)
@@ -1834,8 +1873,8 @@ public static class WolfDynamicLightingSetup
             if (TryFindSceneSurface(origin, direction, maxDistance, SurfaceTarget.Wall, out RaycastHit hit))
             {
                 Vector3 position = hit.point + hit.normal * 0.024f;
-                float width = openingBlueRoom ? 3.2f : (anchor.IsChandelier ? 5.0f : 4.2f);
-                float height = openingBlueRoom ? 1.45f : (anchor.IsChandelier ? 2.4f : 2.0f);
+                float width = openingBlueRoom ? 4.4f : (anchor.IsChandelier ? 6.4f : 5.4f);
+                float height = openingBlueRoom ? 1.8f : (anchor.IsChandelier ? 2.9f : 2.45f);
                 CreateSurfaceReflectionQuad(parent, "wall lamp reflection", position, hit.normal, Vector3.up, material, width, height);
             }
         }
@@ -2286,8 +2325,8 @@ public static class WolfDynamicLightingSetup
             shader = Shader.Find("Universal Render Pipeline/Lit");
         }
         Material material = LoadOrCreateMaterial(LampGlowMaterialPath, shader);
-        SetColor(material, "_Color", new Color(1.0f, 0.88f, 0.68f, 1f));
-        SetEmission(material, CoolLamp * 8.5f);
+        SetColor(material, "_Color", TargetBulbColor);
+        SetEmission(material, TargetBulbEmission * 9.5f);
         SetFloat(material, "_Glossiness", 0.62f);
         SetFloat(material, "_Metallic", 0.0f);
         EditorUtility.SetDirty(material);
@@ -2303,10 +2342,10 @@ public static class WolfDynamicLightingSetup
         }
 
         Material material = LoadOrCreateMaterial(GeneratedLampCapMaterialPath, shader);
-        SetColor(material, "_Color", new Color(0.05f, 0.20f, 0.13f, 1f));
-        SetFloat(material, "_Metallic", 0.12f);
-        SetFloat(material, "_Glossiness", 0.44f);
-        SetFloat(material, "_GlossMapScale", 0.44f);
+        SetColor(material, "_Color", TargetLampCapColor);
+        SetFloat(material, "_Metallic", 0.18f);
+        SetFloat(material, "_Glossiness", 0.48f);
+        SetFloat(material, "_GlossMapScale", 0.48f);
         material.DisableKeyword("_EMISSION");
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
         EditorUtility.SetDirty(material);
@@ -2445,10 +2484,11 @@ public static class WolfDynamicLightingSetup
                 radial = Mathf.SmoothStep(0f, 1f, radial);
                 radial = Mathf.SmoothStep(0f, 1f, radial);
                 float borderDistance = 1f - Mathf.Max(Mathf.Abs(nx), Mathf.Abs(ny));
-                float edgeFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / 0.28f));
+                float edgeFadeWidth = floorReflection ? 0.48f : 0.36f;
+                float edgeFade = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(borderDistance / edgeFadeWidth));
 
-                float broadReflection = floorReflection ? 0.30f : 0.26f;
-                float falloffPower = floorReflection ? 2.10f : 2.35f;
+                float broadReflection = floorReflection ? 0.66f : 0.42f;
+                float falloffPower = floorReflection ? 1.25f : 1.82f;
                 float alpha = Mathf.Clamp01(Mathf.Pow(radial, falloffPower) * broadReflection) * edgeFade;
                 pixels[y * size + x] = new Color(alpha, alpha, alpha, alpha);
             }

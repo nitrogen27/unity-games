@@ -65,6 +65,75 @@ public static class ScenePerformanceAudit
             return;
         }
 
+        CaptureCameraFrame(camera, "WolfMainCameraCapture.png");
+    }
+
+    [MenuItem("Tools/Performance/Capture Four Lamp Lighting Frame")]
+    public static void CaptureFourLampLightingFrame()
+    {
+        Camera camera = Resources.FindObjectsOfTypeAll<Camera>()
+            .FirstOrDefault(candidate => candidate.gameObject.scene == SceneManager.GetActiveScene() &&
+                candidate.gameObject.name == "checkpoint 04 - four lamp hall");
+
+        if (camera == null)
+        {
+            Debug.LogWarning("[PerfAudit] Four lamp checkpoint camera not found.");
+            return;
+        }
+
+        CaptureCameraFrame(camera, "WolfFourLampLightingCapture.png");
+    }
+
+    [MenuItem("Tools/Performance/Capture Four Lamp Lighting Sweep")]
+    public static void CaptureFourLampLightingSweep()
+    {
+        LightingCameraCandidate[] candidates =
+        {
+            new LightingCameraCandidate("01", new Vector3(33.0f, 0.90f, 79.0f), new Vector3(77.0f, 1.02f, 99.0f)),
+            new LightingCameraCandidate("02", new Vector3(43.0f, 0.90f, 55.0f), new Vector3(89.0f, 1.02f, 63.0f)),
+            new LightingCameraCandidate("03", new Vector3(51.0f, 0.90f, 53.0f), new Vector3(101.0f, 1.02f, 57.0f)),
+            new LightingCameraCandidate("04", new Vector3(39.0f, 0.90f, 65.0f), new Vector3(91.0f, 1.02f, 63.0f)),
+            new LightingCameraCandidate("05", new Vector3(57.0f, 0.90f, 69.0f), new Vector3(111.0f, 1.02f, 57.0f)),
+            new LightingCameraCandidate("06", new Vector3(31.0f, 0.90f, 57.0f), new Vector3(83.0f, 1.02f, 61.0f)),
+            new LightingCameraCandidate("07", new Vector3(61.0f, 0.90f, 37.0f), new Vector3(105.0f, 1.02f, 43.0f)),
+            new LightingCameraCandidate("08", new Vector3(49.0f, 0.90f, 35.0f), new Vector3(95.0f, 1.02f, 39.0f))
+        };
+
+        foreach (LightingCameraCandidate candidate in candidates)
+        {
+            CaptureTemporaryCameraFrame(candidate.Position, candidate.LookAt, $"WolfFourLampSweep_{candidate.Name}.png");
+        }
+    }
+
+    private static void CaptureTemporaryCameraFrame(Vector3 position, Vector3 lookAt, string fileName)
+    {
+        GameObject cameraObject = new GameObject($"Temporary lighting sweep camera {fileName}");
+        Camera camera = cameraObject.AddComponent<Camera>();
+        Camera source = Camera.main;
+        if (source != null)
+        {
+            camera.CopyFrom(source);
+        }
+
+        camera.enabled = false;
+        camera.transform.position = position;
+        camera.transform.rotation = Quaternion.LookRotation((lookAt - position).normalized, Vector3.up);
+        camera.fieldOfView = 75f;
+        camera.nearClipPlane = 0.05f;
+        camera.farClipPlane = 100f;
+
+        try
+        {
+            CaptureCameraFrame(camera, fileName);
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(cameraObject);
+        }
+    }
+
+    private static void CaptureCameraFrame(Camera camera, string fileName)
+    {
         int width = Mathf.Clamp(camera.pixelWidth > 0 ? camera.pixelWidth : 1280, 320, 1920);
         int height = Mathf.Clamp(camera.pixelHeight > 0 ? camera.pixelHeight : 720, 180, 1080);
         RenderTextureFormat format = camera.allowHDR ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
@@ -83,8 +152,9 @@ public static class ScenePerformanceAudit
             image.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             image.Apply(false, false);
 
-            string capturePath = Path.GetFullPath(Path.Combine("Library", "WolfMainCameraCapture.png"));
+            string capturePath = Path.GetFullPath(Path.Combine("Library", fileName));
             File.WriteAllBytes(capturePath, image.EncodeToPNG());
+            WriteLightingMetrics(image, capturePath);
             Debug.Log(BuildCameraCaptureSummary(camera, image, capturePath));
         }
         finally
@@ -97,6 +167,97 @@ public static class ScenePerformanceAudit
                 UnityEngine.Object.DestroyImmediate(image);
             }
         }
+    }
+
+    private static void WriteLightingMetrics(Texture2D image, string capturePath)
+    {
+        Color32[] pixels = image.GetPixels32();
+        int width = image.width;
+        int height = image.height;
+        int floorYMin = Mathf.RoundToInt(height * 0.08f);
+        int floorYMax = Mathf.RoundToInt(height * 0.50f);
+        int ceilingYMin = Mathf.RoundToInt(height * 0.55f);
+
+        int floorCount = 0;
+        int floorBrightCount = 0;
+        int floorHotCount = 0;
+        double floorLumaSum = 0.0;
+        double floorBrightLumaSum = 0.0;
+
+        int lampPixelCount = 0;
+        double lampRed = 0.0;
+        double lampGreen = 0.0;
+        double lampBlue = 0.0;
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                Color32 pixel = pixels[y * width + x];
+                double r = pixel.r / 255.0;
+                double g = pixel.g / 255.0;
+                double b = pixel.b / 255.0;
+                double luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
+
+                if (y >= floorYMin && y <= floorYMax)
+                {
+                    floorCount++;
+                    floorLumaSum += luma;
+                    if (luma > 0.18)
+                    {
+                        floorBrightCount++;
+                        floorBrightLumaSum += luma;
+                    }
+                    if (luma > 0.32)
+                    {
+                        floorHotCount++;
+                    }
+                }
+
+                if (y >= ceilingYMin && luma > 0.38 && g > r * 0.90)
+                {
+                    lampPixelCount++;
+                    lampRed += r;
+                    lampGreen += g;
+                    lampBlue += b;
+                }
+            }
+        }
+
+        string metricsPath = Path.ChangeExtension(capturePath, ".metrics.txt");
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine($"image={Path.GetFileName(capturePath)}");
+        builder.AppendLine($"size={width}x{height}");
+        builder.AppendLine($"floor_mean_luma={floorLumaSum / Math.Max(1, floorCount):F4}");
+        builder.AppendLine($"floor_bright_area_pct={(floorBrightCount * 100.0) / Math.Max(1, floorCount):F2}");
+        builder.AppendLine($"floor_hot_area_pct={(floorHotCount * 100.0) / Math.Max(1, floorCount):F2}");
+        builder.AppendLine($"floor_bright_mean_luma={floorBrightLumaSum / Math.Max(1, floorBrightCount):F4}");
+        builder.AppendLine($"lamp_bright_pixels={lampPixelCount}");
+        if (lampPixelCount > 0)
+        {
+            double avgR = lampRed / lampPixelCount;
+            double avgG = lampGreen / lampPixelCount;
+            double avgB = lampBlue / lampPixelCount;
+            builder.AppendLine($"lamp_avg_rgb={avgR:F4},{avgG:F4},{avgB:F4}");
+            builder.AppendLine($"lamp_green_over_red={avgG / Math.Max(0.0001, avgR):F4}");
+            builder.AppendLine($"lamp_blue_over_red={avgB / Math.Max(0.0001, avgR):F4}");
+        }
+
+        File.WriteAllText(metricsPath, builder.ToString());
+    }
+
+    private readonly struct LightingCameraCandidate
+    {
+        public LightingCameraCandidate(string name, Vector3 position, Vector3 lookAt)
+        {
+            Name = name;
+            Position = position;
+            LookAt = lookAt;
+        }
+
+        public string Name { get; }
+        public Vector3 Position { get; }
+        public Vector3 LookAt { get; }
     }
 
     private static void LogStaticAudit()
