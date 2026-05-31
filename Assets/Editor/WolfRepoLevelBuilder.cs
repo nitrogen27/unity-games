@@ -27,6 +27,15 @@ namespace HelloWorldRoom.Editor
         private const float EyeHeight = 0.9f;
         private const float DoorThickness = 0.15f;
         private const float DoorTravel = Cell - 0.02f;
+        private static readonly Vector3[] LargeHallSideRowLampFootprints =
+        {
+            new(55f, 0f, 55f),
+            new(69f, 0f, 55f),
+            new(83f, 0f, 55f),
+            new(55f, 0f, 67f),
+            new(69f, 0f, 67f),
+            new(83f, 0f, 67f)
+        };
 
         private static readonly StatInfo[] StatInfos =
         {
@@ -386,6 +395,11 @@ namespace HelloWorldRoom.Editor
                     material,
                     parent,
                     info.blocking);
+            }
+
+            if (!excludeVerticalReserved)
+            {
+                AddLargeHallSideRowCeilingLamps(materials, parent);
             }
 
             Debug.Log($"[WolfRepo] Spawned {level.statics.Length} static entries.");
@@ -1160,6 +1174,14 @@ namespace HelloWorldRoom.Editor
             light.intensity = warm ? 0.55f : 0.65f;
             light.range = warm ? 7f : 8f;
             ConfigureGeneratedLight(light, 0.15f);
+        }
+
+        private static void AddLargeHallSideRowCeilingLamps(WolfRepoMaterials materials, Transform parent)
+        {
+            for (int i = 0; i < LargeHallSideRowLampFootprints.Length; i++)
+            {
+                AddCeilingLamp("ceilLight", LargeHallSideRowLampFootprints[i], false, materials, parent);
+            }
         }
 
         private static void ConfigureGeneratedLight(Light light, float bounceIntensity)

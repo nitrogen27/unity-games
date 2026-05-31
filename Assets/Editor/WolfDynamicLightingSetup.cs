@@ -28,7 +28,7 @@ public static class WolfDynamicLightingSetup
     private const string CoolWallReflectionMaterialPath = MaterialRoot + "/LampWallReflectionCool.mat";
     private const string OpeningBlueWallMaterialPath = MaterialRoot + "/BlueWall_OpeningRooms_Target.mat";
     private const string IsolatedLampGlossProbePrefix = "Isolated Lamp Gloss Reflection Probe ";
-    private const int MaxRealtimeLampLights = 36;
+    private const int MaxRealtimeLampLights = 48;
     private const int MaxFlickeringLampLights = 0;
     private const int MaxRealtimeSpecularAccentLights = 0;
     private const int PerformanceAntiAliasingSamples = 2;
@@ -63,6 +63,15 @@ public static class WolfDynamicLightingSetup
     private static readonly Color TargetBulbColor = new Color(1.0f, 0.88f, 0.62f, 1f);
     private static readonly Color TargetBulbEmission = new Color(1.0f, 0.74f, 0.42f, 1f);
     private static readonly Color TargetLampCapColor = new Color(0.16f, 0.145f, 0.125f, 1f);
+    private static readonly Vector3[] LargeHallSideRowLampPositions =
+    {
+        new Vector3(55.0f, 1.90f, 55.0f),
+        new Vector3(69.0f, 1.90f, 55.0f),
+        new Vector3(83.0f, 1.90f, 55.0f),
+        new Vector3(55.0f, 1.90f, 67.0f),
+        new Vector3(69.0f, 1.90f, 67.0f),
+        new Vector3(83.0f, 1.90f, 67.0f)
+    };
     private static readonly RoomBalanceFill[] LargeLocationBalanceFills =
     {
         new RoomBalanceFill("large location north west", new Vector3(69.0f, 0.98f, 73.0f), 0.16f, 18.0f),
@@ -1321,6 +1330,7 @@ public static class WolfDynamicLightingSetup
         }
 
         AddStartRoomLampAnchor(anchors);
+        AddLargeHallSideRowLampAnchors(anchors);
         anchors.Sort((left, right) => string.Compare(left.Name, right.Name, System.StringComparison.Ordinal));
         return anchors;
     }
@@ -1340,6 +1350,36 @@ public static class WolfDynamicLightingSetup
         }
 
         anchors.Add(new LampAnchor("start room generated ceilLight cap", startLampPosition, CoolLamp, 1.75f, 15.5f, false, true));
+    }
+
+    private static void AddLargeHallSideRowLampAnchors(List<LampAnchor> anchors)
+    {
+        for (int i = 0; i < LargeHallSideRowLampPositions.Length; i++)
+        {
+            Vector3 position = LargeHallSideRowLampPositions[i];
+            if (HasNearbyLampAnchor(anchors, position, 2.25f))
+            {
+                continue;
+            }
+
+            anchors.Add(new LampAnchor($"large hall side row generated ceilLight cap {position.x:0},{position.z:0}", position, CoolLamp, 1.55f, 15.5f, false, true));
+        }
+    }
+
+    private static bool HasNearbyLampAnchor(IReadOnlyList<LampAnchor> anchors, Vector3 position, float maxDistance)
+    {
+        Vector2 positionXZ = new Vector2(position.x, position.z);
+        float maxDistanceSquared = maxDistance * maxDistance;
+        for (int i = 0; i < anchors.Count; i++)
+        {
+            Vector2 anchorXZ = new Vector2(anchors[i].Position.x, anchors[i].Position.z);
+            if ((anchorXZ - positionXZ).sqrMagnitude <= maxDistanceSquared)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool CreateLampRig(
