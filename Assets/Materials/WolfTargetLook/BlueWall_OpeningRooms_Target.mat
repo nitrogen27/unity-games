@@ -15,6 +15,7 @@ Material:
   - _EMISSION
   - _METALLICGLOSSMAP
   - _NORMALMAP
+  - _PARALLAXMAP
   m_InvalidKeywords: []
   m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
