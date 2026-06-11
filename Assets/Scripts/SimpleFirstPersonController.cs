@@ -14,11 +14,26 @@ namespace HelloWorldRoom
         [Header("Look")]
         [SerializeField] private Camera playerCamera;
         [SerializeField] private float mouseSensitivity = 2.2f;
-        [SerializeField] private float maxPitch = 82f;
+        // 65° keeps the low Wolf ceiling (1.1 m above eye level) from filling
+        // the frame and breaking the flat-shaded illusion when looking up.
+        [SerializeField] private float maxPitch = 65f;
+
+        // When false the camera stays level and the pitch value is consumed by
+        // WolfYShearLook, which fakes look-up/down with a sheared projection so
+        // vertical wall edges never converge (the original Wolf3D behavior).
+        [SerializeField] private bool rotateCameraPitch = true;
 
         private CharacterController controller;
         private float pitch;
         private float verticalVelocity;
+
+        public float Pitch => pitch;
+
+        public bool RotateCameraPitch
+        {
+            get => rotateCameraPitch;
+            set => rotateCameraPitch = value;
+        }
 
         private void Awake()
         {
@@ -68,7 +83,9 @@ namespace HelloWorldRoom
 
             transform.Rotate(Vector3.up * mouseX);
             pitch = Mathf.Clamp(pitch - mouseY, -maxPitch, maxPitch);
-            playerCamera.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+            playerCamera.transform.localRotation = rotateCameraPitch
+                ? Quaternion.Euler(pitch, 0f, 0f)
+                : Quaternion.identity;
         }
 
         private void HandleMovement()

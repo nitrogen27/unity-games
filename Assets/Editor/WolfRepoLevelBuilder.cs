@@ -454,7 +454,9 @@ namespace HelloWorldRoom.Editor
             cameraObject.transform.localRotation = Quaternion.identity;
 
             Camera camera = cameraObject.AddComponent<Camera>();
-            camera.fieldOfView = 75f;
+            // Narrower vertical FOV reduces the perspective stretch that makes the
+            // 2 m ceiling balloon at the screen edges when the player looks up.
+            camera.fieldOfView = 62f;
             camera.nearClipPlane = 0.05f;
             camera.farClipPlane = 200f;
             camera.clearFlags = CameraClearFlags.SolidColor;

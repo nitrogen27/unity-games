@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2f83c37e95af4b6f924a53f1a690a32, type: 3}
+  m_Name: WolfFull3DMaterialLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Rendering.WolfFull3DMaterialLibrary
+  wallsAtlas: {fileID: 2800000, guid: a0dd63132cf5fa649814c615ad9d4ca4, type: 3}
+  spritesAtlas: {fileID: 2800000, guid: e5d601248ac880741874853bf545ec08, type: 3}
+  guardSheet: {fileID: 2800000, guid: d664294bad541fe4098a7f2f6df49343, type: 3}
+  dogSheet: {fileID: 2800000, guid: f4d4ff0625fd5774ca4b76bd5d0515f7, type: 3}
+  wallAtlasMaterial: {fileID: 2100000, guid: d72c357c6f6654ccbaee7d44a93f33ed, type: 2}
+  floorMaterial: {fileID: 2100000, guid: 399aa0786f259433880596cf2b44792a, type: 2}
+  ceilingMaterial: {fileID: 2100000, guid: dc5fde2db1f48415f9b8c754d0b912b8, type: 2}
+  wallOverrides:
+  - wallValue: 8
+    material: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+  - wallValue: 9
+    material: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+  - wallValue: 1
+    material: {fileID: 2100000, guid: 937411b65e73a47e88c5c55797db340a, type: 2}
+  - wallValue: 2
+    material: {fileID: 2100000, guid: 937411b65e73a47e88c5c55797db340a, type: 2}
+  - wallValue: 5
+    material: {fileID: 2100000, guid: cdceef8f2098e402c8b8bbf3cfa2f767, type: 2}
+  - wallValue: 7
+    material: {fileID: 2100000, guid: cdceef8f2098e402c8b8bbf3cfa2f767, type: 2}
+  doorFaceMaterial: {fileID: 2100000, guid: 8a7f3a38233154122a3831b1c089f10b, type: 2}
+  doorJambMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}
+  lampCapMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}
+  lampGlowMaterial: {fileID: 2100000, guid: ebd4c48e62b0246efb6792c61481c980, type: 2}
+  ceilingSpillWarmMaterial: {fileID: 2100000, guid: c878bbdaabd0a4df885926b334c3b6b2, type: 2}
+  ceilingSpillCoolMaterial: {fileID: 2100000, guid: f6a561f0ee961459197ce0bd778f32bc, type: 2}
+  lampWarmCap: {fileID: 2100000, guid: 3ab7b1ba30aa5cf4297382fe683457a2, type: 2}
+  lampGreenCap: {fileID: 2100000, guid: f31fb66de8a5a2e40b8c2e6d1d063e5b, type: 2}
+  lampWarmBulb: {fileID: 2100000, guid: f2983ed3dd4481e44b67bd30f647de4b, type: 2}
+  lampGreenBulb: {fileID: 2100000, guid: 571a182728785cd4aa35f80c0108bc63, type: 2}
