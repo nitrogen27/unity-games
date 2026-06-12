@@ -164,7 +164,10 @@ namespace WolfMini.EditorTools
                     start = wall.start,
                     end = wall.end,
                     baseY = wall.baseY + offsetY,
-                    height = wall.height,
+                    // Lower walls run on up to the upper floor, closing the
+                    // slab band sideways so nothing lit leaks through seam
+                    // cracks between the storeys.
+                    height = wall.height + WolfMiniConstants.FloorSlabThickness,
                     style = wall.style
                 });
             }

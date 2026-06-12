@@ -173,6 +173,16 @@ namespace HelloWorldRoom.Editor.Tests
                 Assert.That(lower.type, Is.EqualTo(upper.type));
             }
 
+            // Lower walls close the slab band: they run from their floor up to
+            // the upper storey's floor plane.
+            for (int i = 0; i < walls; i++)
+            {
+                WallSegmentSpec upper = sector.walls[i];
+                WallSegmentSpec lower = sector.walls[walls + i];
+                Assert.That(lower.baseY, Is.EqualTo(upper.baseY - storey).Within(0.001f));
+                Assert.That(lower.baseY + lower.height, Is.EqualTo(upper.baseY).Within(0.001f));
+            }
+
             foreach (StairwellSpec stairwell in sector.stairwells)
             {
                 Assert.That(stairwell.topY, Is.EqualTo(0f).Within(0.001f));

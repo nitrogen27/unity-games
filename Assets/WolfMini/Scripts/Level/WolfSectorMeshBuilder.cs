@@ -205,13 +205,19 @@ namespace WolfMini.Level
                 Vector3.down, uv);
         }
 
-        /// <summary>Pieces of a horizontal rectangle at <paramref name="planeY"/> left after cutting out the stairwell openings on that plane.</summary>
+        /// <summary>
+        /// Pieces of a horizontal rectangle at <paramref name="planeY"/> left
+        /// after cutting out the stairwell openings. An opening punches through
+        /// every plane the shaft passes: the floor at its top and any lower
+        /// storey ceiling between, but not the floor the stairs land on.
+        /// </summary>
         private List<Rect> SubtractStairwellOpenings(Rect area, float planeY)
         {
+            const float eps = 0.001f;
             var pieces = new List<Rect> { area };
             foreach (StairwellSpec stairwell in definition.stairwells)
             {
-                if (stairwell == null || Mathf.Abs(stairwell.topY - planeY) > 0.001f)
+                if (stairwell == null || planeY > stairwell.topY + eps || planeY <= stairwell.bottomY + eps)
                 {
                     continue;
                 }
