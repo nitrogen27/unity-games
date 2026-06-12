@@ -270,6 +270,9 @@ namespace WolfMini.Level
         /// <summary>Wall style of the shaft side walls; matches the surrounding room walls.</summary>
         public int wallStyle = 1;
 
+        /// <summary>Thickness of the shaft walls (one brick), so their tops and ends read as solid masonry.</summary>
+        public float wallThickness = 0.45f;
+
         /// <summary>How many times smaller the floor tiles on the steps are than on the room floor.</summary>
         public float treadUvScale = 4f;
     }

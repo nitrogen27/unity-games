@@ -99,7 +99,7 @@ namespace WolfMini.EditorTools
         {
             const int corridorStyle = 8; // blue stone, same as the corridor walls
             const int hallStyle = 2;     // tan stone, same as the big south hall walls
-            float lowerY = -WolfMiniConstants.WallHeight;
+            float lowerY = -(WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness);
 
             DuplicateStoreyBelow(target, lowerY);
 
@@ -113,7 +113,7 @@ namespace WolfMini.EditorTools
                 bottomY = lowerY,
                 alongZ = true,
                 descendSign = 1,
-                stepCount = 16,
+                stepCount = 18,
                 wallStyle = corridorStyle,
                 treadUvScale = 4f
             });
@@ -131,7 +131,7 @@ namespace WolfMini.EditorTools
                 bottomY = lowerY,
                 alongZ = false,
                 descendSign = 1,
-                stepCount = 16,
+                stepCount = 18,
                 wallStyle = hallStyle,
                 treadUvScale = 4f
             });

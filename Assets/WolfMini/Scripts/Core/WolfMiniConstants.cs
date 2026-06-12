@@ -30,6 +30,10 @@ namespace WolfMini.Core
         public const float PlayerStepOffset = 0.30f;
         public const float UpperFloorY = 0f;
         public const float LowerFloorY = -3f;
+        // Slab between stacked storeys: keeps the lower storey's ceiling,
+        // lamps and door slabs clear of the upper floor plane, so nothing
+        // z-fights or bleeds through seams at grazing angles.
+        public const float FloorSlabThickness = 0.45f;
         public const int HudBaseWidth = 640;
         public const int HudBaseHeight = 80;
         public const float DoorThickness = 0.22f;

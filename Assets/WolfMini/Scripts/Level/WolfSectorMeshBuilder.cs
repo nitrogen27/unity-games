@@ -292,6 +292,10 @@ namespace WolfMini.Level
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, shaftWall);
             }
 
+            // Slab edge over the mouth: closes the band between the lower
+            // storey's ceiling and the upper floor where the stairs exit.
+            EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, CreateMouthLintel(stairwell));
+
             for (int step = 0; step < steps; step++)
             {
                 float topEdge = stairwell.alongZ
@@ -331,36 +335,107 @@ namespace WolfMini.Level
         }
 
         /// <summary>
-        /// Walls of the stair shaft. The side planes carry faces both ways:
-        /// inward for the open shaft seen from above, outward so the enclosure
-        /// reads as a solid block when the storey below runs past it. The high
-        /// end gets an outward head wall; the low end stays open as the mouth.
+        /// Walls of the stair shaft as one-brick-thick boxes: interior faces
+        /// flush with the opening for the shaft seen from above, exterior
+        /// faces one brick out and end caps at the mouth corners so the
+        /// enclosure reads as solid masonry from the storey below. The high
+        /// end gets a capped head wall; the low end stays open as the mouth.
         /// </summary>
         private static IEnumerable<WallSegmentSpec> CreateShaftWalls(StairwellSpec stairwell)
         {
-            Rect opening = stairwell.opening;
+            Rect o = stairwell.opening;
             int sign = stairwell.descendSign >= 0 ? 1 : -1;
-            var c00 = new Vector2(opening.xMin, opening.yMin);
-            var c01 = new Vector2(opening.xMin, opening.yMax);
-            var c10 = new Vector2(opening.xMax, opening.yMin);
-            var c11 = new Vector2(opening.xMax, opening.yMax);
+            float t = Mathf.Max(0.01f, stairwell.wallThickness);
 
             if (stairwell.alongZ)
             {
-                yield return MakeShaftWall(stairwell, c00, c01);
-                yield return MakeShaftWall(stairwell, c01, c00);
-                yield return MakeShaftWall(stairwell, c11, c10);
-                yield return MakeShaftWall(stairwell, c10, c11);
-                yield return sign > 0 ? MakeShaftWall(stairwell, c00, c10) : MakeShaftWall(stairwell, c11, c01);
+                // Interior faces flush with the opening.
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMin, o.yMin), new Vector2(o.xMin, o.yMax));
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMax, o.yMax), new Vector2(o.xMax, o.yMin));
+                // Exterior faces one brick out.
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMin - t, o.yMax), new Vector2(o.xMin - t, o.yMin));
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMax + t, o.yMin), new Vector2(o.xMax + t, o.yMax));
+
+                float zHead = sign > 0 ? o.yMin : o.yMax;
+                float zHeadOut = zHead - sign * t;
+                float zMouth = sign > 0 ? o.yMax : o.yMin;
+                if (sign > 0)
+                {
+                    // End caps at the mouth corners, facing out of the mouth.
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMin, zMouth), new Vector2(o.xMin - t, zMouth));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMax + t, zMouth), new Vector2(o.xMax, zMouth));
+                    // Head wall outer face and its end caps.
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMin - t, zHeadOut), new Vector2(o.xMax + t, zHeadOut));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMin - t, zHead), new Vector2(o.xMin - t, zHeadOut));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMax + t, zHeadOut), new Vector2(o.xMax + t, zHead));
+                }
+                else
+                {
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMin - t, zMouth), new Vector2(o.xMin, zMouth));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMax, zMouth), new Vector2(o.xMax + t, zMouth));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMax + t, zHeadOut), new Vector2(o.xMin - t, zHeadOut));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMin - t, zHeadOut), new Vector2(o.xMin - t, zHead));
+                    yield return MakeShaftWall(stairwell, new Vector2(o.xMax + t, zHead), new Vector2(o.xMax + t, zHeadOut));
+                }
             }
             else
             {
-                yield return MakeShaftWall(stairwell, c10, c00);
-                yield return MakeShaftWall(stairwell, c00, c10);
-                yield return MakeShaftWall(stairwell, c01, c11);
-                yield return MakeShaftWall(stairwell, c11, c01);
-                yield return sign > 0 ? MakeShaftWall(stairwell, c01, c00) : MakeShaftWall(stairwell, c10, c11);
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMax, o.yMin), new Vector2(o.xMin, o.yMin));
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMin, o.yMax), new Vector2(o.xMax, o.yMax));
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMin, o.yMin - t), new Vector2(o.xMax, o.yMin - t));
+                yield return MakeShaftWall(stairwell, new Vector2(o.xMax, o.yMax + t), new Vector2(o.xMin, o.yMax + t));
+
+                float xHead = sign > 0 ? o.xMin : o.xMax;
+                float xHeadOut = xHead - sign * t;
+                float xMouth = sign > 0 ? o.xMax : o.xMin;
+                if (sign > 0)
+                {
+                    yield return MakeShaftWall(stairwell, new Vector2(xMouth, o.yMin - t), new Vector2(xMouth, o.yMin));
+                    yield return MakeShaftWall(stairwell, new Vector2(xMouth, o.yMax), new Vector2(xMouth, o.yMax + t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHeadOut, o.yMax + t), new Vector2(xHeadOut, o.yMin - t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHeadOut, o.yMin - t), new Vector2(xHead, o.yMin - t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHead, o.yMax + t), new Vector2(xHeadOut, o.yMax + t));
+                }
+                else
+                {
+                    yield return MakeShaftWall(stairwell, new Vector2(xMouth, o.yMin), new Vector2(xMouth, o.yMin - t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xMouth, o.yMax + t), new Vector2(xMouth, o.yMax));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHeadOut, o.yMin - t), new Vector2(xHeadOut, o.yMax + t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHead, o.yMin - t), new Vector2(xHeadOut, o.yMin - t));
+                    yield return MakeShaftWall(stairwell, new Vector2(xHeadOut, o.yMax + t), new Vector2(xHead, o.yMax + t));
+                }
             }
+        }
+
+        /// <summary>Slab edge over the stair mouth: closes the band between the lower storey's ceiling and the upper floor.</summary>
+        private static WallSegmentSpec CreateMouthLintel(StairwellSpec stairwell)
+        {
+            Rect o = stairwell.opening;
+            int sign = stairwell.descendSign >= 0 ? 1 : -1;
+
+            Vector2 start;
+            Vector2 end;
+            if (stairwell.alongZ)
+            {
+                float zMouth = sign > 0 ? o.yMax : o.yMin;
+                start = sign > 0 ? new Vector2(o.xMax, zMouth) : new Vector2(o.xMin, zMouth);
+                end = sign > 0 ? new Vector2(o.xMin, zMouth) : new Vector2(o.xMax, zMouth);
+            }
+            else
+            {
+                float xMouth = sign > 0 ? o.xMax : o.xMin;
+                start = sign > 0 ? new Vector2(xMouth, o.yMin) : new Vector2(xMouth, o.yMax);
+                end = sign > 0 ? new Vector2(xMouth, o.yMax) : new Vector2(xMouth, o.yMin);
+            }
+
+            return new WallSegmentSpec
+            {
+                start = start,
+                end = end,
+                baseY = stairwell.topY - WolfMiniConstants.FloorSlabThickness,
+                height = WolfMiniConstants.FloorSlabThickness,
+                style = stairwell.wallStyle
+            };
         }
 
         private static WallSegmentSpec MakeShaftWall(StairwellSpec stairwell, Vector2 start, Vector2 end)

@@ -152,7 +152,9 @@ namespace HelloWorldRoom.Editor.Tests
             Assert.That(sector.props, Has.Count.EqualTo(props * 2));
             Assert.That(sector.enemies, Has.Count.EqualTo(enemies * 2));
 
-            float storey = WolfMiniConstants.WallHeight;
+            // Storeys are separated by a slab so nothing of the lower storey
+            // touches the upper floor plane.
+            float storey = WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness;
             for (int i = 0; i < sectors; i++)
             {
                 SectorSpec upper = sector.sectors[i];
