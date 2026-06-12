@@ -24,7 +24,8 @@ namespace WolfMini.Level
         [SerializeField] private WolfFull3DMaterialLibrary materialLibrary;
         [SerializeField] private bool buildOnStart = true;
         [SerializeField] private bool buildLights = true;
-        [SerializeField] private int maxRealtimeLights = 48;
+        // Covers both storeys: all lamps are shadowless point lights.
+        [SerializeField] private int maxRealtimeLights = 96;
 
         public WolfSectorLevelDefinition Definition
         {
@@ -286,9 +287,9 @@ namespace WolfMini.Level
             float module = WolfMiniConstants.FloorTextureModule / Mathf.Max(1f, stairwell.treadUvScale);
             int sign = stairwell.descendSign >= 0 ? 1 : -1;
 
-            foreach (WallSegmentSpec sideWall in CreateShaftSideWalls(stairwell))
+            foreach (WallSegmentSpec shaftWall in CreateShaftWalls(stairwell))
             {
-                EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, sideWall);
+                EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, shaftWall);
             }
 
             for (int step = 0; step < steps; step++)
@@ -329,51 +330,49 @@ namespace WolfMini.Level
             }
         }
 
-        /// <summary>Shaft walls flanking the stairs, full depth, faces pointing into the shaft.</summary>
-        private static IEnumerable<WallSegmentSpec> CreateShaftSideWalls(StairwellSpec stairwell)
+        /// <summary>
+        /// Walls of the stair shaft. The side planes carry faces both ways:
+        /// inward for the open shaft seen from above, outward so the enclosure
+        /// reads as a solid block when the storey below runs past it. The high
+        /// end gets an outward head wall; the low end stays open as the mouth.
+        /// </summary>
+        private static IEnumerable<WallSegmentSpec> CreateShaftWalls(StairwellSpec stairwell)
         {
             Rect opening = stairwell.opening;
-            float baseY = stairwell.bottomY;
-            float height = stairwell.topY - stairwell.bottomY;
+            int sign = stairwell.descendSign >= 0 ? 1 : -1;
+            var c00 = new Vector2(opening.xMin, opening.yMin);
+            var c01 = new Vector2(opening.xMin, opening.yMax);
+            var c10 = new Vector2(opening.xMax, opening.yMin);
+            var c11 = new Vector2(opening.xMax, opening.yMax);
 
             if (stairwell.alongZ)
             {
-                yield return new WallSegmentSpec
-                {
-                    start = new Vector2(opening.xMin, opening.yMin),
-                    end = new Vector2(opening.xMin, opening.yMax),
-                    baseY = baseY,
-                    height = height,
-                    style = stairwell.wallStyle
-                };
-                yield return new WallSegmentSpec
-                {
-                    start = new Vector2(opening.xMax, opening.yMax),
-                    end = new Vector2(opening.xMax, opening.yMin),
-                    baseY = baseY,
-                    height = height,
-                    style = stairwell.wallStyle
-                };
+                yield return MakeShaftWall(stairwell, c00, c01);
+                yield return MakeShaftWall(stairwell, c01, c00);
+                yield return MakeShaftWall(stairwell, c11, c10);
+                yield return MakeShaftWall(stairwell, c10, c11);
+                yield return sign > 0 ? MakeShaftWall(stairwell, c00, c10) : MakeShaftWall(stairwell, c11, c01);
             }
             else
             {
-                yield return new WallSegmentSpec
-                {
-                    start = new Vector2(opening.xMax, opening.yMin),
-                    end = new Vector2(opening.xMin, opening.yMin),
-                    baseY = baseY,
-                    height = height,
-                    style = stairwell.wallStyle
-                };
-                yield return new WallSegmentSpec
-                {
-                    start = new Vector2(opening.xMin, opening.yMax),
-                    end = new Vector2(opening.xMax, opening.yMax),
-                    baseY = baseY,
-                    height = height,
-                    style = stairwell.wallStyle
-                };
+                yield return MakeShaftWall(stairwell, c10, c00);
+                yield return MakeShaftWall(stairwell, c00, c10);
+                yield return MakeShaftWall(stairwell, c01, c11);
+                yield return MakeShaftWall(stairwell, c11, c01);
+                yield return sign > 0 ? MakeShaftWall(stairwell, c01, c00) : MakeShaftWall(stairwell, c10, c11);
             }
+        }
+
+        private static WallSegmentSpec MakeShaftWall(StairwellSpec stairwell, Vector2 start, Vector2 end)
+        {
+            return new WallSegmentSpec
+            {
+                start = start,
+                end = end,
+                baseY = stairwell.bottomY,
+                height = stairwell.topY - stairwell.bottomY,
+                style = stairwell.wallStyle
+            };
         }
 
         private void EmitWall(WolfMeshBuffer buffer, int wallSubmesh, Dictionary<Material, int> overrideSubmeshes, List<Material> overrideMaterials, WallSegmentSpec wall)

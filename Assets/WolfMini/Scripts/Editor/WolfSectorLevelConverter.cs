@@ -45,7 +45,7 @@ namespace WolfMini.EditorTools
             }
 
             PopulateFromGrid(target, source);
-            AddStartCorridorStairwell(target);
+            AddLowerStoreyWithStairwell(target);
 
             EditorUtility.SetDirty(target);
             AssetDatabase.SaveAssets();
@@ -88,23 +88,26 @@ namespace WolfMini.EditorTools
         }
 
         /// <summary>
-        /// Stairwell in the start corridor (the hallway behind the first
-        /// room's east door): a floor opening between the two side-door rows
-        /// with stairs descending to a matching corridor one storey below.
-        /// Authored here because the repo grid carries no vertical data.
+        /// The lower storey and the stairwell that reaches it. The storey is an
+        /// exact copy of the whole upper floor one wall-height down — same
+        /// rooms, walls, doorways, props and enemies. The stairwell sits in the
+        /// start corridor (the hallway behind the first room's east door),
+        /// between the two side-door rows. Authored here because the repo grid
+        /// carries no vertical data.
         /// </summary>
-        public static void AddStartCorridorStairwell(WolfSectorLevelDefinition target)
+        public static void AddLowerStoreyWithStairwell(WolfSectorLevelDefinition target)
         {
             const int corridorStyle = 8; // blue stone, same as the corridor walls
             float lowerY = -WolfMiniConstants.WallHeight;
 
+            DuplicateStoreyBelow(target, lowerY);
+
             // The corridor spans cells x 33..35; the opening takes the middle
             // cell column on z 7..9, leaving a one-cell walk-around strip on
             // both sides. Stairs descend toward the south door at (34,13).
-            var opening = new Rect(34 * Cell, 7 * Cell, Cell, 3 * Cell);
             target.stairwells.Add(new StairwellSpec
             {
-                opening = opening,
+                opening = new Rect(34 * Cell, 7 * Cell, Cell, 3 * Cell),
                 topY = 0f,
                 bottomY = lowerY,
                 alongZ = true,
@@ -113,45 +116,83 @@ namespace WolfMini.EditorTools
                 wallStyle = corridorStyle,
                 treadUvScale = 4f
             });
-
-            // The storey the stairs land on mirrors the corridor above: same
-            // three-cell width and look one level down, enclosed all around
-            // except the stair mouth in its near wall.
-            var hall = new Rect(33 * Cell, 10 * Cell, 3 * Cell, 3 * Cell);
-            target.sectors.Add(new SectorSpec
-            {
-                id = $"S{target.sectors.Count + 1}",
-                floorY = lowerY,
-                ceilingHeight = WolfMiniConstants.WallHeight,
-                floorAreas = new List<Rect> { hall }
-            });
-
-            target.walls.Add(MakeHallWall(new Vector2(hall.xMin, hall.yMin), new Vector2(hall.xMin, hall.yMax), lowerY, corridorStyle)); // west, face +x
-            target.walls.Add(MakeHallWall(new Vector2(hall.xMax, hall.yMax), new Vector2(hall.xMax, hall.yMin), lowerY, corridorStyle)); // east, face -x
-            target.walls.Add(MakeHallWall(new Vector2(hall.xMin, hall.yMax), new Vector2(hall.xMax, hall.yMax), lowerY, corridorStyle)); // far wall, face -z
-            // Near wall is split around the stair mouth, faces into the hall.
-            target.walls.Add(MakeHallWall(new Vector2(opening.xMin, hall.yMin), new Vector2(hall.xMin, hall.yMin), lowerY, corridorStyle));
-            target.walls.Add(MakeHallWall(new Vector2(hall.xMax, hall.yMin), new Vector2(opening.xMax, hall.yMin), lowerY, corridorStyle));
-
-            int lampIndex = WolfLevelContent.CeilLightTypeIndex;
-            target.props.Add(new LevelPropSpec
-            {
-                position = new Vector3(hall.center.x, lowerY, hall.center.y),
-                typeIndex = lampIndex,
-                typeName = WolfLevelContent.StatInfos[lampIndex].name
-            });
         }
 
-        private static WallSegmentSpec MakeHallWall(Vector2 start, Vector2 end, float baseY, int style)
+        /// <summary>Clones every sector, wall, doorway, prop and enemy shifted down by <paramref name="offsetY"/>.</summary>
+        private static void DuplicateStoreyBelow(WolfSectorLevelDefinition target, float offsetY)
         {
-            return new WallSegmentSpec
+            int sectorCount = target.sectors.Count;
+            for (int i = 0; i < sectorCount; i++)
             {
-                start = start,
-                end = end,
-                baseY = baseY,
-                height = WolfMiniConstants.WallHeight,
-                style = style
-            };
+                SectorSpec sector = target.sectors[i];
+                target.sectors.Add(new SectorSpec
+                {
+                    id = $"{sector.id}_L",
+                    floorY = sector.floorY + offsetY,
+                    ceilingHeight = sector.ceilingHeight,
+                    floorColor = sector.floorColor,
+                    ceilingColor = sector.ceilingColor,
+                    floorAreas = new List<Rect>(sector.floorAreas)
+                });
+            }
+
+            int wallCount = target.walls.Count;
+            for (int i = 0; i < wallCount; i++)
+            {
+                WallSegmentSpec wall = target.walls[i];
+                target.walls.Add(new WallSegmentSpec
+                {
+                    start = wall.start,
+                    end = wall.end,
+                    baseY = wall.baseY + offsetY,
+                    height = wall.height,
+                    style = wall.style
+                });
+            }
+
+            int doorwayCount = target.doorways.Count;
+            for (int i = 0; i < doorwayCount; i++)
+            {
+                DoorwaySpec doorway = target.doorways[i];
+                target.doorways.Add(new DoorwaySpec
+                {
+                    center = doorway.center,
+                    baseY = doorway.baseY + offsetY,
+                    ceilingHeight = doorway.ceilingHeight,
+                    alongZ = doorway.alongZ,
+                    width = doorway.width,
+                    height = doorway.height,
+                    type = doorway.type,
+                    headerStyle = doorway.headerStyle,
+                    slideSign = doorway.slideSign
+                });
+            }
+
+            int propCount = target.props.Count;
+            for (int i = 0; i < propCount; i++)
+            {
+                LevelPropSpec prop = target.props[i];
+                target.props.Add(new LevelPropSpec
+                {
+                    position = prop.position + Vector3.up * offsetY,
+                    typeIndex = prop.typeIndex,
+                    typeName = prop.typeName
+                });
+            }
+
+            int enemyCount = target.enemies.Count;
+            for (int i = 0; i < enemyCount; i++)
+            {
+                LevelEnemySpec enemy = target.enemies[i];
+                target.enemies.Add(new LevelEnemySpec
+                {
+                    position = enemy.position + Vector3.up * offsetY,
+                    type = enemy.type,
+                    yaw = enemy.yaw,
+                    patrol = enemy.patrol,
+                    difficulty = enemy.difficulty
+                });
+            }
         }
 
         /// <summary>

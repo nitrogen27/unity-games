@@ -129,17 +129,48 @@ namespace HelloWorldRoom.Editor.Tests
         }
 
         [Test]
-        public void StartCorridorStairwellDescendsToAMatchingLowerStorey()
+        public void LowerStoreyExactlyMirrorsTheUpperFloor()
         {
-            int sectorsBefore = sector.sectors.Count;
-            WolfSectorLevelConverter.AddStartCorridorStairwell(sector);
+            int sectors = sector.sectors.Count;
+            int walls = sector.walls.Count;
+            int doorways = sector.doorways.Count;
+            int props = sector.props.Count;
+            int enemies = sector.enemies.Count;
+
+            WolfSectorLevelConverter.AddLowerStoreyWithStairwell(sector);
 
             Assert.That(sector.TryValidate(out List<string> errors), Is.True, string.Join("\n", errors));
             Assert.That(sector.stairwells, Has.Count.EqualTo(1));
 
+            // The whole floor is duplicated: same rooms, walls, doors and content.
+            Assert.That(sector.sectors, Has.Count.EqualTo(sectors * 2));
+            Assert.That(sector.walls, Has.Count.EqualTo(walls * 2));
+            Assert.That(sector.doorways, Has.Count.EqualTo(doorways * 2));
+            Assert.That(sector.props, Has.Count.EqualTo(props * 2));
+            Assert.That(sector.enemies, Has.Count.EqualTo(enemies * 2));
+
+            float storey = WolfMiniConstants.WallHeight;
+            for (int i = 0; i < sectors; i++)
+            {
+                SectorSpec upper = sector.sectors[i];
+                SectorSpec lower = sector.sectors[sectors + i];
+                Assert.That(lower.floorY, Is.EqualTo(upper.floorY - storey).Within(0.001f));
+                Assert.That(lower.ceilingHeight, Is.EqualTo(upper.ceilingHeight).Within(0.001f));
+                Assert.That(lower.floorAreas, Is.EqualTo(upper.floorAreas));
+            }
+
+            for (int i = 0; i < doorways; i++)
+            {
+                DoorwaySpec upper = sector.doorways[i];
+                DoorwaySpec lower = sector.doorways[doorways + i];
+                Assert.That(lower.baseY, Is.EqualTo(upper.baseY - storey).Within(0.001f));
+                Assert.That(lower.center, Is.EqualTo(upper.center));
+                Assert.That(lower.type, Is.EqualTo(upper.type));
+            }
+
             StairwellSpec stairwell = sector.stairwells[0];
             Assert.That(stairwell.topY, Is.EqualTo(0f).Within(0.001f));
-            Assert.That(stairwell.bottomY, Is.EqualTo(-WolfMiniConstants.WallHeight).Within(0.001f));
+            Assert.That(stairwell.bottomY, Is.EqualTo(-storey).Within(0.001f));
 
             // The opening leaves a one-cell walk-around strip on both sides of
             // the start corridor (cells x 33..35).
@@ -150,17 +181,6 @@ namespace HelloWorldRoom.Editor.Tests
             // Steps stay climbable for the character controller, both ways.
             float riser = (stairwell.topY - stairwell.bottomY) / stairwell.stepCount;
             Assert.That(riser, Is.LessThanOrEqualTo(WolfMiniConstants.PlayerStepOffset));
-
-            // The lower storey mirrors the corridor above (same three-cell
-            // width) and the stairs land on it: its floor area starts where
-            // the opening ends.
-            SectorSpec hall = sector.sectors[sectorsBefore];
-            Assert.That(hall.floorY, Is.EqualTo(stairwell.bottomY).Within(0.001f));
-            Assert.That(hall.ceilingHeight, Is.EqualTo(WolfMiniConstants.WallHeight).Within(0.001f));
-            Rect hallArea = hall.floorAreas[0];
-            Assert.That(hallArea.yMin, Is.EqualTo(stairwell.opening.yMax).Within(0.001f));
-            Assert.That(hallArea.xMin, Is.EqualTo(33 * cell).Within(0.001f));
-            Assert.That(hallArea.width, Is.EqualTo(3 * cell).Within(0.001f));
         }
     }
 }
