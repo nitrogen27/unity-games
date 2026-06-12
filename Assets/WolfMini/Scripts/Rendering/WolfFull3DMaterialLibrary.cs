@@ -104,7 +104,7 @@ namespace WolfMini.Rendering
         public Material CeilingSpillCoolMaterial { get => ceilingSpillCoolMaterial; set => ceilingSpillCoolMaterial = value; }
 
         /// <summary>Target-look material for a wall value (e.g. blue stone, white stone), if assigned.</summary>
-        public bool TryGetWallOverride(int wallValue, out Material material)
+        public bool TryGetWallOverride(int wallValue, out Material material, out bool tileVertically)
         {
             if (wallOverrides != null)
             {
@@ -113,16 +113,18 @@ namespace WolfMini.Rendering
                     if (entry != null && entry.wallValue == wallValue && entry.material != null)
                     {
                         material = entry.material;
+                        tileVertically = entry.tileVertically;
                         return true;
                     }
                 }
             }
 
             material = null;
+            tileVertically = true;
             return false;
         }
 
-        public void SetWallOverride(int wallValue, Material material)
+        public void SetWallOverride(int wallValue, Material material, bool tileVertically = true)
         {
             wallOverrides ??= new List<WallMaterialOverride>();
             foreach (WallMaterialOverride entry in wallOverrides)
@@ -130,11 +132,12 @@ namespace WolfMini.Rendering
                 if (entry != null && entry.wallValue == wallValue)
                 {
                     entry.material = material;
+                    entry.tileVertically = tileVertically;
                     return;
                 }
             }
 
-            wallOverrides.Add(new WallMaterialOverride { wallValue = wallValue, material = material });
+            wallOverrides.Add(new WallMaterialOverride { wallValue = wallValue, material = material, tileVertically = tileVertically });
         }
 
         /// <summary>UV rect of a wall value's light-side tile inside the walls atlas.</summary>
@@ -254,6 +257,8 @@ namespace WolfMini.Rendering
     {
         public int wallValue;
         public Material material;
+        // True keeps texel density stable when wall geometry gets taller.
+        // False is reserved for deliberate one-off feature panels.
+        public bool tileVertically = true;
     }
 }
-

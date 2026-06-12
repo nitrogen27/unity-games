@@ -7,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using WolfMini.Core;
 
 namespace HelloWorldRoom.Editor
 {
@@ -22,11 +23,13 @@ namespace HelloWorldRoom.Editor
         private const int MapSize = 64;
         private const int AtlasSize = 16;
         private const int StatSpriteOffset = 2;
-        private const float Cell = 2f;
-        private const float WallHeight = 2f;
-        private const float EyeHeight = 0.9f;
-        private const float DoorThickness = 0.15f;
-        private const float DoorTravel = Cell - 0.02f;
+        // Single scale source: the 2.5D remake uses the same module system as
+        // the Full3D pipeline, so both scenes read identically in scale.
+        private const float Cell = WolfMiniConstants.CellSize;
+        private const float WallHeight = WolfMiniConstants.WallHeight;
+        private const float EyeHeight = WolfMiniConstants.EyeHeight;
+        private const float DoorThickness = WolfMiniConstants.DoorThickness;
+        private const float DoorTravel = WolfMiniConstants.DoorTravel;
         private static readonly Vector3[] LargeHallSideRowLampFootprints =
         {
             new(55f, 0f, 55f),
@@ -438,10 +441,10 @@ namespace HelloWorldRoom.Editor
             player.transform.rotation = Quaternion.Euler(0f, 90f + level.spawnAngle, 0f);
 
             CharacterController characterController = player.AddComponent<CharacterController>();
-            characterController.height = 1.45f;
-            characterController.radius = 0.30f;
-            characterController.center = new Vector3(0f, 0.72f, 0f);
-            characterController.stepOffset = 0.22f;
+            characterController.height = WolfMiniConstants.PlayerHeight;
+            characterController.radius = WolfMiniConstants.PlayerRadius;
+            characterController.center = new Vector3(0f, WolfMiniConstants.PlayerCenterY, 0f);
+            characterController.stepOffset = WolfMiniConstants.PlayerStepOffset;
             characterController.slopeLimit = 50f;
 
             SimpleFirstPersonController controller = player.AddComponent<SimpleFirstPersonController>();

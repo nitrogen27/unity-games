@@ -1,0 +1,4106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6dff1333c1bf43f0bbcbf1d4fe38cf5, type: 3}
+  m_Name: WolfRepoLevel1Sector
+  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Level.WolfSectorLevelDefinition
+  levelName: Wolf1 Map1
+  sectors:
+  - id: S1
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 100.799995
+      y: 3.6
+      width: 46.8
+      height: 10.799999
+    - serializedVersion: 2
+      x: 118.799995
+      y: 14.4
+      width: 10.799999
+      height: 32.399998
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S2
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 100.799995
+      y: 18
+      width: 14.4
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S3
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 133.2
+      y: 18
+      width: 14.4
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S4
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 46.8
+      y: 28.8
+      width: 7.2
+      height: 7.2
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S5
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 100.799995
+      y: 32.399998
+      width: 14.4
+      height: 14.4
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S6
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 133.2
+      y: 32.399998
+      width: 14.4
+      height: 14.4
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S7
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 43.199997
+      y: 39.6
+      width: 18
+      height: 3.6
+    - serializedVersion: 2
+      x: 43.199997
+      y: 43.199997
+      width: 7.2
+      height: 7.2
+    - serializedVersion: 2
+      x: 54
+      y: 43.199997
+      width: 7.2
+      height: 7.2
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S8
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 36
+      y: 43.199997
+      width: 3.6
+      height: 3.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S9
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 64.799995
+      y: 43.199997
+      width: 3.6
+      height: 7.2
+    - serializedVersion: 2
+      x: 68.4
+      y: 46.8
+      width: 3.6
+      height: 3.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S10
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 118.799995
+      y: 50.399998
+      width: 10.799999
+      height: 39.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S11
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 3.6
+      y: 54
+      width: 57.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 3.6
+      y: 64.799995
+      width: 10.799999
+      height: 79.2
+    - serializedVersion: 2
+      x: 32.399998
+      y: 64.799995
+      width: 10.799999
+      height: 25.199999
+    - serializedVersion: 2
+      x: 18
+      y: 72
+      width: 10.799999
+      height: 10.799999
+    - serializedVersion: 2
+      x: 14.4
+      y: 75.6
+      width: 3.6
+      height: 3.6
+    - serializedVersion: 2
+      x: 14.4
+      y: 104.399994
+      width: 3.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 18
+      y: 129.59999
+      width: 10.799999
+      height: 10.799999
+    - serializedVersion: 2
+      x: 14.4
+      y: 133.2
+      width: 3.6
+      height: 3.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S12
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 64.799995
+      y: 54
+      width: 21.599998
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S13
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 90
+      y: 57.6
+      width: 3.6
+      height: 3.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S14
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 187.2
+      y: 61.199997
+      width: 3.6
+      height: 18
+    - serializedVersion: 2
+      x: 194.4
+      y: 61.199997
+      width: 3.6
+      height: 18
+    - serializedVersion: 2
+      x: 201.59999
+      y: 61.199997
+      width: 3.6
+      height: 18
+    - serializedVersion: 2
+      x: 208.79999
+      y: 61.199997
+      width: 3.6
+      height: 18
+    - serializedVersion: 2
+      x: 183.59999
+      y: 64.799995
+      width: 3.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 190.79999
+      y: 64.799995
+      width: 3.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 198
+      y: 64.799995
+      width: 3.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 205.2
+      y: 64.799995
+      width: 3.6
+      height: 10.799999
+    - serializedVersion: 2
+      x: 212.4
+      y: 64.799995
+      width: 3.6
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S15
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 169.2
+      y: 64.799995
+      width: 10.799999
+      height: 10.799999
+    - serializedVersion: 2
+      x: 169.2
+      y: 75.6
+      width: 7.2
+      height: 39.6
+    - serializedVersion: 2
+      x: 165.59999
+      y: 100.799995
+      width: 3.6
+      height: 14.4
+    - serializedVersion: 2
+      x: 176.4
+      y: 100.799995
+      width: 3.6
+      height: 14.4
+    - serializedVersion: 2
+      x: 158.4
+      y: 104.399994
+      width: 7.2
+      height: 10.799999
+    - serializedVersion: 2
+      x: 180
+      y: 104.399994
+      width: 10.799999
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S16
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 201.59999
+      y: 90
+      width: 3.6
+      height: 36
+    - serializedVersion: 2
+      x: 212.4
+      y: 90
+      width: 3.6
+      height: 36
+    - serializedVersion: 2
+      x: 194.4
+      y: 93.6
+      width: 7.2
+      height: 32.399998
+    - serializedVersion: 2
+      x: 205.2
+      y: 93.6
+      width: 7.2
+      height: 32.399998
+    - serializedVersion: 2
+      x: 216
+      y: 93.6
+      width: 7.2
+      height: 32.399998
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S17
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 21.599998
+      y: 93.6
+      width: 32.399998
+      height: 32.399998
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S18
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 115.2
+      y: 93.6
+      width: 18
+      height: 32.399998
+    - serializedVersion: 2
+      x: 97.2
+      y: 97.2
+      width: 18
+      height: 25.199999
+    - serializedVersion: 2
+      x: 133.2
+      y: 97.2
+      width: 18
+      height: 25.199999
+    - serializedVersion: 2
+      x: 151.2
+      y: 104.399994
+      width: 3.6
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S19
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 32.399998
+      y: 129.59999
+      width: 10.799999
+      height: 21.599998
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S20
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 118.799995
+      y: 129.59999
+      width: 10.799999
+      height: 43.199997
+    - serializedVersion: 2
+      x: 111.6
+      y: 147.59999
+      width: 7.2
+      height: 3.6
+    - serializedVersion: 2
+      x: 129.59999
+      y: 147.59999
+      width: 7.2
+      height: 3.6
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S21
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 100.799995
+      y: 136.8
+      width: 7.2
+      height: 14.4
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S22
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 3.6
+      y: 147.59999
+      width: 10.799999
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S23
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 21.599998
+      y: 154.8
+      width: 32.399998
+      height: 25.199999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S24
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 57.6
+      y: 162
+      width: 25.199999
+      height: 10.799999
+    - serializedVersion: 2
+      x: 64.799995
+      y: 172.79999
+      width: 10.799999
+      height: 21.599998
+    - serializedVersion: 2
+      x: 75.6
+      y: 183.59999
+      width: 25.199999
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S25
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 104.399994
+      y: 176.4
+      width: 39.6
+      height: 25.199999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S26
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 21.599998
+      y: 183.59999
+      width: 18
+      height: 7.2
+    - serializedVersion: 2
+      x: 21.599998
+      y: 190.79999
+      width: 14.4
+      height: 7.2
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S27
+    floorY: 0
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 147.59999
+      y: 183.59999
+      width: 10.799999
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  - id: S28
+    floorY: -4.2
+    ceilingHeight: 4.2
+    floorAreas:
+    - serializedVersion: 2
+      x: 118.799995
+      y: 36
+      width: 10.799999
+      height: 10.799999
+    floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
+    ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  walls:
+  - start: {x: 104.399994, y: 3.6}
+    end: {x: 100.799995, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 115.2, y: 3.6}
+    end: {x: 111.6, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 136.8, y: 3.6}
+    end: {x: 133.2, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 147.59999, y: 3.6}
+    end: {x: 144, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 108, y: 3.6}
+    end: {x: 104.399994, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 122.399994, y: 3.6}
+    end: {x: 118.799995, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 133.2, y: 3.6}
+    end: {x: 129.59999, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 140.4, y: 3.6}
+    end: {x: 136.8, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 111.6, y: 3.6}
+    end: {x: 108, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 3.6}
+    end: {x: 115.2, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 3.6}
+    end: {x: 126, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 144, y: 3.6}
+    end: {x: 140.4, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 126, y: 3.6}
+    end: {x: 122.399994, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 7
+  - start: {x: 100.799995, y: 3.6}
+    end: {x: 100.799995, y: 7.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 10.799999}
+    end: {x: 100.799995, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 18}
+    end: {x: 100.799995, y: 21.599998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 25.199999}
+    end: {x: 100.799995, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 36}
+    end: {x: 100.799995, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 14.4}
+    end: {x: 147.59999, y: 3.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 21.599998}
+    end: {x: 147.59999, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 28.8}
+    end: {x: 147.59999, y: 25.199999}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 7.2}
+    end: {x: 100.799995, y: 10.799999}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 100.799995, y: 21.599998}
+    end: {x: 100.799995, y: 25.199999}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 100.799995, y: 32.399998}
+    end: {x: 100.799995, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 100.799995, y: 43.199997}
+    end: {x: 100.799995, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 108, y: 18}
+    end: {x: 100.799995, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 144, y: 18}
+    end: {x: 140.4, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 100.799995, y: 14.4}
+    end: {x: 108, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 115.2, y: 14.4}
+    end: {x: 118.799995, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 14.4}
+    end: {x: 133.2, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 140.4, y: 14.4}
+    end: {x: 144, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 115.2, y: 18}
+    end: {x: 108, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 140.4, y: 18}
+    end: {x: 133.2, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 18}
+    end: {x: 144, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 108, y: 14.4}
+    end: {x: 115.2, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 14.4}
+    end: {x: 140.4, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 144, y: 14.4}
+    end: {x: 147.59999, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 14.4}
+    end: {x: 118.799995, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 28.8}
+    end: {x: 118.799995, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 54}
+    end: {x: 118.799995, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 64.799995}
+    end: {x: 118.799995, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 72}
+    end: {x: 118.799995, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 82.799995}
+    end: {x: 118.799995, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 18}
+    end: {x: 129.59999, y: 14.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 36}
+    end: {x: 129.59999, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 54}
+    end: {x: 129.59999, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 64.799995}
+    end: {x: 129.59999, y: 57.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 75.6}
+    end: {x: 129.59999, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 129.59999, y: 90}
+    end: {x: 129.59999, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 118.799995, y: 18}
+    end: {x: 118.799995, y: 21.599998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 25.199999}
+    end: {x: 118.799995, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 36}
+    end: {x: 118.799995, y: 39.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 43.199997}
+    end: {x: 118.799995, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 50.399998}
+    end: {x: 118.799995, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 61.199997}
+    end: {x: 118.799995, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 68.4}
+    end: {x: 118.799995, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 79.2}
+    end: {x: 118.799995, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 86.399994}
+    end: {x: 118.799995, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 115.2, y: 21.599998}
+    end: {x: 115.2, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 115.2, y: 28.8}
+    end: {x: 115.2, y: 25.199999}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 115.2, y: 39.6}
+    end: {x: 115.2, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 115.2, y: 46.8}
+    end: {x: 115.2, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 18}
+    end: {x: 133.2, y: 21.599998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 25.199999}
+    end: {x: 133.2, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 36}
+    end: {x: 133.2, y: 39.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 43.199997}
+    end: {x: 133.2, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 21.599998}
+    end: {x: 129.59999, y: 18}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 32.399998}
+    end: {x: 129.59999, y: 25.199999}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 39.6}
+    end: {x: 129.59999, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 46.8}
+    end: {x: 129.59999, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 57.6}
+    end: {x: 129.59999, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 72}
+    end: {x: 129.59999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 79.2}
+    end: {x: 129.59999, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 25.199999}
+    end: {x: 147.59999, y: 21.599998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 147.59999, y: 46.8}
+    end: {x: 147.59999, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 54, y: 28.8}
+    end: {x: 46.8, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 46.8, y: 28.8}
+    end: {x: 46.8, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 36}
+    end: {x: 54, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 97.2}
+    end: {x: 54, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 108}
+    end: {x: 54, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 118.799995}
+    end: {x: 54, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 126}
+    end: {x: 54, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 158.4}
+    end: {x: 54, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 165.59999}
+    end: {x: 54, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 104.399994, y: 32.399998}
+    end: {x: 100.799995, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 115.2, y: 32.399998}
+    end: {x: 108, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 147.59999, y: 32.399998}
+    end: {x: 133.2, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 100.799995, y: 28.8}
+    end: {x: 104.399994, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 108, y: 28.8}
+    end: {x: 115.2, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 28.8}
+    end: {x: 147.59999, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 108, y: 32.399998}
+    end: {x: 104.399994, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 104.399994, y: 28.8}
+    end: {x: 108, y: 28.8}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 115.2, y: 36}
+    end: {x: 115.2, y: 32.399998}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 133.2, y: 32.399998}
+    end: {x: 133.2, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 61.199997, y: 39.6}
+    end: {x: 43.199997, y: 39.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 46.8, y: 36}
+    end: {x: 54, y: 36}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 39.6, y: 43.199997}
+    end: {x: 36, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 43.199997, y: 39.6}
+    end: {x: 43.199997, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 43.199997, y: 46.8}
+    end: {x: 43.199997, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 61.199997, y: 50.399998}
+    end: {x: 61.199997, y: 39.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 61.199997, y: 57.6}
+    end: {x: 61.199997, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 43.199997}
+    end: {x: 64.799995, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 36, y: 43.199997}
+    end: {x: 36, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 54, y: 43.199997}
+    end: {x: 54, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 50.399998}
+    end: {x: 50.399998, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 43.199997}
+    end: {x: 54, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 43.199997}
+    end: {x: 64.799995, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 54}
+    end: {x: 64.799995, y: 57.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 176.4}
+    end: {x: 64.799995, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 187.2}
+    end: {x: 64.799995, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 46.8}
+    end: {x: 68.4, y: 43.199997}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 72, y: 46.8}
+    end: {x: 68.4, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 36, y: 46.8}
+    end: {x: 39.6, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 72, y: 50.399998}
+    end: {x: 72, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 100.799995, y: 46.8}
+    end: {x: 104.399994, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 108, y: 46.8}
+    end: {x: 111.6, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 46.8}
+    end: {x: 122.399994, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 126, y: 46.8}
+    end: {x: 129.59999, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 46.8}
+    end: {x: 144, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 104.399994, y: 46.8}
+    end: {x: 108, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 111.6, y: 46.8}
+    end: {x: 115.2, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 144, y: 46.8}
+    end: {x: 147.59999, y: 46.8}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 122.399994, y: 50.399998}
+    end: {x: 118.799995, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 50.399998}
+    end: {x: 126, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 10.799999, y: 54}
+    end: {x: 3.6, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 54}
+    end: {x: 14.4, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 54}
+    end: {x: 25.199999, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 54}
+    end: {x: 50.399998, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 72, y: 54}
+    end: {x: 68.4, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 86.399994, y: 54}
+    end: {x: 82.799995, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 54}
+    end: {x: 10.799999, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 25.199999, y: 54}
+    end: {x: 21.599998, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 36, y: 54}
+    end: {x: 32.399998, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 54}
+    end: {x: 39.6, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 61.199997, y: 54}
+    end: {x: 54, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 54}
+    end: {x: 64.799995, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 75.6, y: 54}
+    end: {x: 72, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 82.799995, y: 54}
+    end: {x: 79.2, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 39.6, y: 54}
+    end: {x: 36, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 43.199997, y: 50.399998}
+    end: {x: 50.399998, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 50.399998}
+    end: {x: 61.199997, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 50.399998}
+    end: {x: 68.4, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 50.399998}
+    end: {x: 72, y: 50.399998}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 79.2, y: 54}
+    end: {x: 75.6, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 3.6, y: 54}
+    end: {x: 3.6, y: 57.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 64.799995}
+    end: {x: 3.6, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 75.6}
+    end: {x: 3.6, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 82.799995}
+    end: {x: 3.6, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 93.6}
+    end: {x: 3.6, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 100.799995}
+    end: {x: 3.6, y: 118.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 129.59999}
+    end: {x: 3.6, y: 144}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 147.59999}
+    end: {x: 3.6, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 86.399994, y: 57.6}
+    end: {x: 86.399994, y: 54}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 86.399994, y: 64.799995}
+    end: {x: 86.399994, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 93.6, y: 57.6}
+    end: {x: 90, y: 57.6}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 3.6, y: 57.6}
+    end: {x: 3.6, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 68.4}
+    end: {x: 3.6, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 79.2}
+    end: {x: 3.6, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 97.2}
+    end: {x: 3.6, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 118.799995}
+    end: {x: 3.6, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 126}
+    end: {x: 3.6, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 3.6, y: 154.8}
+    end: {x: 3.6, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 93.6, y: 61.199997}
+    end: {x: 93.6, y: 57.6}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 190.79999, y: 61.199997}
+    end: {x: 187.2, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 198, y: 61.199997}
+    end: {x: 194.4, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 205.2, y: 61.199997}
+    end: {x: 201.59999, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 212.4, y: 61.199997}
+    end: {x: 208.79999, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 64.799995, y: 61.199997}
+    end: {x: 64.799995, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 64.799995, y: 172.79999}
+    end: {x: 64.799995, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 64.799995, y: 183.59999}
+    end: {x: 64.799995, y: 187.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 64.799995, y: 190.79999}
+    end: {x: 64.799995, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 61.199997, y: 64.799995}
+    end: {x: 61.199997, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 90, y: 61.199997}
+    end: {x: 93.6, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 21
+  - start: {x: 172.79999, y: 64.799995}
+    end: {x: 169.2, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 187.2, y: 64.799995}
+    end: {x: 183.59999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 180, y: 64.799995}
+    end: {x: 172.79999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 64.799995}
+    end: {x: 190.79999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 64.799995}
+    end: {x: 198, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 208.79999, y: 64.799995}
+    end: {x: 205.2, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 216, y: 64.799995}
+    end: {x: 212.4, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 187.2, y: 61.199997}
+    end: {x: 187.2, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 187.2, y: 75.6}
+    end: {x: 187.2, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 194.4, y: 61.199997}
+    end: {x: 194.4, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 75.6}
+    end: {x: 194.4, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 93.6}
+    end: {x: 194.4, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 100.799995}
+    end: {x: 194.4, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 111.6}
+    end: {x: 194.4, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 64.799995}
+    end: {x: 190.79999, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 79.2}
+    end: {x: 190.79999, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 115.2}
+    end: {x: 190.79999, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 61.199997}
+    end: {x: 201.59999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 90}
+    end: {x: 201.59999, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 198, y: 64.799995}
+    end: {x: 198, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 208.79999, y: 61.199997}
+    end: {x: 208.79999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 205.2, y: 64.799995}
+    end: {x: 205.2, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 212.4, y: 64.799995}
+    end: {x: 212.4, y: 61.199997}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 212.4, y: 79.2}
+    end: {x: 212.4, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 14.4, y: 68.4}
+    end: {x: 14.4, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 75.6}
+    end: {x: 14.4, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 90}
+    end: {x: 14.4, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 140.4}
+    end: {x: 14.4, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 154.8}
+    end: {x: 14.4, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 14.4, y: 64.799995}
+    end: {x: 18, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 64.799995}
+    end: {x: 25.199999, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 64.799995}
+    end: {x: 32.399998, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 46.8, y: 64.799995}
+    end: {x: 50.399998, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 64.799995}
+    end: {x: 61.199997, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 68.4, y: 64.799995}
+    end: {x: 72, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 79.2, y: 64.799995}
+    end: {x: 82.799995, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 18, y: 64.799995}
+    end: {x: 21.599998, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 25.199999, y: 64.799995}
+    end: {x: 28.8, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 64.799995}
+    end: {x: 46.8, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 64.799995}
+    end: {x: 54, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 64.799995}
+    end: {x: 68.4, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 72, y: 64.799995}
+    end: {x: 75.6, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 82.799995, y: 64.799995}
+    end: {x: 86.399994, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 64.799995}
+    end: {x: 32.399998, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 72}
+    end: {x: 32.399998, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 82.799995}
+    end: {x: 32.399998, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 129.59999}
+    end: {x: 32.399998, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 43.199997, y: 68.4}
+    end: {x: 43.199997, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 82.799995}
+    end: {x: 43.199997, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 90}
+    end: {x: 43.199997, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 133.2}
+    end: {x: 43.199997, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 140.4}
+    end: {x: 43.199997, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 75.6, y: 64.799995}
+    end: {x: 79.2, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 169.2, y: 64.799995}
+    end: {x: 169.2, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 169.2, y: 75.6}
+    end: {x: 169.2, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 169.2, y: 82.799995}
+    end: {x: 169.2, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 169.2, y: 90}
+    end: {x: 169.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 183.59999, y: 64.799995}
+    end: {x: 183.59999, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 183.59999, y: 72}
+    end: {x: 183.59999, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 180, y: 68.4}
+    end: {x: 180, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 180, y: 75.6}
+    end: {x: 180, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 216, y: 68.4}
+    end: {x: 216, y: 64.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 216, y: 75.6}
+    end: {x: 216, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 14.4, y: 72}
+    end: {x: 14.4, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 86.399994}
+    end: {x: 14.4, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 104.399994}
+    end: {x: 14.4, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 122.399994}
+    end: {x: 14.4, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 133.2}
+    end: {x: 14.4, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 144}
+    end: {x: 14.4, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 151.2}
+    end: {x: 14.4, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 158.4}
+    end: {x: 14.4, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 72}
+    end: {x: 18, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 28.8, y: 72}
+    end: {x: 25.199999, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 25.199999, y: 72}
+    end: {x: 21.599998, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 68.4}
+    end: {x: 32.399998, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 79.2}
+    end: {x: 32.399998, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 86.399994}
+    end: {x: 32.399998, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 136.8}
+    end: {x: 32.399998, y: 144}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 147.59999}
+    end: {x: 32.399998, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 75.6}
+    end: {x: 43.199997, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 43.199997, y: 86.399994}
+    end: {x: 43.199997, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 43.199997, y: 144}
+    end: {x: 43.199997, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 43.199997, y: 151.2}
+    end: {x: 43.199997, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 169.2, y: 68.4}
+    end: {x: 169.2, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 169.2, y: 79.2}
+    end: {x: 169.2, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 169.2, y: 86.399994}
+    end: {x: 169.2, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 169.2, y: 97.2}
+    end: {x: 169.2, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 216, y: 72}
+    end: {x: 216, y: 68.4}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 18, y: 72}
+    end: {x: 18, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 18, y: 136.8}
+    end: {x: 18, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 18, y: 75.6}
+    end: {x: 14.4, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 75.6}
+    end: {x: 28.8, y: 72}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 133.2}
+    end: {x: 28.8, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 75.6}
+    end: {x: 32.399998, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 32.399998, y: 133.2}
+    end: {x: 32.399998, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 32.399998, y: 144}
+    end: {x: 32.399998, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 28.8, y: 79.2}
+    end: {x: 28.8, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 28.8, y: 136.8}
+    end: {x: 28.8, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 43.199997, y: 79.2}
+    end: {x: 43.199997, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 43.199997, y: 136.8}
+    end: {x: 43.199997, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 43.199997, y: 147.59999}
+    end: {x: 43.199997, y: 144}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 176.4, y: 79.2}
+    end: {x: 176.4, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 176.4, y: 86.399994}
+    end: {x: 176.4, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 176.4, y: 93.6}
+    end: {x: 176.4, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 176.4, y: 100.799995}
+    end: {x: 176.4, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 176.4, y: 75.6}
+    end: {x: 180, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 75.6}
+    end: {x: 194.4, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 212.4, y: 75.6}
+    end: {x: 216, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 183.59999, y: 75.6}
+    end: {x: 187.2, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 198, y: 75.6}
+    end: {x: 201.59999, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 205.2, y: 75.6}
+    end: {x: 208.79999, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 201.59999, y: 75.6}
+    end: {x: 201.59999, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 198, y: 79.2}
+    end: {x: 198, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 208.79999, y: 75.6}
+    end: {x: 208.79999, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 205.2, y: 79.2}
+    end: {x: 205.2, y: 75.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 205.2, y: 93.6}
+    end: {x: 205.2, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 18, y: 79.2}
+    end: {x: 18, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 18, y: 129.59999}
+    end: {x: 18, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 79.2}
+    end: {x: 18, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 28.8, y: 82.799995}
+    end: {x: 28.8, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 28.8, y: 140.4}
+    end: {x: 28.8, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 176.4, y: 82.799995}
+    end: {x: 176.4, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 176.4, y: 90}
+    end: {x: 176.4, y: 86.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 176.4, y: 97.2}
+    end: {x: 176.4, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 187.2, y: 79.2}
+    end: {x: 190.79999, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 79.2}
+    end: {x: 198, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 79.2}
+    end: {x: 205.2, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 208.79999, y: 79.2}
+    end: {x: 212.4, y: 79.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 18, y: 82.799995}
+    end: {x: 28.8, y: 82.799995}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 205.2, y: 90}
+    end: {x: 201.59999, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 216, y: 90}
+    end: {x: 212.4, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 3.6, y: 90}
+    end: {x: 3.6, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 14.4, y: 93.6}
+    end: {x: 14.4, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 25.199999, y: 93.6}
+    end: {x: 21.599998, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 36, y: 93.6}
+    end: {x: 32.399998, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 93.6}
+    end: {x: 46.8, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 93.6}
+    end: {x: 25.199999, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 46.8, y: 93.6}
+    end: {x: 39.6, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 90}
+    end: {x: 36, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 39.6, y: 90}
+    end: {x: 43.199997, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 122.399994, y: 93.6}
+    end: {x: 115.2, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 133.2, y: 93.6}
+    end: {x: 129.59999, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 93.6}
+    end: {x: 198, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 212.4, y: 93.6}
+    end: {x: 208.79999, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 223.2, y: 93.6}
+    end: {x: 219.59999, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 90}
+    end: {x: 122.399994, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 93.6}
+    end: {x: 126, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 198, y: 93.6}
+    end: {x: 194.4, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 208.79999, y: 93.6}
+    end: {x: 205.2, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 219.59999, y: 93.6}
+    end: {x: 216, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 126, y: 90}
+    end: {x: 129.59999, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 212.4, y: 90}
+    end: {x: 212.4, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 216, y: 93.6}
+    end: {x: 216, y: 90}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 21.599998, y: 93.6}
+    end: {x: 21.599998, y: 108}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 111.6}
+    end: {x: 21.599998, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 122.399994}
+    end: {x: 21.599998, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 154.8}
+    end: {x: 21.599998, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 162}
+    end: {x: 21.599998, y: 165.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 169.2}
+    end: {x: 21.599998, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 183.59999}
+    end: {x: 21.599998, y: 198}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 100.799995, y: 97.2}
+    end: {x: 97.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 108, y: 97.2}
+    end: {x: 104.399994, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 115.2, y: 97.2}
+    end: {x: 111.6, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 136.8, y: 97.2}
+    end: {x: 133.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 147.59999, y: 97.2}
+    end: {x: 144, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 104.399994, y: 97.2}
+    end: {x: 100.799995, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 144, y: 97.2}
+    end: {x: 140.4, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 111.6, y: 97.2}
+    end: {x: 108, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 140.4, y: 97.2}
+    end: {x: 136.8, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 151.2, y: 97.2}
+    end: {x: 147.59999, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 115.2, y: 93.6}
+    end: {x: 115.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 133.2, y: 97.2}
+    end: {x: 133.2, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 133.2, y: 126}
+    end: {x: 133.2, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 223.2, y: 97.2}
+    end: {x: 223.2, y: 93.6}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 223.2, y: 104.399994}
+    end: {x: 223.2, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 223.2, y: 118.799995}
+    end: {x: 223.2, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 223.2, y: 126}
+    end: {x: 223.2, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 54, y: 100.799995}
+    end: {x: 54, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 54, y: 111.6}
+    end: {x: 54, y: 108}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 54, y: 122.399994}
+    end: {x: 54, y: 118.799995}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 54, y: 162}
+    end: {x: 54, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 54, y: 176.4}
+    end: {x: 54, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 97.2, y: 97.2}
+    end: {x: 97.2, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 97.2, y: 104.399994}
+    end: {x: 97.2, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 151.2, y: 100.799995}
+    end: {x: 151.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 151.2, y: 122.399994}
+    end: {x: 151.2, y: 118.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 169.2, y: 100.799995}
+    end: {x: 165.59999, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 180, y: 100.799995}
+    end: {x: 176.4, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 194.4, y: 97.2}
+    end: {x: 194.4, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 194.4, y: 104.399994}
+    end: {x: 194.4, y: 108}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 223.2, y: 100.799995}
+    end: {x: 223.2, y: 97.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 223.2, y: 108}
+    end: {x: 223.2, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 223.2, y: 115.2}
+    end: {x: 223.2, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 223.2, y: 122.399994}
+    end: {x: 223.2, y: 118.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 18, y: 104.399994}
+    end: {x: 14.4, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 54, y: 104.399994}
+    end: {x: 54, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 115.2}
+    end: {x: 54, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 172.79999}
+    end: {x: 54, y: 169.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 180}
+    end: {x: 54, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 97.2, y: 100.799995}
+    end: {x: 97.2, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 97.2, y: 115.2}
+    end: {x: 97.2, y: 118.799995}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 151.2, y: 104.399994}
+    end: {x: 151.2, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 151.2, y: 118.799995}
+    end: {x: 151.2, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 154.8, y: 104.399994}
+    end: {x: 151.2, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 165.59999, y: 104.399994}
+    end: {x: 158.4, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 104.399994}
+    end: {x: 187.2, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 165.59999, y: 100.799995}
+    end: {x: 165.59999, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 180, y: 104.399994}
+    end: {x: 180, y: 100.799995}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 187.2, y: 104.399994}
+    end: {x: 180, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 18, y: 108}
+    end: {x: 18, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 18, y: 115.2}
+    end: {x: 18, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 158.4, y: 104.399994}
+    end: {x: 158.4, y: 108}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 154.8, y: 108}
+    end: {x: 154.8, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 190.79999, y: 108}
+    end: {x: 190.79999, y: 104.399994}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 223.2, y: 111.6}
+    end: {x: 223.2, y: 108}
+    baseY: 0
+    height: 4.2
+    style: 5
+  - start: {x: 97.2, y: 111.6}
+    end: {x: 97.2, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 97.2, y: 118.799995}
+    end: {x: 97.2, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 158.4, y: 111.6}
+    end: {x: 158.4, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 154.8, y: 115.2}
+    end: {x: 154.8, y: 111.6}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 14.4, y: 115.2}
+    end: {x: 18, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 115.2}
+    end: {x: 21.599998, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 165.59999}
+    end: {x: 21.599998, y: 169.2}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 176.4}
+    end: {x: 21.599998, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 151.2, y: 115.2}
+    end: {x: 154.8, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 158.4, y: 115.2}
+    end: {x: 169.2, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 172.79999, y: 115.2}
+    end: {x: 183.59999, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 169.2, y: 115.2}
+    end: {x: 172.79999, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 183.59999, y: 115.2}
+    end: {x: 190.79999, y: 115.2}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 3.6, y: 122.399994}
+    end: {x: 3.6, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 14.4, y: 126}
+    end: {x: 14.4, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 97.2, y: 122.399994}
+    end: {x: 100.799995, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 104.399994, y: 122.399994}
+    end: {x: 108, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 133.2, y: 122.399994}
+    end: {x: 136.8, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 140.4, y: 122.399994}
+    end: {x: 144, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 147.59999, y: 122.399994}
+    end: {x: 151.2, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 100.799995, y: 122.399994}
+    end: {x: 104.399994, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 111.6, y: 122.399994}
+    end: {x: 115.2, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 144, y: 122.399994}
+    end: {x: 147.59999, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 108, y: 122.399994}
+    end: {x: 111.6, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 136.8, y: 122.399994}
+    end: {x: 140.4, y: 122.399994}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 115.2, y: 122.399994}
+    end: {x: 115.2, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 129.59999}
+    end: {x: 18, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 129.59999}
+    end: {x: 25.199999, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 25.199999, y: 129.59999}
+    end: {x: 21.599998, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 36, y: 129.59999}
+    end: {x: 32.399998, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 129.59999}
+    end: {x: 39.6, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 126}
+    end: {x: 25.199999, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 28.8, y: 126}
+    end: {x: 36, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 39.6, y: 126}
+    end: {x: 46.8, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 126}
+    end: {x: 54, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 25.199999, y: 126}
+    end: {x: 28.8, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 46.8, y: 126}
+    end: {x: 50.399998, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 115.2, y: 126}
+    end: {x: 118.799995, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 126}
+    end: {x: 133.2, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 122.399994, y: 129.59999}
+    end: {x: 118.799995, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 129.59999, y: 129.59999}
+    end: {x: 126, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 118.799995, y: 126}
+    end: {x: 122.399994, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 126, y: 126}
+    end: {x: 129.59999, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 194.4, y: 126}
+    end: {x: 198, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 201.59999, y: 126}
+    end: {x: 212.4, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 8
+  - start: {x: 198, y: 126}
+    end: {x: 201.59999, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 212.4, y: 126}
+    end: {x: 223.2, y: 126}
+    baseY: 0
+    height: 4.2
+    style: 9
+  - start: {x: 18, y: 133.2}
+    end: {x: 14.4, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 118.799995, y: 129.59999}
+    end: {x: 118.799995, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 118.799995, y: 136.8}
+    end: {x: 118.799995, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 118.799995, y: 151.2}
+    end: {x: 118.799995, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 118.799995, y: 165.59999}
+    end: {x: 118.799995, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 133.2}
+    end: {x: 129.59999, y: 129.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 147.59999}
+    end: {x: 129.59999, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 162}
+    end: {x: 129.59999, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 172.79999}
+    end: {x: 129.59999, y: 165.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 108, y: 136.8}
+    end: {x: 100.799995, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 118.799995, y: 133.2}
+    end: {x: 118.799995, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 129.59999, y: 136.8}
+    end: {x: 129.59999, y: 133.2}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 14.4, y: 136.8}
+    end: {x: 18, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 100.799995, y: 136.8}
+    end: {x: 100.799995, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 108, y: 147.59999}
+    end: {x: 108, y: 136.8}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 18, y: 140.4}
+    end: {x: 21.599998, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 25.199999, y: 140.4}
+    end: {x: 28.8, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 140.4}
+    end: {x: 25.199999, y: 140.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 7.2, y: 147.59999}
+    end: {x: 3.6, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 14.4, y: 147.59999}
+    end: {x: 10.799999, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 3.6, y: 144}
+    end: {x: 7.2, y: 144}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 10.799999, y: 144}
+    end: {x: 14.4, y: 144}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 118.799995, y: 147.59999}
+    end: {x: 111.6, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 136.8, y: 147.59999}
+    end: {x: 129.59999, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 111.6, y: 147.59999}
+    end: {x: 111.6, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 108, y: 151.2}
+    end: {x: 108, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 136.8, y: 151.2}
+    end: {x: 136.8, y: 147.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 25.199999, y: 154.8}
+    end: {x: 21.599998, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 54, y: 154.8}
+    end: {x: 50.399998, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 154.8}
+    end: {x: 25.199999, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 50.399998, y: 154.8}
+    end: {x: 46.8, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 36, y: 154.8}
+    end: {x: 28.8, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 46.8, y: 154.8}
+    end: {x: 39.6, y: 154.8}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 32.399998, y: 151.2}
+    end: {x: 36, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 39.6, y: 151.2}
+    end: {x: 43.199997, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 100.799995, y: 151.2}
+    end: {x: 108, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 111.6, y: 151.2}
+    end: {x: 118.799995, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 129.59999, y: 151.2}
+    end: {x: 136.8, y: 151.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 3.6, y: 158.4}
+    end: {x: 7.2, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 10.799999, y: 158.4}
+    end: {x: 14.4, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 7.2, y: 158.4}
+    end: {x: 10.799999, y: 158.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 21.599998, y: 158.4}
+    end: {x: 21.599998, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 21.599998, y: 172.79999}
+    end: {x: 21.599998, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 61.199997, y: 162}
+    end: {x: 57.6, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 162}
+    end: {x: 64.799995, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 75.6, y: 162}
+    end: {x: 72, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 82.799995, y: 162}
+    end: {x: 79.2, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 162}
+    end: {x: 61.199997, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 79.2, y: 162}
+    end: {x: 75.6, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 72, y: 162}
+    end: {x: 68.4, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 57.6, y: 162}
+    end: {x: 57.6, y: 165.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 82.799995, y: 172.79999}
+    end: {x: 82.799995, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 118.799995, y: 162}
+    end: {x: 118.799995, y: 165.59999}
+    baseY: 0
+    height: 4.2
+    style: 11
+  - start: {x: 129.59999, y: 165.59999}
+    end: {x: 129.59999, y: 162}
+    baseY: 0
+    height: 4.2
+    style: 11
+  - start: {x: 57.6, y: 169.2}
+    end: {x: 57.6, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 57.6, y: 172.79999}
+    end: {x: 61.199997, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 75.6, y: 172.79999}
+    end: {x: 79.2, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 61.199997, y: 172.79999}
+    end: {x: 64.799995, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 79.2, y: 172.79999}
+    end: {x: 82.799995, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 75.6, y: 183.59999}
+    end: {x: 75.6, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 111.6, y: 176.4}
+    end: {x: 104.399994, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 122.399994, y: 176.4}
+    end: {x: 115.2, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 133.2, y: 176.4}
+    end: {x: 126, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 144, y: 176.4}
+    end: {x: 136.8, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 115.2, y: 176.4}
+    end: {x: 111.6, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 136.8, y: 176.4}
+    end: {x: 133.2, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 118.799995, y: 172.79999}
+    end: {x: 122.399994, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 126, y: 172.79999}
+    end: {x: 129.59999, y: 172.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 104.399994, y: 176.4}
+    end: {x: 104.399994, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 104.399994, y: 183.59999}
+    end: {x: 104.399994, y: 187.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 104.399994, y: 190.79999}
+    end: {x: 104.399994, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 104.399994, y: 198}
+    end: {x: 104.399994, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 144, y: 180}
+    end: {x: 144, y: 176.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 144, y: 187.2}
+    end: {x: 144, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 144, y: 194.4}
+    end: {x: 144, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 144, y: 201.59999}
+    end: {x: 144, y: 198}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 25.199999, y: 183.59999}
+    end: {x: 21.599998, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 36, y: 183.59999}
+    end: {x: 32.399998, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 100.799995, y: 183.59999}
+    end: {x: 97.2, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 21.599998, y: 180}
+    end: {x: 25.199999, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 32.399998, y: 180}
+    end: {x: 36, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 39.6, y: 180}
+    end: {x: 43.199997, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 28.8, y: 183.59999}
+    end: {x: 25.199999, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 25.199999, y: 180}
+    end: {x: 28.8, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 46.8, y: 180}
+    end: {x: 50.399998, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 6
+  - start: {x: 32.399998, y: 183.59999}
+    end: {x: 28.8, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 86.399994, y: 183.59999}
+    end: {x: 75.6, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 97.2, y: 183.59999}
+    end: {x: 90, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 28.8, y: 180}
+    end: {x: 32.399998, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 43.199997, y: 180}
+    end: {x: 46.8, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 50.399998, y: 180}
+    end: {x: 54, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 39.6, y: 183.59999}
+    end: {x: 36, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 36, y: 180}
+    end: {x: 39.6, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 4
+  - start: {x: 90, y: 183.59999}
+    end: {x: 86.399994, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 104.399994, y: 180}
+    end: {x: 104.399994, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 11
+  - start: {x: 144, y: 183.59999}
+    end: {x: 144, y: 180}
+    baseY: 0
+    height: 4.2
+    style: 11
+  - start: {x: 158.4, y: 183.59999}
+    end: {x: 147.59999, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 39.6, y: 190.79999}
+    end: {x: 39.6, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 100.799995, y: 187.2}
+    end: {x: 100.799995, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 100.799995, y: 194.4}
+    end: {x: 100.799995, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 147.59999, y: 183.59999}
+    end: {x: 147.59999, y: 187.2}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 147.59999, y: 190.79999}
+    end: {x: 147.59999, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 158.4, y: 187.2}
+    end: {x: 158.4, y: 183.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 158.4, y: 194.4}
+    end: {x: 158.4, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 158.4, y: 190.79999}
+    end: {x: 158.4, y: 187.2}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 36, y: 198}
+    end: {x: 36, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 36, y: 190.79999}
+    end: {x: 39.6, y: 190.79999}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 64.799995, y: 194.4}
+    end: {x: 68.4, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 75.6, y: 194.4}
+    end: {x: 79.2, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 90, y: 194.4}
+    end: {x: 93.6, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 97.2, y: 194.4}
+    end: {x: 100.799995, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 68.4, y: 194.4}
+    end: {x: 75.6, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 79.2, y: 194.4}
+    end: {x: 86.399994, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 93.6, y: 194.4}
+    end: {x: 97.2, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 2
+  - start: {x: 86.399994, y: 194.4}
+    end: {x: 90, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 3
+  - start: {x: 104.399994, y: 194.4}
+    end: {x: 104.399994, y: 198}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 144, y: 198}
+    end: {x: 144, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 147.59999, y: 194.4}
+    end: {x: 158.4, y: 194.4}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 21.599998, y: 198}
+    end: {x: 36, y: 198}
+    baseY: 0
+    height: 4.2
+    style: 1
+  - start: {x: 104.399994, y: 201.59999}
+    end: {x: 111.6, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 115.2, y: 201.59999}
+    end: {x: 133.2, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 136.8, y: 201.59999}
+    end: {x: 144, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 12
+  - start: {x: 111.6, y: 201.59999}
+    end: {x: 115.2, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 133.2, y: 201.59999}
+    end: {x: 136.8, y: 201.59999}
+    baseY: 0
+    height: 4.2
+    style: 10
+  - start: {x: 118.799995, y: 36}
+    end: {x: 118.799995, y: 46.8}
+    baseY: -4.2
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 46.8}
+    end: {x: 129.59999, y: 36}
+    baseY: -4.2
+    height: 4.2
+    style: 8
+  - start: {x: 118.799995, y: 46.8}
+    end: {x: 129.59999, y: 46.8}
+    baseY: -4.2
+    height: 4.2
+    style: 8
+  - start: {x: 122.399994, y: 36}
+    end: {x: 118.799995, y: 36}
+    baseY: -4.2
+    height: 4.2
+    style: 8
+  - start: {x: 129.59999, y: 36}
+    end: {x: 125.99999, y: 36}
+    baseY: -4.2
+    height: 4.2
+    style: 8
+  doorways:
+  - center: {x: 102.6, y: 189}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 12
+    slideSign: 1
+  - center: {x: 145.8, y: 189}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 12
+    slideSign: 1
+  - center: {x: 124.2, y: 174.59999}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 12
+    slideSign: 1
+  - center: {x: 55.8, y: 167.4}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 2
+    slideSign: 1
+  - center: {x: 37.8, y: 153}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 1
+    slideSign: 1
+  - center: {x: 9, y: 145.8}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 1
+    slideSign: 1
+  - center: {x: 37.8, y: 127.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 1
+    slideSign: 1
+  - center: {x: 124.2, y: 127.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 10
+    slideSign: 1
+  - center: {x: 19.8, y: 109.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 1
+    slideSign: 1
+  - center: {x: 156.59999, y: 109.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 9
+    slideSign: 1
+  - center: {x: 192.59999, y: 109.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 9
+    slideSign: 1
+  - center: {x: 37.8, y: 91.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 2
+    slideSign: 1
+  - center: {x: 124.2, y: 91.799995}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 9
+    slideSign: 1
+  - center: {x: 181.79999, y: 70.2}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  - center: {x: 63, y: 59.399998}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 2
+    slideSign: 1
+  - center: {x: 88.2, y: 59.399998}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: elevator
+    headerStyle: 3
+    slideSign: 1
+  - center: {x: 124.2, y: 48.6}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 0
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  - center: {x: 41.399998, y: 45}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: elevator
+    headerStyle: 3
+    slideSign: 1
+  - center: {x: 117, y: 41.399998}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  - center: {x: 131.4, y: 41.399998}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  - center: {x: 117, y: 23.4}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  - center: {x: 131.4, y: 23.4}
+    baseY: 0
+    ceilingHeight: 4.2
+    alongZ: 1
+    width: 4.2
+    height: 4.2
+    type: normal
+    headerStyle: 8
+    slideSign: 1
+  stairwells:
+  - opening:
+      serializedVersion: 2
+      x: 122.399994
+      y: 25.199999
+      width: 3.6
+      height: 10.799999
+    topY: 0
+    bottomY: -4.2
+    alongZ: 1
+    descendSign: 1
+    stepCount: 16
+    wallStyle: 8
+    treadUvScale: 4
+  - opening:
+      serializedVersion: 2
+      x: 122.399994
+      y: 25.199999
+      width: 3.6
+      height: 10.799999
+    topY: 0
+    bottomY: -4.2
+    alongZ: 1
+    descendSign: 1
+    stepCount: 16
+    wallStyle: 8
+    treadUvScale: 4
+  props:
+  - position: {x: 106.2, y: 0, z: 199.79999}
+    typeIndex: 12
+    typeName: 
+  - position: {x: 142.2, y: 0, z: 199.79999}
+    typeIndex: 12
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 196.2}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 27, y: 0, z: 196.2}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 196.2}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 34.2, y: 0, z: 196.2}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 113.399994, y: 0, z: 196.2}
+    typeIndex: 2
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 196.2}
+    typeIndex: 2
+    typeName: 
+  - position: {x: 135, y: 0, z: 196.2}
+    typeIndex: 2
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 192.59999}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 27, y: 0, z: 192.59999}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 192.59999}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 34.2, y: 0, z: 192.59999}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 149.4, y: 0, z: 192.59999}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 153, y: 0, z: 192.59999}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 156.59999, y: 0, z: 192.59999}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 189}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 27, y: 0, z: 189}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 189}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 34.2, y: 0, z: 189}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 70.2, y: 0, z: 189}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 88.2, y: 0, z: 189}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 189}
+    typeIndex: 4
+    typeName: 
+  - position: {x: 156.59999, y: 0, z: 189}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 185.4}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 27, y: 0, z: 185.4}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 185.4}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 149.4, y: 0, z: 185.4}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 153, y: 0, z: 185.4}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 156.59999, y: 0, z: 185.4}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 27, y: 0, z: 178.2}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 178.2}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 34.2, y: 0, z: 178.2}
+    typeIndex: 8
+    typeName: 
+  - position: {x: 41.399998, y: 0, z: 178.2}
+    typeIndex: 8
+    typeName: 
+  - position: {x: 45, y: 0, z: 178.2}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 27, y: 0, z: 174.59999}
+    typeIndex: 3
+    typeName: 
+  - position: {x: 41.399998, y: 0, z: 174.59999}
+    typeIndex: 29
+    typeName: 
+  - position: {x: 48.6, y: 0, z: 174.59999}
+    typeIndex: 3
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 167.4}
+    typeIndex: 39
+    typeName: 
+  - position: {x: 37.8, y: 0, z: 167.4}
+    typeIndex: 2
+    typeName: 
+  - position: {x: 70.2, y: 0, z: 167.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 163.8}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 160.2}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 27, y: 0, z: 160.2}
+    typeIndex: 3
+    typeName: 
+  - position: {x: 48.6, y: 0, z: 160.2}
+    typeIndex: 3
+    typeName: 
+  - position: {x: 9, y: 0, z: 156.59999}
+    typeIndex: 25
+    typeName: 
+  - position: {x: 12.599999, y: 0, z: 156.59999}
+    typeIndex: 35
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 156.59999}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 27, y: 0, z: 156.59999}
+    typeIndex: 31
+    typeName: 
+  - position: {x: 9, y: 0, z: 153}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 149.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 135, y: 0, z: 149.4}
+    typeIndex: 16
+    typeName: 
+  - position: {x: 37.8, y: 0, z: 145.8}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 102.6, y: 0, z: 145.8}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 102.6, y: 0, z: 142.2}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 106.2, y: 0, z: 142.2}
+    typeIndex: 25
+    typeName: 
+  - position: {x: 9, y: 0, z: 138.59999}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 27, y: 0, z: 138.59999}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 102.6, y: 0, z: 138.59999}
+    typeIndex: 27
+    typeName: 
+  - position: {x: 106.2, y: 0, z: 138.59999}
+    typeIndex: 25
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 135}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 37.8, y: 0, z: 135}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 135}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 27, y: 0, z: 131.4}
+    typeIndex: 30
+    typeName: 
+  - position: {x: 9, y: 0, z: 124.2}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 117, y: 0, z: 124.2}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 131.4, y: 0, z: 124.2}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 196.2, y: 0, z: 124.2}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 210.59999, y: 0, z: 124.2}
+    typeIndex: 0
+    typeName: 
+  - position: {x: 214.2, y: 0, z: 124.2}
+    typeIndex: 35
+    typeName: 
+  - position: {x: 217.79999, y: 0, z: 124.2}
+    typeIndex: 35
+    typeName: 
+  - position: {x: 221.4, y: 0, z: 124.2}
+    typeIndex: 35
+    typeName: 
+  - position: {x: 27, y: 0, z: 120.6}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 48.6, y: 0, z: 120.6}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 99, y: 0, z: 120.6}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 149.4, y: 0, z: 120.6}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 221.4, y: 0, z: 120.6}
+    typeIndex: 35
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 117}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 45, y: 0, z: 117}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 106.2, y: 0, z: 109.799995}
+    typeIndex: 4
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 109.799995}
+    typeIndex: 4
+    typeName: 
+  - position: {x: 142.2, y: 0, z: 109.799995}
+    typeIndex: 4
+    typeName: 
+  - position: {x: 30.599998, y: 0, z: 102.6}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 45, y: 0, z: 102.6}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 203.4, y: 0, z: 102.6}
+    typeIndex: 13
+    typeName: 
+  - position: {x: 207, y: 0, z: 102.6}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 214.2, y: 0, z: 102.6}
+    typeIndex: 13
+    typeName: 
+  - position: {x: 27, y: 0, z: 99}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 48.6, y: 0, z: 99}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 99, y: 0, z: 99}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 149.4, y: 0, z: 99}
+    typeIndex: 11
+    typeName: 
+  - position: {x: 217.79999, y: 0, z: 95.399994}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 9, y: 0, z: 91.799995}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 203.4, y: 0, z: 91.799995}
+    typeIndex: 36
+    typeName: 
+  - position: {x: 214.2, y: 0, z: 91.799995}
+    typeIndex: 37
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 84.6}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 27, y: 0, z: 81}
+    typeIndex: 1
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 77.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 37.8, y: 0, z: 77.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 210.59999, y: 0, z: 77.4}
+    typeIndex: 6
+    typeName: 
+  - position: {x: 19.8, y: 0, z: 73.799995}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 9, y: 0, z: 70.2}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 70.2}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 214.2, y: 0, z: 66.6}
+    typeIndex: 23
+    typeName: 
+  - position: {x: 23.4, y: 0, z: 59.399998}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 52.199997, y: 0, z: 59.399998}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 55.8}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 70.2, y: 0, z: 48.6}
+    typeIndex: 25
+    typeName: 
+  - position: {x: 102.6, y: 0, z: 45}
+    typeIndex: 19
+    typeName: 
+  - position: {x: 106.2, y: 0, z: 45}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 41.399998}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 138.59999, y: 0, z: 41.399998}
+    typeIndex: 9
+    typeName: 
+  - position: {x: 52.199997, y: 0, z: 30.599998}
+    typeIndex: 33
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 23.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 135, y: 0, z: 23.4}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 145.8, y: 0, z: 23.4}
+    typeIndex: 19
+    typeName: 
+  - position: {x: 109.799995, y: 0, z: 9}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 9}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 138.59999, y: 0, z: 9}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 145.8, y: 0, z: 9}
+    typeIndex: 26
+    typeName: 
+  - position: {x: 124.2, y: 0, z: 5.3999996}
+    typeIndex: 24
+    typeName: 
+  - position: {x: 124.2, y: -4.2, z: 41.4}
+    typeIndex: 14
+    typeName: ceilLight
+  enemies:
+  - position: {x: 120.6, y: 0, z: 196.2}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 0
+  - position: {x: 142.2, y: 0, z: 189}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 1
+  - position: {x: 153, y: 0, z: 189}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 2
+  - position: {x: 52.199997, y: 0, z: 174.59999}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 2
+  - position: {x: 30.599998, y: 0, z: 171}
+    type: guard
+    yaw: 0
+    patrol: 0
+    difficulty: 0
+  - position: {x: 70.2, y: 0, z: 171}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 0
+  - position: {x: 45, y: 0, z: 167.4}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 1
+  - position: {x: 124.2, y: 0, z: 167.4}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 1
+  - position: {x: 77.4, y: 0, z: 163.8}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 1
+  - position: {x: 30.599998, y: 0, z: 160.2}
+    type: guard
+    yaw: 0
+    patrol: 0
+    difficulty: 2
+  - position: {x: 52.199997, y: 0, z: 156.59999}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 2
+  - position: {x: 113.399994, y: 0, z: 149.4}
+    type: guard
+    yaw: 0
+    patrol: 0
+    difficulty: 0
+  - position: {x: 27, y: 0, z: 135}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 0
+  - position: {x: 37.8, y: 0, z: 131.4}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 2
+  - position: {x: 23.4, y: 0, z: 124.2}
+    type: guard
+    yaw: 0
+    patrol: 0
+    difficulty: 2
+  - position: {x: 106.2, y: 0, z: 120.6}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 2
+  - position: {x: 214.2, y: 0, z: 117}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 0
+  - position: {x: 27, y: 0, z: 109.799995}
+    type: guard
+    yaw: 180
+    patrol: 1
+    difficulty: 0
+  - position: {x: 138.59999, y: 0, z: 109.799995}
+    type: guard
+    yaw: 180
+    patrol: 1
+    difficulty: 0
+  - position: {x: 163.8, y: 0, z: 106.2}
+    type: dog
+    yaw: 180
+    patrol: 1
+    difficulty: 2
+  - position: {x: 196.2, y: 0, z: 102.6}
+    type: dog
+    yaw: 270
+    patrol: 1
+    difficulty: 1
+  - position: {x: 221.4, y: 0, z: 102.6}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 2
+  - position: {x: 48.6, y: 0, z: 95.399994}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 2
+  - position: {x: 19.8, y: 0, z: 81}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 2
+  - position: {x: 174.59999, y: 0, z: 81}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 2
+  - position: {x: 203.4, y: 0, z: 73.799995}
+    type: dog
+    yaw: 180
+    patrol: 1
+    difficulty: 1
+  - position: {x: 214.2, y: 0, z: 70.2}
+    type: dog
+    yaw: 180
+    patrol: 1
+    difficulty: 2
+  - position: {x: 9, y: 0, z: 66.6}
+    type: guard
+    yaw: 270
+    patrol: 1
+    difficulty: 1
+  - position: {x: 37.8, y: 0, z: 66.6}
+    type: guard
+    yaw: 90
+    patrol: 1
+    difficulty: 2
+  - position: {x: 124.2, y: 0, z: 66.6}
+    type: guard
+    yaw: 270
+    patrol: 0
+    difficulty: 2
+  - position: {x: 174.59999, y: 0, z: 66.6}
+    type: guard
+    yaw: 90
+    patrol: 0
+    difficulty: 0
+  - position: {x: 196.2, y: 0, z: 66.6}
+    type: dog
+    yaw: 0
+    patrol: 1
+    difficulty: 0
+  - position: {x: 84.6, y: 0, z: 63}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 2
+  - position: {x: 77.4, y: 0, z: 59.399998}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 0
+  - position: {x: 84.6, y: 0, z: 55.8}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 1
+  - position: {x: 142.2, y: 0, z: 9}
+    type: guard
+    yaw: 180
+    patrol: 0
+    difficulty: 1
+  - position: {x: 102.6, y: 0, z: 5.3999996}
+    type: guard
+    yaw: 0
+    patrol: 0
+    difficulty: 2
+  playerSpawnPosition: {x: 106.2, y: 0, z: 23.4}
+  playerSpawnYaw: 90

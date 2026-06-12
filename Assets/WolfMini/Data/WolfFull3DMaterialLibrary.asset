@@ -22,16 +22,22 @@ MonoBehaviour:
   wallOverrides:
   - wallValue: 8
     material: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+    tileVertically: 1
   - wallValue: 9
     material: {fileID: 2100000, guid: fd45836849eff4616b8def856c627b68, type: 2}
+    tileVertically: 1
   - wallValue: 1
     material: {fileID: 2100000, guid: 937411b65e73a47e88c5c55797db340a, type: 2}
+    tileVertically: 1
   - wallValue: 2
     material: {fileID: 2100000, guid: 937411b65e73a47e88c5c55797db340a, type: 2}
+    tileVertically: 1
   - wallValue: 5
     material: {fileID: 2100000, guid: cdceef8f2098e402c8b8bbf3cfa2f767, type: 2}
+    tileVertically: 0
   - wallValue: 7
     material: {fileID: 2100000, guid: cdceef8f2098e402c8b8bbf3cfa2f767, type: 2}
+    tileVertically: 0
   doorFaceMaterial: {fileID: 2100000, guid: 8a7f3a38233154122a3831b1c089f10b, type: 2}
   doorJambMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}
   lampCapMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}

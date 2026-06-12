@@ -74,6 +74,7 @@ namespace HelloWorldRoom.Editor.Tests
             Assert.That(definition.floors, Has.Count.EqualTo(1));
             GridFloorSpec floor = definition.floors[0];
             Assert.That(floor.id, Is.EqualTo(WolfFull3DImporter.MainFloorId));
+            Assert.That(floor.ceilingHeight, Is.EqualTo(WolfMini.Core.WolfMiniConstants.WallHeight));
             Assert.That(floor.walls, Has.Length.EqualTo(64 * 64));
             Assert.That(floor.doors, Has.Count.EqualTo(22));
             Assert.That(floor.enemies, Has.Count.EqualTo(37));

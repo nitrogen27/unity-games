@@ -9,6 +9,8 @@ namespace HelloWorldRoom
         [SerializeField] private float closeDelay = 3.5f;
         [SerializeField] private bool locked;
         [SerializeField] private AudioSource audioSource;
+        // Second leaf of a double door; using either leaf opens both.
+        [SerializeField] private WolfDoor linkedLeaf;
 
         private Vector3 closedPosition;
         private Vector3 targetPosition;
@@ -46,7 +48,28 @@ namespace HelloWorldRoom
             }
         }
 
+        public void SetLinkedLeaf(WolfDoor leaf)
+        {
+            linkedLeaf = leaf;
+        }
+
         public void Use()
+        {
+            Initialize();
+
+            if (locked)
+            {
+                return;
+            }
+
+            Open();
+            if (linkedLeaf != null)
+            {
+                linkedLeaf.UseLinked();
+            }
+        }
+
+        private void UseLinked()
         {
             Initialize();
 

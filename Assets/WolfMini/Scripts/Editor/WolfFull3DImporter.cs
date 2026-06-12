@@ -130,11 +130,11 @@ namespace WolfMini.EditorTools
             library.DogSheet = LoadTexture("dog.png");
 
             EnsureGeneratedMaterialFolder();
-            library.WallAtlasMaterial = EnsureUnlitTextureMaterial("Full3D_WallAtlas", library.WallsAtlas);
+            library.WallAtlasMaterial = EnsureAtlasRepeatMaterial("Full3D_WallAtlas", library.WallsAtlas);
 
-            // The legacy target-look scene tiled FloorTile 32x over the 64-cell map
-            // (one repeat per 2 cells) and CeilingPanel 16x (one repeat per 4
-            // cells); generated mesh UVs are one unit per cell, hence 0.5 / 0.25.
+            // Generated mesh UVs are measured in the unscaled 2 m texture
+            // module. The target-look floor still repeats every 4 m and the
+            // ceiling every 8 m, independent of the enlarged geometry cell.
             library.FloorMaterial = EnsureSurfaceMaterial("Full3D_Floor", $"{TargetLookFolder}/FloorTile_Target.mat", new Color32(112, 112, 112, 255), new Vector2(0.5f, 0.5f));
             library.CeilingMaterial = EnsureSurfaceMaterial("Full3D_Ceiling", $"{TargetLookFolder}/CeilingPanel_Target.mat", new Color32(56, 56, 56, 255), new Vector2(0.25f, 0.25f));
 
@@ -147,8 +147,11 @@ namespace WolfMini.EditorTools
             library.SetWallOverride(9, blueWall);
             library.SetWallOverride(1, whiteStoneWall);
             library.SetWallOverride(2, whiteStoneWall);
-            library.SetWallOverride(5, prisonCellDoor);
-            library.SetWallOverride(7, prisonCellDoor);
+            // Prison fronts are clamped feature textures. The mesh builder emits
+            // them as fixed 2 m slices, so they repeat without full-height
+            // stretching and without requiring Repeat wrap mode.
+            library.SetWallOverride(5, prisonCellDoor, tileVertically: false);
+            library.SetWallOverride(7, prisonCellDoor, tileVertically: false);
 
             Material darkMetal = LoadTargetMaterial("DarkMetalTrim_Target");
             library.DoorFaceMaterial = LoadTargetMaterial("DoorTeal_Target");
@@ -193,9 +196,9 @@ namespace WolfMini.EditorTools
         }
 
         /// <summary>
-        /// Generated meshes carry one-UV-unit-per-cell coordinates, so every surface
-        /// material must use texture scale (1,1). Target-look materials are cloned
-        /// with the scale reset instead of being referenced directly.
+        /// Generated meshes carry UVs in fixed texture modules. Target-look
+        /// materials are cloned with the requested tiling instead of being
+        /// referenced directly.
         /// </summary>
         private static Material EnsureSurfaceMaterial(string name, string targetLookPath, Color fallbackColor, Vector2 textureScale)
         {
@@ -225,6 +228,38 @@ namespace WolfMini.EditorTools
         private static Material LoadTargetMaterial(string materialName)
         {
             return AssetDatabase.LoadAssetAtPath<Material>($"{TargetLookFolder}/{materialName}.mat");
+        }
+
+        /// <summary>
+        /// Material for atlas walls: WolfMini/AtlasRepeat tiles one atlas window
+        /// using continuous module UVs (TEXCOORD0) and the window origin baked
+        /// into TEXCOORD1 by the mesh builder.
+        /// </summary>
+        private static Material EnsureAtlasRepeatMaterial(string name, Texture2D texture)
+        {
+            string path = $"{GeneratedMaterialFolder}/{name}.mat";
+            Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            Shader shader = Shader.Find("WolfMini/AtlasRepeat") ?? Shader.Find("Unlit/Texture");
+            if (material == null)
+            {
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, path);
+            }
+            else
+            {
+                material.shader = shader;
+            }
+
+            material.mainTexture = texture;
+            material.mainTextureScale = Vector2.one;
+            material.mainTextureOffset = Vector2.zero;
+            if (material.HasProperty("_WindowScale"))
+            {
+                material.SetFloat("_WindowScale", 1f / WolfFull3DMaterialLibrary.WallAtlasSize);
+            }
+
+            EditorUtility.SetDirty(material);
+            return material;
         }
 
         private static Material EnsureUnlitTextureMaterial(string name, Texture2D texture)

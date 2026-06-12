@@ -10,15 +10,16 @@ namespace WolfMini.Level
     /// Builds the level from a <see cref="WolfLevelDefinition"/> as chunked combined
     /// meshes (floor/ceiling/wall submeshes per chunk) instead of one cube per cell.
     /// Wall faces share a single atlas material with per-face UVs; floors and
-    /// ceilings tile one texture repeat per cell, which removes the giant-quad
+    /// ceilings tile in fixed 2 m texture modules, which removes the giant-quad
     /// stretching and per-cube seams that showed up when looking at the ceiling.
     /// </summary>
     public sealed class WolfLevelMeshBuilder : MonoBehaviour
     {
         private const float Cell = WolfMiniConstants.CellSize;
+        private const float TextureTileSize = WolfMiniConstants.WallTextureModule;
+        private const float WorldScale = WolfMiniConstants.WorldScale;
         private const float DoorThickness = WolfMiniConstants.DoorThickness;
         private const float DoorTravel = WolfMiniConstants.DoorTravel;
-        private const int StatSpriteOffset = 2;
 
         [SerializeField] private WolfLevelDefinition definition;
         [SerializeField] private WolfFull3DMaterialLibrary materialLibrary;
@@ -34,67 +35,6 @@ namespace WolfMini.Level
             new Vector2Int(-1, 0),
             new Vector2Int(0, 1),
             new Vector2Int(0, -1)
-        };
-
-        private static readonly StatInfo[] StatInfos =
-        {
-            new StatInfo("puddle", false, null),
-            new StatInfo("greenBarrel", true, null),
-            new StatInfo("tableChairs", true, null),
-            new StatInfo("floorLamp", true, null),
-            new StatInfo("chandelier", false, null),
-            new StatInfo("hangedMan", true, null),
-            new StatInfo("dogFood", false, "food"),
-            new StatInfo("pillar", true, null),
-            new StatInfo("tree", true, null),
-            new StatInfo("skeleton", false, null),
-            new StatInfo("sink", true, null),
-            new StatInfo("plant", true, null),
-            new StatInfo("urn", true, null),
-            new StatInfo("bareTable", true, null),
-            new StatInfo("ceilLight", false, null),
-            new StatInfo("pans", false, null),
-            new StatInfo("armor", true, null),
-            new StatInfo("cage", true, null),
-            new StatInfo("cageSkel", true, null),
-            new StatInfo("bonesRelax", false, null),
-            new StatInfo("key1", false, "key1"),
-            new StatInfo("key2", false, "key2"),
-            new StatInfo("stuff", true, null),
-            new StatInfo("junk", false, null),
-            new StatInfo("food", false, "food"),
-            new StatInfo("firstaid", false, "health"),
-            new StatInfo("clip", false, "ammo"),
-            new StatInfo("machinegun", false, "machinegun"),
-            new StatInfo("chaingun", false, "chaingun"),
-            new StatInfo("cross", false, "cross"),
-            new StatInfo("chalice", false, "chalice"),
-            new StatInfo("bible", false, "bible"),
-            new StatInfo("crown", false, "crown"),
-            new StatInfo("oneUp", false, "oneup"),
-            new StatInfo("gibs", false, null),
-            new StatInfo("barrel", true, null),
-            new StatInfo("well", true, null),
-            new StatInfo("emptyWell", true, null),
-            new StatInfo("gibs2", false, null),
-            new StatInfo("flag", true, null),
-            new StatInfo("callApogee", true, null),
-            new StatInfo("junk2", false, null),
-            new StatInfo("junk3", false, null),
-            new StatInfo("junk4", false, null),
-            new StatInfo("pots", false, null),
-            new StatInfo("stove", true, null),
-            new StatInfo("spears", true, null)
-        };
-
-        private static readonly Dictionary<string, EnemyInfo> EnemyInfos = new Dictionary<string, EnemyInfo>
-        {
-            ["guard"] = new EnemyInfo(1.55f, 2.08f, Color.white),
-            ["officer"] = new EnemyInfo(1.55f, 2.08f, new Color(0.9f, 0.9f, 1.2f)),
-            ["ss"] = new EnemyInfo(1.68f, 2.24f, new Color(0.5f, 0.5f, 0.5f)),
-            ["dog"] = new EnemyInfo(1.30f, 1.05f, Color.white),
-            ["mutant"] = new EnemyInfo(1.68f, 2.24f, new Color(0.4f, 0.8f, 0.3f)),
-            ["boss"] = new EnemyInfo(2.30f, 2.78f, new Color(1.2f, 0.8f, 0.8f))
         };
 
         public WolfLevelDefinition Definition
@@ -217,7 +157,7 @@ namespace WolfMini.Level
 
                     if (wallValue <= 0)
                     {
-                        Rect cellUV = new Rect(x, z, 1f, 1f);
+                        Rect cellUV = new Rect(x0 / TextureTileSize, z0 / TextureTileSize, Cell / TextureTileSize, Cell / TextureTileSize);
                         if (!definition.IsFloorSlabCut(floor.id, x, z))
                         {
                             buffer.AddQuad(floorSubmesh,
@@ -243,7 +183,9 @@ namespace WolfMini.Level
 
                     int submesh = wallSubmesh;
                     Rect tileUV;
-                    if (materialLibrary.TryGetWallOverride(wallValue, out Material overrideMaterial))
+                    bool atlasWindow = true;
+                    bool tileVertically = true;
+                    if (materialLibrary.TryGetWallOverride(wallValue, out Material overrideMaterial, out bool overrideTiles))
                     {
                         if (!overrideSubmeshes.TryGetValue(overrideMaterial, out submesh))
                         {
@@ -253,6 +195,8 @@ namespace WolfMini.Level
                         }
 
                         tileUV = new Rect(0f, 0f, 1f, 1f);
+                        atlasWindow = false;
+                        tileVertically = overrideTiles;
                     }
                     else
                     {
@@ -266,7 +210,7 @@ namespace WolfMini.Level
                             continue;
                         }
 
-                        AddWallFace(buffer, submesh, direction, x0, x1, z0, z1, floorY, ceilingY, tileUV);
+                        AddWallColumn(buffer, submesh, direction, x0, x1, z0, z1, floorY, ceilingY, tileUV, atlasWindow, tileVertically);
                     }
                 }
             }
@@ -298,6 +242,69 @@ namespace WolfMini.Level
             chunkObject.AddComponent<MeshCollider>().sharedMesh = mesh;
         }
 
+        /// <summary>
+        /// Emits one wall face, keeping texel density at one texture repeat per
+        /// fixed 2 m texture module. Atlas windows cannot wrap, so they are emitted as
+        /// stacked quads (full tiles plus a proportional partial slice); override
+        /// materials with repeat wrap use a single quad with UVs scaled to the
+        /// wall dimensions; clamped feature walls are sliced into modules too.
+        /// </summary>
+        private static void AddWallColumn(
+            WolfMeshBuffer buffer,
+            int submesh,
+            Vector2Int direction,
+            float x0,
+            float x1,
+            float z0,
+            float z1,
+            float y0,
+            float y1,
+            Rect uv,
+            bool atlasWindow,
+            bool tileVertically)
+        {
+            if (!atlasWindow)
+            {
+                if (tileVertically)
+                {
+                    Rect repeated = new Rect(uv.x, uv.y, uv.width * Cell / TextureTileSize, uv.height * (y1 - y0) / TextureTileSize);
+                    AddWallFace(buffer, submesh, direction, x0, x1, z0, z1, y0, y1, repeated);
+                    return;
+                }
+
+                AddSlicedWallFace(buffer, submesh, direction, x0, x1, z0, z1, y0, y1, uv);
+                return;
+            }
+
+            AddSlicedWallFace(buffer, submesh, direction, x0, x1, z0, z1, y0, y1, uv);
+        }
+
+        private static void AddSlicedWallFace(
+            WolfMeshBuffer buffer,
+            int submesh,
+            Vector2Int direction,
+            float x0,
+            float x1,
+            float z0,
+            float z1,
+            float y0,
+            float y1,
+            Rect uv)
+        {
+            for (float along = 0f; along < Cell - 0.001f; along += TextureTileSize)
+            {
+                float pieceEnd = Mathf.Min(along + TextureTileSize, Cell);
+                float widthFraction = (pieceEnd - along) / TextureTileSize;
+                for (float y = y0; y < y1 - 0.001f; y += TextureTileSize)
+                {
+                    float segmentTop = Mathf.Min(y + TextureTileSize, y1);
+                    float heightFraction = (segmentTop - y) / TextureTileSize;
+                    Rect segmentUV = new Rect(uv.xMin, uv.yMin, uv.width * widthFraction, uv.height * heightFraction);
+                    AddWallFaceSlice(buffer, submesh, direction, x0, x1, z0, z1, along, pieceEnd, y, segmentTop, segmentUV);
+                }
+            }
+        }
+
         private static void AddWallFace(
             WolfMeshBuffer buffer,
             int submesh,
@@ -310,32 +317,49 @@ namespace WolfMini.Level
             float y1,
             Rect uv)
         {
+            AddWallFaceSlice(buffer, submesh, direction, x0, x1, z0, z1, 0f, Cell, y0, y1, uv);
+        }
+
+        private static void AddWallFaceSlice(
+            WolfMeshBuffer buffer,
+            int submesh,
+            Vector2Int direction,
+            float x0,
+            float x1,
+            float z0,
+            float z1,
+            float fromDistance,
+            float toDistance,
+            float y0,
+            float y1,
+            Rect uv)
+        {
             if (direction.x > 0)
             {
                 buffer.AddQuad(submesh,
-                    new Vector3(x1, y0, z0), new Vector3(x1, y0, z1),
-                    new Vector3(x1, y1, z1), new Vector3(x1, y1, z0),
+                    new Vector3(x1, y0, z0 + fromDistance), new Vector3(x1, y0, z0 + toDistance),
+                    new Vector3(x1, y1, z0 + toDistance), new Vector3(x1, y1, z0 + fromDistance),
                     Vector3.right, uv);
             }
             else if (direction.x < 0)
             {
                 buffer.AddQuad(submesh,
-                    new Vector3(x0, y0, z1), new Vector3(x0, y0, z0),
-                    new Vector3(x0, y1, z0), new Vector3(x0, y1, z1),
+                    new Vector3(x0, y0, z1 - fromDistance), new Vector3(x0, y0, z1 - toDistance),
+                    new Vector3(x0, y1, z1 - toDistance), new Vector3(x0, y1, z1 - fromDistance),
                     Vector3.left, uv);
             }
             else if (direction.y > 0)
             {
                 buffer.AddQuad(submesh,
-                    new Vector3(x1, y0, z1), new Vector3(x0, y0, z1),
-                    new Vector3(x0, y1, z1), new Vector3(x1, y1, z1),
+                    new Vector3(x1 - fromDistance, y0, z1), new Vector3(x1 - toDistance, y0, z1),
+                    new Vector3(x1 - toDistance, y1, z1), new Vector3(x1 - fromDistance, y1, z1),
                     Vector3.forward, uv);
             }
             else
             {
                 buffer.AddQuad(submesh,
-                    new Vector3(x0, y0, z0), new Vector3(x1, y0, z0),
-                    new Vector3(x1, y1, z0), new Vector3(x0, y1, z0),
+                    new Vector3(x0 + fromDistance, y0, z0), new Vector3(x0 + toDistance, y0, z0),
+                    new Vector3(x0 + toDistance, y1, z0), new Vector3(x0 + fromDistance, y1, z0),
                     Vector3.back, uv);
             }
         }
@@ -354,9 +378,12 @@ namespace WolfMini.Level
                     continue;
                 }
 
+                // Doors are real door-sized slabs; the band between the door top
+                // and the ceiling is filled by a static lintel below.
+                float doorHeight = Mathf.Min(WolfMiniConstants.DoorHeight, floor.ceilingHeight);
                 Vector3 size = doorSpec.vertical
-                    ? new Vector3(DoorThickness, floor.ceilingHeight, Cell)
-                    : new Vector3(Cell, floor.ceilingHeight, DoorThickness);
+                    ? new Vector3(DoorThickness, doorHeight, Cell)
+                    : new Vector3(Cell, doorHeight, DoorThickness);
 
                 int faceTile = doorSpec.type switch
                 {
@@ -379,7 +406,7 @@ namespace WolfMini.Level
 
                 GameObject door = new GameObject($"Door {doorSpec.type} {doorSpec.x:00},{doorSpec.y:00}");
                 door.transform.SetParent(parent, false);
-                door.transform.position = CellCenter(doorSpec.x, doorSpec.y, floor.y + floor.ceilingHeight * 0.5f);
+                door.transform.position = CellCenter(doorSpec.x, doorSpec.y, floor.y + doorHeight * 0.5f);
 
                 Mesh mesh = CreateDoorBoxMesh(size, doorSpec.vertical, faceUV, jambUV);
                 door.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -395,8 +422,36 @@ namespace WolfMini.Level
                     ? new Vector3(0f, 0f, DoorTravel)
                     : new Vector3(DoorTravel, 0f, 0f);
                 bool locked = doorSpec.type == "gold" || doorSpec.type == "silver";
-                door.AddComponent<WolfDoor>().Configure(slideOffset, 2.4f, 3.5f, locked);
+                door.AddComponent<WolfDoor>().Configure(slideOffset, 2.4f * WorldScale, 3.5f, locked);
+
+                BuildDoorLintel(parent, floor, doorSpec, doorHeight, jambUV,
+                    jambMaterial != null ? jambMaterial : materialLibrary.WallAtlasMaterial);
             }
+        }
+
+        /// <summary>Static band filling the doorway between the door top and the ceiling.</summary>
+        private static void BuildDoorLintel(Transform parent, GridFloorSpec floor, GridDoorSpec doorSpec, float doorHeight, Rect jambUV, Material material)
+        {
+            float lintelHeight = floor.ceilingHeight - doorHeight;
+            if (lintelHeight < 0.01f)
+            {
+                return;
+            }
+
+            Vector3 size = doorSpec.vertical
+                ? new Vector3(DoorThickness, lintelHeight, Cell)
+                : new Vector3(Cell, lintelHeight, DoorThickness);
+
+            GameObject lintel = new GameObject($"Door lintel {doorSpec.x:00},{doorSpec.y:00}");
+            lintel.transform.SetParent(parent, false);
+            lintel.transform.position = CellCenter(doorSpec.x, doorSpec.y, floor.y + doorHeight + lintelHeight * 0.5f);
+            lintel.isStatic = true;
+
+            Mesh mesh = CreateDoorBoxMesh(size, doorSpec.vertical, jambUV, jambUV);
+            lintel.AddComponent<MeshFilter>().sharedMesh = mesh;
+            lintel.AddComponent<MeshRenderer>().sharedMaterials = new[] { material, material };
+            BoxCollider collider = lintel.AddComponent<BoxCollider>();
+            collider.size = size;
         }
 
         private static Mesh CreateDoorBoxMesh(Vector3 size, bool vertical, Rect faceUV, Rect jambUV)
@@ -432,18 +487,18 @@ namespace WolfMini.Level
 
             foreach (GridStaticSpec staticSpec in floor.statics)
             {
-                if (staticSpec == null || staticSpec.typeIndex < 0 || staticSpec.typeIndex >= StatInfos.Length)
+                if (staticSpec == null || staticSpec.typeIndex < 0 || staticSpec.typeIndex >= WolfLevelContent.StatInfos.Length)
                 {
                     continue;
                 }
 
-                StatInfo info = StatInfos[staticSpec.typeIndex];
+                WolfLevelContent.StatInfo info = WolfLevelContent.StatInfos[staticSpec.typeIndex];
                 Vector3 basePosition = CellCenter(staticSpec.x, staticSpec.y, floor.y);
 
-                // ceilLight (14) and chandelier (4) become lamp fixtures + point lights.
-                if (staticSpec.typeIndex == 14 || staticSpec.typeIndex == 4)
+                // Ceiling lights and chandeliers become lamp fixtures + point lights.
+                if (staticSpec.typeIndex == WolfLevelContent.CeilLightTypeIndex || staticSpec.typeIndex == WolfLevelContent.ChandelierTypeIndex)
                 {
-                    bool warm = staticSpec.typeIndex == 4;
+                    bool warm = staticSpec.typeIndex == WolfLevelContent.ChandelierTypeIndex;
                     bool withLight = buildLights && lightsBudget > 0;
                     if (withLight)
                     {
@@ -454,14 +509,14 @@ namespace WolfMini.Level
                     continue;
                 }
 
-                // 15 (pans) is skipped to match the reference builder.
-                if (staticSpec.typeIndex == 15)
+                // pans are skipped to match the reference builder.
+                if (staticSpec.typeIndex == WolfLevelContent.PansTypeIndex)
                 {
                     continue;
                 }
 
-                float scale = info.pickupType == null ? 1.0f : GetPickupScale(info.pickupType);
-                Material material = materialLibrary.GetStaticMaterial(staticSpec.typeIndex, StatSpriteOffset);
+                float scale = WolfLevelContent.GetStaticScale(info.pickupType);
+                Material material = materialLibrary.GetStaticMaterial(staticSpec.typeIndex, WolfLevelContent.SpriteOffset);
                 CreateBillboard(
                     parent,
                     $"{info.name} {staticSpec.x:00},{staticSpec.y:00}",
@@ -487,9 +542,9 @@ namespace WolfMini.Level
                     continue;
                 }
 
-                EnemyInfo info = EnemyInfos.TryGetValue(enemySpec.type, out EnemyInfo found)
+                WolfLevelContent.EnemyInfo info = WolfLevelContent.EnemyInfos.TryGetValue(enemySpec.type, out WolfLevelContent.EnemyInfo found)
                     ? found
-                    : EnemyInfos["guard"];
+                    : WolfLevelContent.EnemyInfos["guard"];
                 Vector3 basePosition = CellCenter(enemySpec.x, enemySpec.y, floor.y);
                 Material material = materialLibrary.GetEnemyMaterial(enemySpec.type, info.tint);
                 CreateBillboard(
@@ -503,19 +558,14 @@ namespace WolfMini.Level
             }
         }
 
-        // Lamp light colors and intensities ported from WolfDynamicLightingSetup
-        // (chandeliers warm and stronger, ceiling lights cooler).
-        private static readonly Color WarmLampColor = new Color(1.0f, 0.72f, 0.36f);
-        private static readonly Color CoolLampColor = new Color(1.0f, 0.84f, 0.62f);
-
         private void AddCeilingLamp(Transform parent, string name, Vector3 basePosition, GridFloorSpec floor, bool warm, bool withLight)
         {
             float ceilingY = floor.y + floor.ceilingHeight;
 
             GameObject cap = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             cap.name = $"{name} cap {basePosition.x:0},{basePosition.z:0}";
-            cap.transform.position = new Vector3(basePosition.x, ceilingY - 0.05f, basePosition.z);
-            cap.transform.localScale = new Vector3(0.48f, 0.05f, 0.48f);
+            cap.transform.position = new Vector3(basePosition.x, ceilingY - 0.05f * WorldScale, basePosition.z);
+            cap.transform.localScale = new Vector3(0.48f, 0.05f, 0.48f) * WorldScale;
             cap.transform.SetParent(parent, true);
             Material capMaterial = materialLibrary.LampCapMaterial != null
                 ? materialLibrary.LampCapMaterial
@@ -525,8 +575,8 @@ namespace WolfMini.Level
 
             GameObject bulb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             bulb.name = $"{name} bulb {basePosition.x:0},{basePosition.z:0}";
-            bulb.transform.position = new Vector3(basePosition.x, ceilingY - 0.16f, basePosition.z);
-            bulb.transform.localScale = Vector3.one * 0.20f;
+            bulb.transform.position = new Vector3(basePosition.x, ceilingY - 0.16f * WorldScale, basePosition.z);
+            bulb.transform.localScale = Vector3.one * 0.20f * WorldScale;
             bulb.transform.SetParent(parent, true);
             Material bulbMaterial = materialLibrary.LampGlowMaterial != null
                 ? materialLibrary.LampGlowMaterial
@@ -542,15 +592,15 @@ namespace WolfMini.Level
             }
 
             GameObject lightObject = new GameObject($"{name} light {basePosition.x:0},{basePosition.z:0}");
-            lightObject.transform.position = new Vector3(basePosition.x, ceilingY - 0.22f, basePosition.z);
+            lightObject.transform.position = new Vector3(basePosition.x, ceilingY - 0.22f * WorldScale, basePosition.z);
             lightObject.transform.SetParent(parent, true);
             Light light = lightObject.AddComponent<Light>();
             light.type = LightType.Point;
-            light.color = warm ? WarmLampColor : CoolLampColor;
+            light.color = warm ? WolfLevelContent.WarmLampColor : WolfLevelContent.CoolLampColor;
             // The target-look scene baked 2.0/1.7 with GI; these run realtime in
             // deferred, so slightly lower values give a comparable exposure.
             light.intensity = warm ? 1.4f : 1.15f;
-            light.range = warm ? 16f : 13f;
+            light.range = (warm ? 16f : 13f) * WorldScale;
             light.bounceIntensity = 0.15f;
             light.shadows = LightShadows.None;
         }
@@ -569,7 +619,7 @@ namespace WolfMini.Level
             spill.transform.SetParent(parent, true);
             spill.transform.position = new Vector3(basePosition.x, ceilingY - 0.02f, basePosition.z);
             spill.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            float diameter = warm ? 4.8f : 3.8f;
+            float diameter = (warm ? 4.8f : 3.8f) * WorldScale;
             spill.transform.localScale = new Vector3(diameter, diameter, 1f);
 
             Renderer renderer = spill.GetComponent<Renderer>();
@@ -602,19 +652,6 @@ namespace WolfMini.Level
             }
         }
 
-        private static float GetPickupScale(string pickupType)
-        {
-            return pickupType switch
-            {
-                "ammo" => 0.66f,
-                "food" => 0.72f,
-                "health" => 0.78f,
-                "key1" => 0.72f,
-                "key2" => 0.72f,
-                _ => 0.82f
-            };
-        }
-
         private static Vector3 CellCenter(int x, int z, float y)
         {
             return new Vector3((x + 0.5f) * Cell, y, (z + 0.5f) * Cell);
@@ -637,33 +674,6 @@ namespace WolfMini.Level
             }
         }
 
-        private readonly struct StatInfo
-        {
-            public readonly string name;
-            public readonly bool blocking;
-            public readonly string pickupType;
-
-            public StatInfo(string name, bool blocking, string pickupType)
-            {
-                this.name = name;
-                this.blocking = blocking;
-                this.pickupType = pickupType;
-            }
-        }
-
-        private readonly struct EnemyInfo
-        {
-            public readonly float width;
-            public readonly float height;
-            public readonly Color tint;
-
-            public EnemyInfo(float width, float height, Color tint)
-            {
-                this.width = width;
-                this.height = height;
-                this.tint = tint;
-            }
-        }
     }
 
     /// <summary>Accumulates quads into vertex/uv/normal lists with per-submesh triangle indices.</summary>
@@ -672,6 +682,9 @@ namespace WolfMini.Level
         private readonly List<Vector3> vertices = new List<Vector3>();
         private readonly List<Vector3> normals = new List<Vector3>();
         private readonly List<Vector2> uvs = new List<Vector2>();
+        // TEXCOORD1: atlas-window origin consumed by the WolfMini/AtlasRepeat
+        // shader; zero for quads rendered with plain materials.
+        private readonly List<Vector2> atlasWindows = new List<Vector2>();
         private readonly List<List<int>> submeshTriangles = new List<List<int>>();
 
         public WolfMeshBuffer(int submeshCount)
@@ -697,6 +710,12 @@ namespace WolfMini.Level
         /// </summary>
         public void AddQuad(int submesh, Vector3 bl, Vector3 br, Vector3 tr, Vector3 tl, Vector3 normal, Rect uv)
         {
+            AddQuad(submesh, bl, br, tr, tl, normal, uv, Vector2.zero);
+        }
+
+        /// <summary>Adds a quad carrying an atlas-window origin in TEXCOORD1 for the atlas-repeat shader.</summary>
+        public void AddQuad(int submesh, Vector3 bl, Vector3 br, Vector3 tr, Vector3 tl, Vector3 normal, Rect uv, Vector2 atlasWindow)
+        {
             EnsureSubmesh(submesh);
             int baseIndex = vertices.Count;
             vertices.Add(bl);
@@ -713,6 +732,11 @@ namespace WolfMini.Level
             uvs.Add(new Vector2(uv.xMax, uv.yMin));
             uvs.Add(new Vector2(uv.xMax, uv.yMax));
             uvs.Add(new Vector2(uv.xMin, uv.yMax));
+
+            for (int i = 0; i < 4; i++)
+            {
+                atlasWindows.Add(atlasWindow);
+            }
 
             List<int> triangles = submeshTriangles[submesh];
             triangles.Add(baseIndex);
@@ -736,6 +760,7 @@ namespace WolfMini.Level
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);
             mesh.SetUVs(0, uvs);
+            mesh.SetUVs(1, atlasWindows);
             mesh.subMeshCount = submeshTriangles.Count;
             for (int i = 0; i < submeshTriangles.Count; i++)
             {

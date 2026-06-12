@@ -12,34 +12,38 @@ namespace WolfMini.EditorTools
 {
     /// <summary>
     /// Creates the true-3D game scene: level builder (geometry is generated at
-    /// Start so the saved scene stays small), player rig with the anti-distortion
-    /// camera settings, HUD and ambient setup.
+    /// Start so the saved scene stays small), player rig with a standard
+    /// physically pitching first-person camera, HUD and ambient setup.
     /// </summary>
     public static class WolfFull3DSceneBuilder
     {
         private const string ScenePath = "Assets/Scenes/WolfRepoLevel1Full3D.unity";
         private const string RepoTextureFolder = "Assets/Textures/WolfRepo";
 
-        // Vertical FOV 62 instead of 75 reduces edge stretching; look-up/down is
-        // rendered with a y-sheared projection (WolfYShearLook) so wall verticals
-        // never converge, and the pitch clamp keeps the shear in its sweet spot.
-        private const float CameraFieldOfView = 62f;
+        // Honest perspective with the low Wolf ceilings kept: the narrower FOV
+        // and the pitch clamp limit how strongly verticals converge when the
+        // player looks up at the nearby ceiling.
+        private const float CameraFieldOfView = 58f;
         private const float CameraMaxPitch = 45f;
 
         [MenuItem("Tools/Wolf Full3D/Build Full3D Scene")]
         public static void BuildScene()
         {
-            var definition = AssetDatabase.LoadAssetAtPath<WolfLevelDefinition>(WolfFull3DImporter.DefinitionAssetPath);
-            if (definition == null)
+            if (AssetDatabase.LoadAssetAtPath<WolfSectorLevelDefinition>(WolfSectorLevelConverter.SectorAssetPath) == null)
             {
-                Debug.LogError("[WolfFull3D] Run 'Import Repo Level Into Definition' first.");
+                Debug.LogError("[WolfFull3D] Run 'Convert Repo Level To Sector Definition' first.");
                 return;
             }
 
-            WolfFull3DMaterialLibrary library = WolfFull3DImporter.EnsureMaterialLibrary();
-
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "WolfRepoLevel1Full3D";
+
+            // Loaded after the scene switch: NewScene(Single) can unload
+            // non-dirty assets, which would leave a fake-null reference on the
+            // builder in the open scene (the saved file still got the guid, but
+            // edit-mode rebuilds saw no definition).
+            var definition = AssetDatabase.LoadAssetAtPath<WolfSectorLevelDefinition>(WolfSectorLevelConverter.SectorAssetPath);
+            WolfFull3DMaterialLibrary library = WolfFull3DImporter.EnsureMaterialLibrary();
 
             // Ambient ported from WolfDynamicLightingSetup (warm trilight dusk).
             RenderSettings.ambientMode = AmbientMode.Trilight;
@@ -61,10 +65,10 @@ namespace WolfMini.EditorTools
         [MenuItem("Tools/Wolf Full3D/Rebuild Level In Open Scene")]
         public static void RebuildLevelInOpenScene()
         {
-            WolfLevelMeshBuilder builder = Object.FindFirstObjectByType<WolfLevelMeshBuilder>();
+            WolfSectorMeshBuilder builder = Object.FindFirstObjectByType<WolfSectorMeshBuilder>();
             if (builder == null)
             {
-                Debug.LogError("[WolfFull3D] No WolfLevelMeshBuilder in the open scene. Run 'Build Full3D Scene' first.");
+                Debug.LogError("[WolfFull3D] No WolfSectorMeshBuilder in the open scene. Run 'Build Full3D Scene' first.");
                 return;
             }
 
@@ -72,34 +76,26 @@ namespace WolfMini.EditorTools
             Debug.Log("[WolfFull3D] Rebuilt generated level in the open scene (editor preview).");
         }
 
-        private static void CreateLevelBuilder(WolfLevelDefinition definition, WolfFull3DMaterialLibrary library)
+        private static void CreateLevelBuilder(WolfSectorLevelDefinition definition, WolfFull3DMaterialLibrary library)
         {
-            GameObject builderObject = new GameObject("Wolf Full3D Level Builder");
-            WolfLevelMeshBuilder builder = builderObject.AddComponent<WolfLevelMeshBuilder>();
+            GameObject builderObject = new GameObject("Wolf Sector Level Builder");
+            WolfSectorMeshBuilder builder = builderObject.AddComponent<WolfSectorMeshBuilder>();
             builder.Definition = definition;
             builder.MaterialLibrary = library;
             builder.BuildOnStart = true;
         }
 
-        private static void CreatePlayer(WolfLevelDefinition definition)
+        private static void CreatePlayer(WolfSectorLevelDefinition definition)
         {
-            GridFloorSpec spawnFloor = definition.FindFloor(definition.playerSpawn.floorId);
-            float floorY = spawnFloor?.y ?? 0f;
-            Vector2Int cell = definition.playerSpawn.cell;
-            Vector3 spawnPosition = new Vector3(
-                (cell.x + 0.5f) * WolfMiniConstants.CellSize,
-                floorY,
-                (cell.y + 0.5f) * WolfMiniConstants.CellSize);
-
             GameObject player = new GameObject("Wolf Full3D Player");
-            player.transform.position = spawnPosition;
-            player.transform.rotation = Quaternion.Euler(0f, 90f + definition.playerSpawn.angle, 0f);
+            player.transform.position = definition.playerSpawnPosition;
+            player.transform.rotation = Quaternion.Euler(0f, definition.playerSpawnYaw, 0f);
 
             CharacterController characterController = player.AddComponent<CharacterController>();
-            characterController.height = 1.45f;
-            characterController.radius = 0.30f;
-            characterController.center = new Vector3(0f, 0.72f, 0f);
-            characterController.stepOffset = 0.22f;
+            characterController.height = WolfMiniConstants.PlayerHeight;
+            characterController.radius = WolfMiniConstants.PlayerRadius;
+            characterController.center = new Vector3(0f, WolfMiniConstants.PlayerCenterY, 0f);
+            characterController.stepOffset = WolfMiniConstants.PlayerStepOffset;
             characterController.slopeLimit = 50f;
 
             SimpleFirstPersonController controller = player.AddComponent<SimpleFirstPersonController>();
@@ -114,20 +110,25 @@ namespace WolfMini.EditorTools
             Camera camera = cameraObject.AddComponent<Camera>();
             camera.fieldOfView = CameraFieldOfView;
             camera.nearClipPlane = 0.05f;
-            camera.farClipPlane = 200f;
+            camera.farClipPlane = 260f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color32(56, 56, 56, 255);
             cameraObject.AddComponent<AudioListener>();
-            cameraObject.AddComponent<WolfYShearLook>();
 
             SerializedObject serializedController = new SerializedObject(controller);
             serializedController.FindProperty("playerCamera").objectReferenceValue = camera;
             serializedController.FindProperty("maxPitch").floatValue = CameraMaxPitch;
-            serializedController.FindProperty("rotateCameraPitch").boolValue = false;
+            // Speeds scale with the cell so traversal keeps the Wolf pace
+            // (cells per second), otherwise the larger world feels like wading.
+            serializedController.FindProperty("walkSpeed").floatValue = 4f * WolfMiniConstants.WorldScale;
+            serializedController.FindProperty("runSpeed").floatValue = 7f * WolfMiniConstants.WorldScale;
+            serializedController.FindProperty("jumpHeight").floatValue = 1.1f * WolfMiniConstants.WorldScale;
+            serializedController.FindProperty("gravity").floatValue = -18f * WolfMiniConstants.WorldScale;
             serializedController.ApplyModifiedPropertiesWithoutUndo();
 
             SerializedObject serializedInteractor = new SerializedObject(interactor);
             serializedInteractor.FindProperty("playerCamera").objectReferenceValue = camera;
+            serializedInteractor.FindProperty("range").floatValue = 2.4f * WolfMiniConstants.WorldScale;
             serializedInteractor.ApplyModifiedPropertiesWithoutUndo();
         }
 

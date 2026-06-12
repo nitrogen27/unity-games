@@ -6,6 +6,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
+using WolfMini.Core;
 
 namespace HelloWorldRoom.Editor
 {
@@ -212,10 +213,10 @@ namespace HelloWorldRoom.Editor
             player.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 
             CharacterController characterController = player.AddComponent<CharacterController>();
-            characterController.height = 1.8f;
-            characterController.radius = 0.35f;
-            characterController.center = new Vector3(0f, 0.9f, 0f);
-            characterController.stepOffset = 0.38f;
+            characterController.height = WolfMiniConstants.PlayerHeight;
+            characterController.radius = WolfMiniConstants.PlayerRadius;
+            characterController.center = new Vector3(0f, WolfMiniConstants.PlayerCenterY, 0f);
+            characterController.stepOffset = WolfMiniConstants.PlayerStepOffset;
             characterController.slopeLimit = 55f;
 
             SimpleFirstPersonController controller = player.AddComponent<SimpleFirstPersonController>();
@@ -224,7 +225,7 @@ namespace HelloWorldRoom.Editor
             GameObject cameraObject = new GameObject("First Person Camera");
             cameraObject.tag = "MainCamera";
             cameraObject.transform.SetParent(player.transform);
-            cameraObject.transform.localPosition = new Vector3(0f, 1.62f, 0f);
+            cameraObject.transform.localPosition = new Vector3(0f, WolfMiniConstants.EyeHeight, 0f);
             cameraObject.transform.localRotation = Quaternion.identity;
 
             Camera camera = cameraObject.AddComponent<Camera>();
