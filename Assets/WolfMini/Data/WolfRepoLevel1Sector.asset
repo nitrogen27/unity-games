@@ -6996,6 +6996,32 @@ MonoBehaviour:
     stepCount: 16
     wallStyle: 8
     treadUvScale: 4
+  - opening:
+      serializedVersion: 2
+      x: 122.399994
+      y: 25.199999
+      width: 3.6
+      height: 10.799999
+    topY: 0
+    bottomY: -4.2
+    alongZ: 1
+    descendSign: 1
+    stepCount: 16
+    wallStyle: 8
+    treadUvScale: 4
+  - opening:
+      serializedVersion: 2
+      x: 100.799995
+      y: 100.799995
+      width: 10.799999
+      height: 3.6
+    topY: 0
+    bottomY: -4.2
+    alongZ: 0
+    descendSign: 1
+    stepCount: 16
+    wallStyle: 2
+    treadUvScale: 4
   props:
   - position: {x: 106.2, y: 0, z: 199.79999}
     typeIndex: 12

@@ -140,7 +140,10 @@ namespace HelloWorldRoom.Editor.Tests
             WolfSectorLevelConverter.AddLowerStoreyWithStairwell(sector);
 
             Assert.That(sector.TryValidate(out List<string> errors), Is.True, string.Join("\n", errors));
-            Assert.That(sector.stairwells, Has.Count.EqualTo(1));
+
+            // Two ways between the storeys: down in the start corridor, back
+            // up in the big south hall.
+            Assert.That(sector.stairwells, Has.Count.EqualTo(2));
 
             // The whole floor is duplicated: same rooms, walls, doors and content.
             Assert.That(sector.sectors, Has.Count.EqualTo(sectors * 2));
@@ -168,19 +171,31 @@ namespace HelloWorldRoom.Editor.Tests
                 Assert.That(lower.type, Is.EqualTo(upper.type));
             }
 
-            StairwellSpec stairwell = sector.stairwells[0];
-            Assert.That(stairwell.topY, Is.EqualTo(0f).Within(0.001f));
-            Assert.That(stairwell.bottomY, Is.EqualTo(-storey).Within(0.001f));
+            foreach (StairwellSpec stairwell in sector.stairwells)
+            {
+                Assert.That(stairwell.topY, Is.EqualTo(0f).Within(0.001f));
+                Assert.That(stairwell.bottomY, Is.EqualTo(-storey).Within(0.001f));
 
-            // The opening leaves a one-cell walk-around strip on both sides of
-            // the start corridor (cells x 33..35).
+                // Steps stay climbable for the character controller, both ways.
+                float riser = (stairwell.topY - stairwell.bottomY) / stairwell.stepCount;
+                Assert.That(riser, Is.LessThanOrEqualTo(WolfMiniConstants.PlayerStepOffset));
+            }
+
             float cell = WolfMiniConstants.CellSize;
-            Assert.That(stairwell.opening.xMin, Is.EqualTo(34 * cell).Within(0.001f));
-            Assert.That(stairwell.opening.xMax, Is.EqualTo(35 * cell).Within(0.001f));
 
-            // Steps stay climbable for the character controller, both ways.
-            float riser = (stairwell.topY - stairwell.bottomY) / stairwell.stepCount;
-            Assert.That(riser, Is.LessThanOrEqualTo(WolfMiniConstants.PlayerStepOffset));
+            // The corridor opening leaves a one-cell walk-around strip on both
+            // sides of the start corridor (cells x 33..35).
+            Rect corridorOpening = sector.stairwells[0].opening;
+            Assert.That(corridorOpening.xMin, Is.EqualTo(34 * cell).Within(0.001f));
+            Assert.That(corridorOpening.xMax, Is.EqualTo(35 * cell).Within(0.001f));
+
+            // The hall staircase stays inside the big south hall (cells
+            // x 27..41, z 27..33), clear of the chandelier row at z 30.
+            Rect hallOpening = sector.stairwells[1].opening;
+            Assert.That(hallOpening.xMin, Is.GreaterThanOrEqualTo(28 * cell - 0.001f));
+            Assert.That(hallOpening.xMax, Is.LessThanOrEqualTo(41 * cell + 0.001f));
+            Assert.That(hallOpening.yMin, Is.GreaterThanOrEqualTo(28 * cell - 0.001f));
+            Assert.That(hallOpening.yMax, Is.LessThanOrEqualTo(30 * cell + 0.001f));
         }
     }
 }

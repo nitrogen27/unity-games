@@ -98,6 +98,7 @@ namespace WolfMini.EditorTools
         public static void AddLowerStoreyWithStairwell(WolfSectorLevelDefinition target)
         {
             const int corridorStyle = 8; // blue stone, same as the corridor walls
+            const int hallStyle = 2;     // tan stone, same as the big south hall walls
             float lowerY = -WolfMiniConstants.WallHeight;
 
             DuplicateStoreyBelow(target, lowerY);
@@ -114,6 +115,24 @@ namespace WolfMini.EditorTools
                 descendSign = 1,
                 stepCount = 16,
                 wallStyle = corridorStyle,
+                treadUvScale = 4f
+            });
+
+            // Return staircase in the big south hall (cells x 27..41, z 27..33):
+            // from the lower hall copy back up to the same hall on the upper
+            // floor. It sits in the hall's north-west part (cells x 28..30,
+            // row z 28), clear of the chandelier row at z 30, both guards and
+            // the entrance path from the north door; the mouth opens east
+            // toward the hall center, the stairs climb west.
+            target.stairwells.Add(new StairwellSpec
+            {
+                opening = new Rect(28 * Cell, 28 * Cell, 3 * Cell, Cell),
+                topY = 0f,
+                bottomY = lowerY,
+                alongZ = false,
+                descendSign = 1,
+                stepCount = 16,
+                wallStyle = hallStyle,
                 treadUvScale = 4f
             });
         }
