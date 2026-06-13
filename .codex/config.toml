@@ -1,0 +1,6 @@
+[mcp_servers.unity]
+command = "node"
+args = ["Library/PackageCache/com.gamelovers.mcp-unity@d176a9d737cc/Server~/build/index.js"]
+
+[mcp_servers.unity.env]
+UNITY_PORT = "8090"
