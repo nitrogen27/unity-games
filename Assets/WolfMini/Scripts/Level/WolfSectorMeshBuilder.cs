@@ -114,15 +114,15 @@ namespace WolfMini.Level
                 float ceilingY = sector.floorY + sector.ceilingHeight;
                 foreach (Rect area in sector.floorAreas)
                 {
-                    // Stairwell openings punch through every horizontal plane
-                    // they sit on: the upper sector's floor and, when a lower
-                    // sector reaches up to the same plane, its ceiling.
-                    foreach (Rect piece in SubtractStairwellOpenings(area, sector.floorY))
+                    // Vertical openings punch through the horizontal planes
+                    // they cross: stair shafts, and simple atrium voids that
+                    // leave the lower floor intact.
+                    foreach (Rect piece in SubtractVerticalOpenings(area, sector.floorY))
                     {
                         AddFloorQuad(buffer, floorSubmesh, piece, sector.floorY, WolfMiniConstants.FloorTextureModule);
                     }
 
-                    foreach (Rect piece in SubtractStairwellOpenings(area, ceilingY))
+                    foreach (Rect piece in SubtractVerticalOpenings(area, ceilingY))
                     {
                         AddCeilingQuad(buffer, ceilingSubmesh, piece, ceilingY);
                     }
@@ -134,6 +134,17 @@ namespace WolfMini.Level
                 if (stairwell != null)
                 {
                     AddStairwellGeometry(buffer, floorSubmesh, wallSubmesh, overrideSubmeshes, overrideMaterials, stairwell);
+                }
+            }
+
+            if (definition.floorOpenings != null)
+            {
+                foreach (FloorOpeningSpec opening in definition.floorOpenings)
+                {
+                    if (opening != null)
+                    {
+                        AddFloorOpeningGeometry(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, opening);
+                    }
                 }
             }
 
@@ -207,12 +218,11 @@ namespace WolfMini.Level
 
         /// <summary>
         /// Pieces of a horizontal rectangle at <paramref name="planeY"/> left
-        /// after cutting out the stairwell openings. An opening punches through
-        /// every plane the shaft passes: the floor at its top and any lower
-        /// storey ceiling between, including the lower floor inside the shaft.
-        /// The actual lower landing remains outside the opening at the mouth.
+        /// after cutting vertical openings out of it. Stairwells consume the
+        /// lower floor inside their shaft; floor openings leave that floor
+        /// intact and only cut the planes above it.
         /// </summary>
-        private List<Rect> SubtractStairwellOpenings(Rect area, float planeY)
+        private List<Rect> SubtractVerticalOpenings(Rect area, float planeY)
         {
             const float eps = 0.001f;
             var pieces = new List<Rect> { area };
@@ -224,6 +234,21 @@ namespace WolfMini.Level
                 }
 
                 pieces = SubtractRect(pieces, stairwell.opening);
+            }
+
+            if (definition.floorOpenings == null)
+            {
+                return pieces;
+            }
+
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening == null || planeY > opening.topY + eps || planeY <= opening.bottomY + eps)
+                {
+                    continue;
+                }
+
+                pieces = SubtractRect(pieces, opening.opening);
             }
 
             return pieces;
@@ -459,6 +484,46 @@ namespace WolfMini.Level
                     yield return MakeShaftWall(stairwell, new Vector2(xHead, o.yMin - t), new Vector2(xHeadOut, o.yMin - t));
                     yield return MakeShaftWall(stairwell, new Vector2(xHeadOut, o.yMax + t), new Vector2(xHead, o.yMax + t));
                 }
+            }
+        }
+
+        private void AddFloorOpeningGeometry(
+            WolfMeshBuffer buffer,
+            int wallSubmesh,
+            Dictionary<Material, int> overrideSubmeshes,
+            List<Material> overrideMaterials,
+            FloorOpeningSpec opening)
+        {
+            foreach (WallSegmentSpec slabEdge in CreateRectSlabEdges(opening.opening, opening.topY, opening.wallStyle))
+            {
+                EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
+            }
+        }
+
+        /// <summary>Two-sided slab faces around a rectangular gallery/atrium opening.</summary>
+        private static IEnumerable<WallSegmentSpec> CreateRectSlabEdges(Rect opening, float topY, int style)
+        {
+            float baseY = topY - WolfMiniConstants.FloorSlabThickness;
+            const float height = WolfMiniConstants.FloorSlabThickness;
+
+            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMin, opening.yMin), new Vector2(opening.xMax, opening.yMin), baseY, height, style))
+            {
+                yield return edge;
+            }
+
+            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMax, opening.yMin), new Vector2(opening.xMax, opening.yMax), baseY, height, style))
+            {
+                yield return edge;
+            }
+
+            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMax, opening.yMax), new Vector2(opening.xMin, opening.yMax), baseY, height, style))
+            {
+                yield return edge;
+            }
+
+            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMin, opening.yMax), new Vector2(opening.xMin, opening.yMin), baseY, height, style))
+            {
+                yield return edge;
             }
         }
 

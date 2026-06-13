@@ -77,6 +77,12 @@ namespace WolfMini.EditorTools
             target.props.Clear();
             target.enemies.Clear();
             target.stairwells.Clear();
+            if (target.floorOpenings == null)
+            {
+                target.floorOpenings = new List<FloorOpeningSpec>();
+            }
+
+            target.floorOpenings.Clear();
 
             BuildSectors(target, floor);
             BuildWallSegments(target, floor);
@@ -136,6 +142,17 @@ namespace WolfMini.EditorTools
                 stepCount = stairStepCount,
                 wallStyle = hallStyle,
                 treadUvScale = 4f
+            });
+
+            // Minimal second-tier gallery in the big south hall: the upper hall
+            // floor becomes a walkable ring around this void, while the lower
+            // hall floor stays intact so the player can look down into it.
+            target.floorOpenings.Add(new FloorOpeningSpec
+            {
+                opening = new Rect(31 * Cell, 28 * Cell, 8 * Cell, 5 * Cell),
+                topY = 0f,
+                bottomY = lowerY,
+                wallStyle = hallStyle
             });
         }
 

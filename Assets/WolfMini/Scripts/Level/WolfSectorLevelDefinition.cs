@@ -20,6 +20,7 @@ namespace WolfMini.Level
         public List<WallSegmentSpec> walls = new List<WallSegmentSpec>();
         public List<DoorwaySpec> doorways = new List<DoorwaySpec>();
         public List<StairwellSpec> stairwells = new List<StairwellSpec>();
+        public List<FloorOpeningSpec> floorOpenings = new List<FloorOpeningSpec>();
         public List<LevelPropSpec> props = new List<LevelPropSpec>();
         public List<LevelEnemySpec> enemies = new List<LevelEnemySpec>();
         public Vector3 playerSpawnPosition;
@@ -123,6 +124,28 @@ namespace WolfMini.Level
                     if (stairwell.stepCount < 2)
                     {
                         errors.Add($"Stairwell at index {i} needs at least two steps.");
+                    }
+                }
+            }
+
+            if (floorOpenings != null)
+            {
+                for (int i = 0; i < floorOpenings.Count; i++)
+                {
+                    FloorOpeningSpec opening = floorOpenings[i];
+                    if (opening == null)
+                    {
+                        continue;
+                    }
+
+                    if (opening.opening.width <= 0f || opening.opening.height <= 0f)
+                    {
+                        errors.Add($"Floor opening at index {i} has a degenerate opening {opening.opening}.");
+                    }
+
+                    if (opening.bottomY >= opening.topY)
+                    {
+                        errors.Add($"Floor opening at index {i} must span upward: bottomY must lie below topY.");
                     }
                 }
             }
@@ -275,6 +298,26 @@ namespace WolfMini.Level
 
         /// <summary>How many times smaller the floor tiles on the steps are than on the room floor.</summary>
         public float treadUvScale = 4f;
+    }
+
+    /// <summary>
+    /// Rectangular vertical void that cuts floor/ceiling planes between storeys
+    /// without adding stairs. Used for simple atrium openings and gallery edges.
+    /// </summary>
+    [Serializable]
+    public sealed class FloorOpeningSpec
+    {
+        /// <summary>World-space XZ rectangle to cut out (Rect.y is the Z coordinate).</summary>
+        public Rect opening;
+
+        /// <summary>Highest floor plane that is cut by this opening.</summary>
+        public float topY;
+
+        /// <summary>Lower floor plane under the opening; this floor is left intact.</summary>
+        public float bottomY = -2f;
+
+        /// <summary>Wall style used on the exposed slab edge around the opening.</summary>
+        public int wallStyle = 1;
     }
 
     [Serializable]

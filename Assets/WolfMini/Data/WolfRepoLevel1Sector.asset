@@ -6985,6 +6985,16 @@ MonoBehaviour:
     wallStyle: 2
     wallThickness: 0.45
     treadUvScale: 4
+  floorOpenings:
+  - opening:
+      serializedVersion: 2
+      x: 111.6
+      y: 100.799995
+      width: 28.8
+      height: 18
+    topY: 0
+    bottomY: -4.6499996
+    wallStyle: 2
   props:
   - position: {x: 106.2, y: 0, z: 199.79999}
     typeIndex: 12
