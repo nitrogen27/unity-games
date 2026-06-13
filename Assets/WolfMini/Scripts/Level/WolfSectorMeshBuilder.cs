@@ -298,9 +298,14 @@ namespace WolfMini.Level
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, shaftWall);
             }
 
-            // Slab edge over the mouth: closes the band between the lower
-            // storey's ceiling and the upper floor where the stairs exit.
-            EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, CreateMouthLintel(stairwell));
+            // Slab edges at both transverse cuts: the side shaft walls already
+            // close the long edges, while these two-sided faces give the upper
+            // floor/lower ceiling band visible wall-material thickness at both
+            // stair ends.
+            foreach (WallSegmentSpec slabEdge in CreateTransverseSlabEdges(stairwell))
+            {
+                EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
+            }
 
             for (int step = 0; step < steps; step++)
             {
@@ -316,7 +321,14 @@ namespace WolfMini.Level
                     : Rect.MinMaxRect(Mathf.Min(near, far), opening.yMin, Mathf.Max(near, far), opening.yMax);
                 AddFloorQuad(buffer, floorSubmesh, treadRect, treadY, module);
 
-                // Riser at the step's high edge, facing down the descent.
+                // Riser at the step's high edge, facing down the descent. The
+                // first high edge is the cut slab edge itself, emitted above with
+                // wall material so the ceiling/floor band reads as thick masonry.
+                if (step == 0)
+                {
+                    continue;
+                }
+
                 Vector2 origin;
                 Vector2 direction;
                 Vector3 normal;
@@ -413,34 +425,58 @@ namespace WolfMini.Level
             }
         }
 
-        /// <summary>Slab edge over the stair mouth: closes the band between the lower storey's ceiling and the upper floor.</summary>
-        private static WallSegmentSpec CreateMouthLintel(StairwellSpec stairwell)
+        /// <summary>
+        /// Two-sided slab faces on the two transverse sides of the stair opening.
+        /// The long sides are already covered by the full-height shaft walls, so
+        /// emitting only these end bands avoids duplicate faces along the sides.
+        /// </summary>
+        private static IEnumerable<WallSegmentSpec> CreateTransverseSlabEdges(StairwellSpec stairwell)
         {
             Rect o = stairwell.opening;
-            int sign = stairwell.descendSign >= 0 ? 1 : -1;
+            float baseY = stairwell.topY - WolfMiniConstants.FloorSlabThickness;
+            const float height = WolfMiniConstants.FloorSlabThickness;
 
-            Vector2 start;
-            Vector2 end;
             if (stairwell.alongZ)
             {
-                float zMouth = sign > 0 ? o.yMax : o.yMin;
-                start = sign > 0 ? new Vector2(o.xMax, zMouth) : new Vector2(o.xMin, zMouth);
-                end = sign > 0 ? new Vector2(o.xMin, zMouth) : new Vector2(o.xMax, zMouth);
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), baseY, height, stairwell.wallStyle))
+                {
+                    yield return edge;
+                }
+
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), baseY, height, stairwell.wallStyle))
+                {
+                    yield return edge;
+                }
             }
             else
             {
-                float xMouth = sign > 0 ? o.xMax : o.xMin;
-                start = sign > 0 ? new Vector2(xMouth, o.yMin) : new Vector2(xMouth, o.yMax);
-                end = sign > 0 ? new Vector2(xMouth, o.yMax) : new Vector2(xMouth, o.yMin);
-            }
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMin, o.yMax), new Vector2(o.xMin, o.yMin), baseY, height, stairwell.wallStyle))
+                {
+                    yield return edge;
+                }
 
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMax, o.yMin), new Vector2(o.xMax, o.yMax), baseY, height, stairwell.wallStyle))
+                {
+                    yield return edge;
+                }
+            }
+        }
+
+        private static IEnumerable<WallSegmentSpec> CreateDoubleSidedSlabEdge(Vector2 start, Vector2 end, float baseY, float height, int style)
+        {
+            yield return MakeSlabEdge(start, end, baseY, height, style);
+            yield return MakeSlabEdge(end, start, baseY, height, style);
+        }
+
+        private static WallSegmentSpec MakeSlabEdge(Vector2 start, Vector2 end, float baseY, float height, int style)
+        {
             return new WallSegmentSpec
             {
                 start = start,
                 end = end,
-                baseY = stairwell.topY - WolfMiniConstants.FloorSlabThickness,
-                height = WolfMiniConstants.FloorSlabThickness,
-                style = stairwell.wallStyle
+                baseY = baseY,
+                height = height,
+                style = style
             };
         }
 
