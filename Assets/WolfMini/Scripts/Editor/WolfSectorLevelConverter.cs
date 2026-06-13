@@ -76,6 +76,7 @@ namespace WolfMini.EditorTools
             target.doorways.Clear();
             target.props.Clear();
             target.enemies.Clear();
+            target.stairwells.Clear();
 
             BuildSectors(target, floor);
             BuildWallSegments(target, floor);
@@ -99,6 +100,7 @@ namespace WolfMini.EditorTools
         {
             const int corridorStyle = 8; // blue stone, same as the corridor walls
             const int hallStyle = 2;     // tan stone, same as the big south hall walls
+            const int stairStepCount = 13;
             float lowerY = -(WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness);
 
             DuplicateStoreyBelow(target, lowerY);
@@ -113,7 +115,7 @@ namespace WolfMini.EditorTools
                 bottomY = lowerY,
                 alongZ = true,
                 descendSign = 1,
-                stepCount = 18,
+                stepCount = stairStepCount,
                 wallStyle = corridorStyle,
                 treadUvScale = 4f
             });
@@ -131,7 +133,7 @@ namespace WolfMini.EditorTools
                 bottomY = lowerY,
                 alongZ = false,
                 descendSign = 1,
-                stepCount = 18,
+                stepCount = stairStepCount,
                 wallStyle = hallStyle,
                 treadUvScale = 4f
             });

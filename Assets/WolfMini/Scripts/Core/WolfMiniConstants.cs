@@ -27,7 +27,7 @@ namespace WolfMini.Core
         public const float PlayerHeight = 1.75f;
         public const float PlayerRadius = 0.35f;
         public const float PlayerCenterY = PlayerHeight * 0.5f;
-        public const float PlayerStepOffset = 0.30f;
+        public const float PlayerStepOffset = 0.38f;
         public const float UpperFloorY = 0f;
         public const float LowerFloorY = -3f;
         // Slab between stacked storeys: keeps the lower storey's ceiling,

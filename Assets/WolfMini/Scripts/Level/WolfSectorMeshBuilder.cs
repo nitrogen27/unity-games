@@ -209,7 +209,8 @@ namespace WolfMini.Level
         /// Pieces of a horizontal rectangle at <paramref name="planeY"/> left
         /// after cutting out the stairwell openings. An opening punches through
         /// every plane the shaft passes: the floor at its top and any lower
-        /// storey ceiling between, but not the floor the stairs land on.
+        /// storey ceiling between, including the lower floor inside the shaft.
+        /// The actual lower landing remains outside the opening at the mouth.
         /// </summary>
         private List<Rect> SubtractStairwellOpenings(Rect area, float planeY)
         {
@@ -217,7 +218,7 @@ namespace WolfMini.Level
             var pieces = new List<Rect> { area };
             foreach (StairwellSpec stairwell in definition.stairwells)
             {
-                if (stairwell == null || planeY > stairwell.topY + eps || planeY <= stairwell.bottomY + eps)
+                if (stairwell == null || planeY > stairwell.topY + eps || planeY < stairwell.bottomY - eps)
                 {
                     continue;
                 }
@@ -272,9 +273,9 @@ namespace WolfMini.Level
         /// Staircase down through a floor opening: the shaft's side walls use
         /// the wall style (so the pit reads as cut into the same walls), treads
         /// and risers use the floor material with tiles scaled down by
-        /// <see cref="StairwellSpec.treadUvScale"/>. The slope is sealed: first
-        /// riser starts at the upper floor edge, the last tread lands on the
-        /// lower floor.
+        /// <see cref="StairwellSpec.treadUvScale"/>. The upper tread is flush
+        /// with the upper floor, and the lower mouth gets a full-depth starter
+        /// step one riser above the lower floor.
         /// </summary>
         private void AddStairwellGeometry(
             WolfMeshBuffer buffer,
@@ -307,49 +308,85 @@ namespace WolfMini.Level
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
             }
 
+            float topEdge = stairwell.alongZ
+                ? (sign > 0 ? opening.yMin : opening.yMax)
+                : (sign > 0 ? opening.xMin : opening.xMax);
+
             for (int step = 0; step < steps; step++)
             {
-                float topEdge = stairwell.alongZ
-                    ? (sign > 0 ? opening.yMin : opening.yMax)
-                    : (sign > 0 ? opening.xMin : opening.xMax);
                 float near = topEdge + sign * step * tread;
                 float far = near + sign * tread;
-                float treadY = stairwell.topY - (step + 1) * riser;
+                float treadSurfaceY = stairwell.topY - step * riser;
 
                 Rect treadRect = stairwell.alongZ
                     ? Rect.MinMaxRect(opening.xMin, Mathf.Min(near, far), opening.xMax, Mathf.Max(near, far))
                     : Rect.MinMaxRect(Mathf.Min(near, far), opening.yMin, Mathf.Max(near, far), opening.yMax);
-                AddFloorQuad(buffer, floorSubmesh, treadRect, treadY, module);
+                AddFloorQuad(buffer, floorSubmesh, treadRect, treadSurfaceY, module);
 
                 // Riser at the step's high edge, facing down the descent. The
-                // first high edge is the cut slab edge itself, emitted above with
-                // wall material so the ceiling/floor band reads as thick masonry.
+                // upper tread is already flush with the upper floor, while every
+                // following tread steps down by one uniform riser.
                 if (step == 0)
                 {
                     continue;
                 }
 
-                Vector2 origin;
-                Vector2 direction;
-                Vector3 normal;
-                if (stairwell.alongZ)
-                {
-                    normal = new Vector3(0f, 0f, sign);
-                    direction = new Vector2(-sign, 0f);
-                    origin = new Vector2(sign > 0 ? opening.xMax : opening.xMin, near);
-                }
-                else
-                {
-                    normal = new Vector3(sign, 0f, 0f);
-                    direction = new Vector2(0f, sign);
-                    origin = new Vector2(near, sign > 0 ? opening.yMin : opening.yMax);
-                }
-
-                float width = stairwell.alongZ ? opening.width : opening.height;
-                float riserTop = stairwell.topY - step * riser;
-                Rect riserUV = new Rect(Vector2.Dot(origin, direction) / module, treadY / module, width / module, riser / module);
-                AddWallQuad(buffer, floorSubmesh, origin, direction, normal, 0f, width, treadY, riserTop, riserUV);
+                AddStairRiser(
+                    buffer,
+                    floorSubmesh,
+                    stairwell,
+                    opening,
+                    sign,
+                    near,
+                    treadSurfaceY,
+                    treadSurfaceY + riser,
+                    module);
             }
+
+            float mouthPlane = topEdge + sign * run;
+            AddStairRiser(
+                buffer,
+                floorSubmesh,
+                stairwell,
+                opening,
+                sign,
+                mouthPlane,
+                stairwell.bottomY,
+                stairwell.bottomY + riser,
+                module);
+        }
+
+        private static void AddStairRiser(
+            WolfMeshBuffer buffer,
+            int floorSubmesh,
+            StairwellSpec stairwell,
+            Rect opening,
+            int sign,
+            float riserPlane,
+            float riserBottom,
+            float riserTop,
+            float module)
+        {
+            Vector2 origin;
+            Vector2 direction;
+            Vector3 normal;
+            if (stairwell.alongZ)
+            {
+                normal = new Vector3(0f, 0f, sign);
+                direction = new Vector2(-sign, 0f);
+                origin = new Vector2(sign > 0 ? opening.xMax : opening.xMin, riserPlane);
+            }
+            else
+            {
+                normal = new Vector3(sign, 0f, 0f);
+                direction = new Vector2(0f, sign);
+                origin = new Vector2(riserPlane, sign > 0 ? opening.yMin : opening.yMax);
+            }
+
+            float width = stairwell.alongZ ? opening.width : opening.height;
+            float height = riserTop - riserBottom;
+            Rect riserUV = new Rect(Vector2.Dot(origin, direction) / module, riserBottom / module, width / module, height / module);
+            AddWallQuad(buffer, floorSubmesh, origin, direction, normal, 0f, width, riserBottom, riserTop, riserUV);
         }
 
         /// <summary>
@@ -735,16 +772,24 @@ namespace WolfMini.Level
         }
 
         /// <summary>
-        /// Continuous module UVs anchored to world coordinates: U is the world
-        /// distance along the segment axis, V is the world height, both divided
-        /// by the texture module. Collinear runs and stacked bands stay
-        /// phase-aligned, so no seam can appear inside or between segments.
+        /// Continuous module UVs: U is anchored to world distance along the
+        /// segment axis, while V is anchored to the local storey height. Lower
+        /// walls can extend into the floor slab for sealing, but their visible
+        /// room-height section still starts at the bottom of the wall texture
+        /// instead of showing an extra repeated strip at floor level.
         /// </summary>
         private static Rect ModuleUV(Vector2 start, Vector2 direction, float length, float baseY, float height)
         {
             float u0 = Vector2.Dot(start, direction) / Module;
-            float v0 = baseY / Module;
+            float v0 = StoreyLocalY(baseY) / Module;
             return new Rect(u0, v0, length / Module, height / Module);
+        }
+
+        private static float StoreyLocalY(float worldY)
+        {
+            float storeyHeight = WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness;
+            float localY = Mathf.Repeat(worldY, storeyHeight);
+            return localY >= storeyHeight - 0.001f ? 0f : localY;
         }
 
         /// <summary>Seamless repeat material: one continuous quad per wall run.</summary>
