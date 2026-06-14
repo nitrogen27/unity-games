@@ -328,7 +328,7 @@ namespace WolfMini.Level
             // close the long edges, while these two-sided faces give the upper
             // floor/lower ceiling band visible wall-material thickness at both
             // stair ends.
-            foreach (WallSegmentSpec slabEdge in CreateTransverseSlabEdges(stairwell))
+            foreach (WallSegmentSpec slabEdge in CreateStairwellSlabEdges(stairwell))
             {
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
             }
@@ -494,37 +494,241 @@ namespace WolfMini.Level
             List<Material> overrideMaterials,
             FloorOpeningSpec opening)
         {
-            foreach (WallSegmentSpec slabEdge in CreateRectSlabEdges(opening.opening, opening.topY, opening.wallStyle))
+            foreach (WallSegmentSpec slabEdge in CreateFloorOpeningSlabEdges(opening))
             {
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
             }
         }
 
-        /// <summary>Two-sided slab faces around a rectangular gallery/atrium opening.</summary>
-        private static IEnumerable<WallSegmentSpec> CreateRectSlabEdges(Rect opening, float topY, int style)
+        /// <summary>
+        /// Two-sided slab faces around a rectangular gallery/atrium opening.
+        /// Adjacent stair openings remove the shared edge span, so the slab band
+        /// does not hang across the stair mouth.
+        /// </summary>
+        private IEnumerable<WallSegmentSpec> CreateFloorOpeningSlabEdges(FloorOpeningSpec spec)
         {
+            Rect opening = spec.opening;
+            int style = spec.wallStyle;
+            float topY = spec.topY;
             float baseY = topY - WolfMiniConstants.FloorSlabThickness;
             const float height = WolfMiniConstants.FloorSlabThickness;
 
-            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMin, opening.yMin), new Vector2(opening.xMax, opening.yMin), baseY, height, style))
+            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMin), new Vector2(opening.xMax, opening.yMin), topY))
             {
-                yield return edge;
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                {
+                    yield return edge;
+                }
             }
 
-            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMax, opening.yMin), new Vector2(opening.xMax, opening.yMax), baseY, height, style))
+            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMin), new Vector2(opening.xMax, opening.yMax), topY))
             {
-                yield return edge;
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                {
+                    yield return edge;
+                }
             }
 
-            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMax, opening.yMax), new Vector2(opening.xMin, opening.yMax), baseY, height, style))
+            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMax), new Vector2(opening.xMin, opening.yMax), topY))
             {
-                yield return edge;
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                {
+                    yield return edge;
+                }
             }
 
-            foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(opening.xMin, opening.yMax), new Vector2(opening.xMin, opening.yMin), baseY, height, style))
+            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMax), new Vector2(opening.xMin, opening.yMin), topY))
             {
-                yield return edge;
+                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                {
+                    yield return edge;
+                }
             }
+        }
+
+        private IEnumerable<EdgeSegment> ClipOpeningEdgeByAdjacentStairwells(Rect opening, Vector2 start, Vector2 end, float topY)
+        {
+            const float eps = 0.001f;
+            bool alongX = Mathf.Abs(start.y - end.y) <= eps;
+            bool alongZ = Mathf.Abs(start.x - end.x) <= eps;
+            if ((!alongX && !alongZ) || definition.stairwells == null)
+            {
+                yield return new EdgeSegment(start, end);
+                yield break;
+            }
+
+            float edgeMin = alongX ? Mathf.Min(start.x, end.x) : Mathf.Min(start.y, end.y);
+            float edgeMax = alongX ? Mathf.Max(start.x, end.x) : Mathf.Max(start.y, end.y);
+            var blocked = new List<Vector2>();
+
+            foreach (StairwellSpec stairwell in definition.stairwells)
+            {
+                if (stairwell == null || Mathf.Abs(stairwell.topY - topY) > eps)
+                {
+                    continue;
+                }
+
+                Rect stair = stairwell.opening;
+                if (!RectanglesTouchOnEdge(opening, stair, eps))
+                {
+                    continue;
+                }
+
+                if (alongX)
+                {
+                    float z = start.y;
+                    if (Mathf.Abs(stair.yMax - z) > eps && Mathf.Abs(stair.yMin - z) > eps)
+                    {
+                        continue;
+                    }
+
+                    AddBlockedInterval(blocked, edgeMin, edgeMax, stair.xMin, stair.xMax, eps);
+                }
+                else
+                {
+                    float x = start.x;
+                    if (Mathf.Abs(stair.xMax - x) > eps && Mathf.Abs(stair.xMin - x) > eps)
+                    {
+                        continue;
+                    }
+
+                    AddBlockedInterval(blocked, edgeMin, edgeMax, stair.yMin, stair.yMax, eps);
+                }
+            }
+
+            if (blocked.Count == 0)
+            {
+                yield return new EdgeSegment(start, end);
+                yield break;
+            }
+
+            blocked.Sort((a, b) => a.x.CompareTo(b.x));
+            float cursor = edgeMin;
+            foreach (Vector2 interval in blocked)
+            {
+                if (interval.x > cursor + eps)
+                {
+                    yield return MakeEdgeSegment(start, end, alongX, cursor, interval.x);
+                }
+
+                cursor = Mathf.Max(cursor, interval.y);
+            }
+
+            if (cursor < edgeMax - eps)
+            {
+                yield return MakeEdgeSegment(start, end, alongX, cursor, edgeMax);
+            }
+        }
+
+        private IEnumerable<EdgeSegment> ClipStairwellEdgeByAdjacentFloorOpenings(Rect stairwell, Vector2 start, Vector2 end, float topY)
+        {
+            const float eps = 0.001f;
+            bool alongX = Mathf.Abs(start.y - end.y) <= eps;
+            bool alongZ = Mathf.Abs(start.x - end.x) <= eps;
+            if ((!alongX && !alongZ) || definition.floorOpenings == null)
+            {
+                yield return new EdgeSegment(start, end);
+                yield break;
+            }
+
+            float edgeMin = alongX ? Mathf.Min(start.x, end.x) : Mathf.Min(start.y, end.y);
+            float edgeMax = alongX ? Mathf.Max(start.x, end.x) : Mathf.Max(start.y, end.y);
+            var blocked = new List<Vector2>();
+
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening == null || Mathf.Abs(opening.topY - topY) > eps)
+                {
+                    continue;
+                }
+
+                Rect floorOpening = opening.opening;
+                if (!RectanglesTouchOnEdge(stairwell, floorOpening, eps))
+                {
+                    continue;
+                }
+
+                if (alongX)
+                {
+                    float z = start.y;
+                    if (Mathf.Abs(floorOpening.yMax - z) > eps && Mathf.Abs(floorOpening.yMin - z) > eps)
+                    {
+                        continue;
+                    }
+
+                    AddBlockedInterval(blocked, edgeMin, edgeMax, floorOpening.xMin, floorOpening.xMax, eps);
+                }
+                else
+                {
+                    float x = start.x;
+                    if (Mathf.Abs(floorOpening.xMax - x) > eps && Mathf.Abs(floorOpening.xMin - x) > eps)
+                    {
+                        continue;
+                    }
+
+                    AddBlockedInterval(blocked, edgeMin, edgeMax, floorOpening.yMin, floorOpening.yMax, eps);
+                }
+            }
+
+            if (blocked.Count == 0)
+            {
+                yield return new EdgeSegment(start, end);
+                yield break;
+            }
+
+            blocked.Sort((a, b) => a.x.CompareTo(b.x));
+            float cursor = edgeMin;
+            foreach (Vector2 interval in blocked)
+            {
+                if (interval.x > cursor + eps)
+                {
+                    yield return MakeEdgeSegment(start, end, alongX, cursor, interval.x);
+                }
+
+                cursor = Mathf.Max(cursor, interval.y);
+            }
+
+            if (cursor < edgeMax - eps)
+            {
+                yield return MakeEdgeSegment(start, end, alongX, cursor, edgeMax);
+            }
+        }
+
+        private static bool RectanglesTouchOnEdge(Rect a, Rect b, float eps)
+        {
+            bool touchesVertical = Mathf.Abs(a.xMin - b.xMax) <= eps || Mathf.Abs(a.xMax - b.xMin) <= eps;
+            bool overlapsZ = Mathf.Min(a.yMax, b.yMax) > Mathf.Max(a.yMin, b.yMin) + eps;
+            bool touchesHorizontal = Mathf.Abs(a.yMin - b.yMax) <= eps || Mathf.Abs(a.yMax - b.yMin) <= eps;
+            bool overlapsX = Mathf.Min(a.xMax, b.xMax) > Mathf.Max(a.xMin, b.xMin) + eps;
+            return (touchesVertical && overlapsZ) || (touchesHorizontal && overlapsX);
+        }
+
+        private static void AddBlockedInterval(List<Vector2> blocked, float edgeMin, float edgeMax, float min, float max, float eps)
+        {
+            float clippedMin = Mathf.Max(edgeMin, min);
+            float clippedMax = Mathf.Min(edgeMax, max);
+            if (clippedMax > clippedMin + eps)
+            {
+                blocked.Add(new Vector2(clippedMin, clippedMax));
+            }
+        }
+
+        private static EdgeSegment MakeEdgeSegment(Vector2 start, Vector2 end, bool alongX, float min, float max)
+        {
+            if (alongX)
+            {
+                bool forward = start.x <= end.x;
+                float z = start.y;
+                return forward
+                    ? new EdgeSegment(new Vector2(min, z), new Vector2(max, z))
+                    : new EdgeSegment(new Vector2(max, z), new Vector2(min, z));
+            }
+
+            bool zForward = start.y <= end.y;
+            float x = start.x;
+            return zForward
+                ? new EdgeSegment(new Vector2(x, min), new Vector2(x, max))
+                : new EdgeSegment(new Vector2(x, max), new Vector2(x, min));
         }
 
         /// <summary>
@@ -532,7 +736,7 @@ namespace WolfMini.Level
         /// The long sides are already covered by the full-height shaft walls, so
         /// emitting only these end bands avoids duplicate faces along the sides.
         /// </summary>
-        private static IEnumerable<WallSegmentSpec> CreateTransverseSlabEdges(StairwellSpec stairwell)
+        private IEnumerable<WallSegmentSpec> CreateStairwellSlabEdges(StairwellSpec stairwell)
         {
             Rect o = stairwell.opening;
             float baseY = stairwell.topY - WolfMiniConstants.FloorSlabThickness;
@@ -540,26 +744,38 @@ namespace WolfMini.Level
 
             if (stairwell.alongZ)
             {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), baseY, height, stairwell.wallStyle))
+                foreach (EdgeSegment segment in ClipStairwellEdgeByAdjacentFloorOpenings(o, new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), stairwell.topY))
                 {
-                    yield return edge;
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, stairwell.wallStyle))
+                    {
+                        yield return edge;
+                    }
                 }
 
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), baseY, height, stairwell.wallStyle))
+                foreach (EdgeSegment segment in ClipStairwellEdgeByAdjacentFloorOpenings(o, new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), stairwell.topY))
                 {
-                    yield return edge;
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, stairwell.wallStyle))
+                    {
+                        yield return edge;
+                    }
                 }
             }
             else
             {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMin, o.yMax), new Vector2(o.xMin, o.yMin), baseY, height, stairwell.wallStyle))
+                foreach (EdgeSegment segment in ClipStairwellEdgeByAdjacentFloorOpenings(o, new Vector2(o.xMin, o.yMax), new Vector2(o.xMin, o.yMin), stairwell.topY))
                 {
-                    yield return edge;
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, stairwell.wallStyle))
+                    {
+                        yield return edge;
+                    }
                 }
 
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(new Vector2(o.xMax, o.yMin), new Vector2(o.xMax, o.yMax), baseY, height, stairwell.wallStyle))
+                foreach (EdgeSegment segment in ClipStairwellEdgeByAdjacentFloorOpenings(o, new Vector2(o.xMax, o.yMin), new Vector2(o.xMax, o.yMax), stairwell.topY))
                 {
-                    yield return edge;
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, stairwell.wallStyle))
+                    {
+                        yield return edge;
+                    }
                 }
             }
         }
@@ -580,6 +796,18 @@ namespace WolfMini.Level
                 height = height,
                 style = style
             };
+        }
+
+        private readonly struct EdgeSegment
+        {
+            public readonly Vector2 start;
+            public readonly Vector2 end;
+
+            public EdgeSegment(Vector2 start, Vector2 end)
+            {
+                this.start = start;
+                this.end = end;
+            }
         }
 
         private static WallSegmentSpec MakeShaftWall(StairwellSpec stairwell, Vector2 start, Vector2 end)
@@ -1056,6 +1284,11 @@ namespace WolfMini.Level
 
                 if (prop.typeIndex == WolfLevelContent.CeilLightTypeIndex || prop.typeIndex == WolfLevelContent.ChandelierTypeIndex)
                 {
+                    if (IsCeilingPropInsideFloorOpening(prop))
+                    {
+                        continue;
+                    }
+
                     bool warm = prop.typeIndex == WolfLevelContent.ChandelierTypeIndex;
                     bool withLight = buildLights && lightsBudget > 0;
                     if (withLight)
@@ -1083,6 +1316,33 @@ namespace WolfMini.Level
                     info.blocking,
                     prop.position.y);
             }
+        }
+
+        private bool IsCeilingPropInsideFloorOpening(LevelPropSpec prop)
+        {
+            if (definition.floorOpenings == null)
+            {
+                return false;
+            }
+
+            const float eps = 0.001f;
+            Vector2 point = new Vector2(prop.position.x, prop.position.z);
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening == null || prop.position.y > opening.topY + eps || prop.position.y < opening.bottomY - eps)
+                {
+                    continue;
+                }
+
+                Rect rect = opening.opening;
+                if (point.x >= rect.xMin - eps && point.x <= rect.xMax + eps &&
+                    point.y >= rect.yMin - eps && point.y <= rect.yMax + eps)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void BuildEnemies(Transform parent)

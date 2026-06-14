@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using WolfMini.Core;
 using WolfMini.EditorTools;
 using WolfMini.Level;
+using WolfMini.Rendering;
 
 namespace HelloWorldRoom.Editor.Tests
 {
@@ -208,6 +210,113 @@ namespace HelloWorldRoom.Editor.Tests
             Assert.That(hallOpening.xMax, Is.LessThanOrEqualTo(41 * cell + 0.001f));
             Assert.That(hallOpening.yMin, Is.GreaterThanOrEqualTo(28 * cell - 0.001f));
             Assert.That(hallOpening.yMax, Is.LessThanOrEqualTo(30 * cell + 0.001f));
+        }
+
+        [Test]
+        public void AtriumBuildSkipsCeilingLampsInsideVoid()
+        {
+            GameObject root = BuildConvertedSector();
+            try
+            {
+                Assert.That(FindDescendant(root.transform, "chandelier cap 124,110"), Is.Null);
+                Assert.That(FindDescendant(root.transform, "chandelier bulb 124,110"), Is.Null);
+                Assert.That(FindDescendant(root.transform, "chandelier cap 106,110"), Is.Not.Null);
+                Assert.That(FindDescendant(root.transform, "chandelier cap 142,110"), Is.Not.Null);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void AtriumDoesNotBuildSlabBandAcrossHallStairMouth()
+        {
+            GameObject root = BuildConvertedSector();
+            try
+            {
+                MeshFilter geometry = FindDescendant(root.transform, "Level Geometry")?.GetComponent<MeshFilter>();
+                Assert.That(geometry, Is.Not.Null);
+
+                float cell = WolfMiniConstants.CellSize;
+                float sharedEdgeX = 31 * cell;
+                float mouthZMin = 28 * cell;
+                float mouthZMax = 29 * cell;
+
+                Assert.That(
+                    HasVerticalQuad(geometry.sharedMesh, sharedEdgeX, mouthZMin, mouthZMax, -WolfMiniConstants.FloorSlabThickness, 0f),
+                    Is.False);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        private GameObject BuildConvertedSector()
+        {
+            WolfSectorLevelConverter.AddLowerStoreyWithStairwell(sector);
+
+            GameObject root = new GameObject("WolfSectorLevelTests Root");
+            var builder = root.AddComponent<WolfSectorMeshBuilder>();
+            builder.BuildOnStart = false;
+            builder.Definition = sector;
+            builder.MaterialLibrary = AssetDatabase.LoadAssetAtPath<WolfFull3DMaterialLibrary>(
+                "Assets/WolfMini/Data/WolfFull3DMaterialLibrary.asset");
+            Assert.That(builder.MaterialLibrary, Is.Not.Null);
+
+            builder.Build();
+            return root;
+        }
+
+        private static Transform FindDescendant(Transform root, string name)
+        {
+            if (root.name == name)
+            {
+                return root;
+            }
+
+            foreach (Transform child in root)
+            {
+                Transform found = FindDescendant(child, name);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool HasVerticalQuad(Mesh mesh, float x, float zMin, float zMax, float yMin, float yMax)
+        {
+            const float eps = 0.001f;
+            Vector3[] vertices = mesh.vertices;
+            for (int i = 0; i + 3 < vertices.Length; i += 4)
+            {
+                if (Mathf.Abs(vertices[i].x - x) > eps ||
+                    Mathf.Abs(vertices[i + 1].x - x) > eps ||
+                    Mathf.Abs(vertices[i + 2].x - x) > eps ||
+                    Mathf.Abs(vertices[i + 3].x - x) > eps)
+                {
+                    continue;
+                }
+
+                float quadZMin = Mathf.Min(vertices[i].z, vertices[i + 1].z, vertices[i + 2].z, vertices[i + 3].z);
+                float quadZMax = Mathf.Max(vertices[i].z, vertices[i + 1].z, vertices[i + 2].z, vertices[i + 3].z);
+                float quadYMin = Mathf.Min(vertices[i].y, vertices[i + 1].y, vertices[i + 2].y, vertices[i + 3].y);
+                float quadYMax = Mathf.Max(vertices[i].y, vertices[i + 1].y, vertices[i + 2].y, vertices[i + 3].y);
+
+                if (Mathf.Abs(quadZMin - zMin) <= eps &&
+                    Mathf.Abs(quadZMax - zMax) <= eps &&
+                    Mathf.Abs(quadYMin - yMin) <= eps &&
+                    Mathf.Abs(quadYMax - yMax) <= eps)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
