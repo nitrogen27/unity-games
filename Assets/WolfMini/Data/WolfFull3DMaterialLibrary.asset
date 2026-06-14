@@ -44,6 +44,10 @@ MonoBehaviour:
   lampGlowMaterial: {fileID: 2100000, guid: ebd4c48e62b0246efb6792c61481c980, type: 2}
   ceilingSpillWarmMaterial: {fileID: 2100000, guid: c878bbdaabd0a4df885926b334c3b6b2, type: 2}
   ceilingSpillCoolMaterial: {fileID: 2100000, guid: f6a561f0ee961459197ce0bd778f32bc, type: 2}
+  lampFloorReflectionWarmMaterial: {fileID: 2100000, guid: e0e4abc7846fc401b80f8a7dfef20eac, type: 2}
+  lampFloorReflectionCoolMaterial: {fileID: 2100000, guid: f741533c31bb34ef5a54f3519245ae90, type: 2}
+  lampWallReflectionWarmMaterial: {fileID: 2100000, guid: 0536d41abb83446df9a2d92725dc12d1, type: 2}
+  lampWallReflectionCoolMaterial: {fileID: 2100000, guid: 68da380636f8c4499ad72c20c45a333c, type: 2}
   lampWarmCap: {fileID: 2100000, guid: 3ab7b1ba30aa5cf4297382fe683457a2, type: 2}
   lampGreenCap: {fileID: 2100000, guid: f31fb66de8a5a2e40b8c2e6d1d063e5b, type: 2}
   lampWarmBulb: {fileID: 2100000, guid: f2983ed3dd4481e44b67bd30f647de4b, type: 2}

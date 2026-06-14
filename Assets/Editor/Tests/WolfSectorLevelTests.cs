@@ -253,6 +253,47 @@ namespace HelloWorldRoom.Editor.Tests
             }
         }
 
+        [Test]
+        public void Full3DMaterialLibraryKeepsTargetLookLightingMaterials()
+        {
+            WolfFull3DMaterialLibrary library = AssetDatabase.LoadAssetAtPath<WolfFull3DMaterialLibrary>(
+                "Assets/WolfMini/Data/WolfFull3DMaterialLibrary.asset");
+
+            Assert.That(library, Is.Not.Null);
+            Assert.That(library.LampGlowMaterial, Is.Not.Null);
+            Assert.That(library.CeilingSpillWarmMaterial, Is.Not.Null);
+            Assert.That(library.CeilingSpillCoolMaterial, Is.Not.Null);
+            Assert.That(library.LampFloorReflectionWarmMaterial, Is.Not.Null);
+            Assert.That(library.LampFloorReflectionCoolMaterial, Is.Not.Null);
+            Assert.That(library.LampWallReflectionWarmMaterial, Is.Not.Null);
+            Assert.That(library.LampWallReflectionCoolMaterial, Is.Not.Null);
+        }
+
+        [Test]
+        public void AtriumBuildAddsTargetLookLightingRig()
+        {
+            GameObject root = BuildConvertedSector();
+            try
+            {
+                Assert.That(FindDescendant(root.transform, "Atrium Lighting"), Is.Not.Null);
+                Assert.That(FindDescendant(root.transform, "atrium floor reflection 01"), Is.Not.Null);
+                Assert.That(FindDescendant(root.transform, "atrium lower fill 01"), Is.Not.Null);
+                Assert.That(FindDescendant(root.transform, "atrium vertical glow 01"), Is.Not.Null);
+                Assert.That(FindDescendant(root.transform, "atrium upper fill 01"), Is.Not.Null);
+
+                Assert.That(HasLight(root, "atrium lower fill 01", LightShadows.Soft), Is.True);
+                Assert.That(HasLight(root, "atrium upper fill 01", LightShadows.Soft), Is.True);
+                Assert.That(HasLightNameContaining(root, "chandelier light ", LightShadows.Soft), Is.True);
+                Assert.That(HasLightNameContaining(root, "ceiling bounce", LightShadows.None), Is.True);
+                Assert.That(HasRendererNameContaining(root, "floor reflection"), Is.True);
+                Assert.That(HasRendererNameContaining(root, "wall reflection"), Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
         private GameObject BuildConvertedSector()
         {
             WolfSectorLevelConverter.AddLowerStoreyWithStairwell(sector);
@@ -286,6 +327,45 @@ namespace HelloWorldRoom.Editor.Tests
             }
 
             return null;
+        }
+
+        private static bool HasLight(GameObject root, string name, LightShadows shadows)
+        {
+            foreach (Light light in root.GetComponentsInChildren<Light>(true))
+            {
+                if (light.name == name && light.shadows == shadows)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasLightNameContaining(GameObject root, string token, LightShadows shadows)
+        {
+            foreach (Light light in root.GetComponentsInChildren<Light>(true))
+            {
+                if (light.name.Contains(token) && light.shadows == shadows)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasRendererNameContaining(GameObject root, string token)
+        {
+            foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer.name.Contains(token))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool HasVerticalQuad(Mesh mesh, float x, float zMin, float zMax, float yMin, float yMax)

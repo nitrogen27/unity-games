@@ -160,6 +160,10 @@ namespace WolfMini.EditorTools
             library.LampGlowMaterial = LoadTargetMaterial("DynamicLampGlow");
             library.CeilingSpillWarmMaterial = LoadTargetMaterial("CeilingLampSpillWarm");
             library.CeilingSpillCoolMaterial = LoadTargetMaterial("CeilingLampSpillCool");
+            library.LampFloorReflectionWarmMaterial = LoadTargetMaterial("LampFloorReflectionWarm");
+            library.LampFloorReflectionCoolMaterial = LoadTargetMaterial("LampFloorReflectionCool");
+            library.LampWallReflectionWarmMaterial = LoadTargetMaterial("LampWallReflectionWarm");
+            library.LampWallReflectionCoolMaterial = LoadTargetMaterial("LampWallReflectionCool");
 
             library.LampWarmCap = AssetDatabase.LoadAssetAtPath<Material>($"{RepoMaterialFolder}/Mat_WolfRepo_LampWarmCap.mat");
             library.LampGreenCap = AssetDatabase.LoadAssetAtPath<Material>($"{RepoMaterialFolder}/Mat_WolfRepo_LampGreenCap.mat");
