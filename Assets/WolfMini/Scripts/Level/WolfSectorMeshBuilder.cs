@@ -510,49 +510,86 @@ namespace WolfMini.Level
         }
 
         /// <summary>
-        /// Two-sided slab faces around a rectangular gallery/atrium opening.
-        /// Adjacent stair openings remove the shared edge span, so the slab band
-        /// does not hang across the stair mouth.
+        /// Two-sided slab faces around a rectangular gallery/atrium opening,
+        /// one band per floor plane the void cuts, so a multi-storey opening
+        /// shows the slab on every gallery tier. Adjacent stair openings remove
+        /// the shared edge span, so no band hangs across a stair mouth.
         /// </summary>
         private IEnumerable<WallSegmentSpec> CreateFloorOpeningSlabEdges(FloorOpeningSpec spec)
         {
             Rect opening = spec.opening;
             int style = spec.wallStyle;
-            float topY = spec.topY;
-            float baseY = topY - WolfMiniConstants.FloorSlabThickness;
             const float height = WolfMiniConstants.FloorSlabThickness;
 
-            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMin), new Vector2(opening.xMax, opening.yMin), topY))
+            foreach (float plane in FloorPlanesCutByOpening(spec))
             {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                float baseY = plane - WolfMiniConstants.FloorSlabThickness;
+
+                foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMin), new Vector2(opening.xMax, opening.yMin), plane))
                 {
-                    yield return edge;
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                    {
+                        yield return edge;
+                    }
+                }
+
+                foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMin), new Vector2(opening.xMax, opening.yMax), plane))
+                {
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                    {
+                        yield return edge;
+                    }
+                }
+
+                foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMax), new Vector2(opening.xMin, opening.yMax), plane))
+                {
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                    {
+                        yield return edge;
+                    }
+                }
+
+                foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMax), new Vector2(opening.xMin, opening.yMin), plane))
+                {
+                    foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
+                    {
+                        yield return edge;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Distinct sector floor planes the opening punches through, highest
+        /// first: every storey floor above the opening's own (intact) bottom
+        /// floor whose sector overlaps the void footprint.
+        /// </summary>
+        private List<float> FloorPlanesCutByOpening(FloorOpeningSpec spec)
+        {
+            const float eps = 0.001f;
+            var planes = new List<float>();
+            foreach (SectorSpec sector in definition.sectors)
+            {
+                if (sector?.floorAreas == null ||
+                    sector.floorY > spec.topY + eps ||
+                    sector.floorY <= spec.bottomY + eps ||
+                    planes.Exists(p => Mathf.Abs(p - sector.floorY) <= eps))
+                {
+                    continue;
+                }
+
+                foreach (Rect area in sector.floorAreas)
+                {
+                    if (area.Overlaps(spec.opening))
+                    {
+                        planes.Add(sector.floorY);
+                        break;
+                    }
                 }
             }
 
-            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMin), new Vector2(opening.xMax, opening.yMax), topY))
-            {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
-                {
-                    yield return edge;
-                }
-            }
-
-            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMax, opening.yMax), new Vector2(opening.xMin, opening.yMax), topY))
-            {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
-                {
-                    yield return edge;
-                }
-            }
-
-            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, new Vector2(opening.xMin, opening.yMax), new Vector2(opening.xMin, opening.yMin), topY))
-            {
-                foreach (WallSegmentSpec edge in CreateDoubleSidedSlabEdge(segment.start, segment.end, baseY, height, style))
-                {
-                    yield return edge;
-                }
-            }
+            planes.Sort((a, b) => b.CompareTo(a));
+            return planes;
         }
 
         private IEnumerable<EdgeSegment> ClipOpeningEdgeByAdjacentStairwells(Rect opening, Vector2 start, Vector2 end, float topY)
@@ -572,7 +609,9 @@ namespace WolfMini.Level
 
             foreach (StairwellSpec stairwell in definition.stairwells)
             {
-                if (stairwell == null || Mathf.Abs(stairwell.topY - topY) > eps)
+                // Only stair shafts that cut through this floor plane can
+                // interrupt the band along it.
+                if (stairwell == null || topY > stairwell.topY + eps || topY < stairwell.bottomY - eps)
                 {
                     continue;
                 }
@@ -646,7 +685,9 @@ namespace WolfMini.Level
 
             foreach (FloorOpeningSpec opening in definition.floorOpenings)
             {
-                if (opening == null || Mathf.Abs(opening.topY - topY) > eps)
+                // Only voids that cut through this floor plane can swallow
+                // the band along it.
+                if (opening == null || topY > opening.topY + eps || topY <= opening.bottomY + eps)
                 {
                     continue;
                 }
@@ -1293,7 +1334,7 @@ namespace WolfMini.Level
 
                 if (prop.typeIndex == WolfLevelContent.CeilLightTypeIndex || prop.typeIndex == WolfLevelContent.ChandelierTypeIndex)
                 {
-                    if (IsCeilingPropInsideFloorOpening(prop))
+                    if (IsCeilingPropInsideFloorOpening(prop) || IsCeilingPropInsideStairwell(prop))
                     {
                         continue;
                     }
@@ -1344,6 +1385,39 @@ namespace WolfMini.Level
                 }
 
                 Rect rect = opening.opening;
+                if (point.x >= rect.xMin - eps && point.x <= rect.xMax + eps &&
+                    point.y >= rect.yMin - eps && point.y <= rect.yMax + eps)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Ceiling lamps of storeys crossed by a stair shaft are dropped: the
+        /// shaft cuts their ceiling plane, so they would float inside the
+        /// staircase, and the storey at the shaft's top would hang its lamp
+        /// over the open pit.
+        /// </summary>
+        private bool IsCeilingPropInsideStairwell(LevelPropSpec prop)
+        {
+            if (definition.stairwells == null)
+            {
+                return false;
+            }
+
+            const float eps = 0.001f;
+            Vector2 point = new Vector2(prop.position.x, prop.position.z);
+            foreach (StairwellSpec stairwell in definition.stairwells)
+            {
+                if (stairwell == null || prop.position.y > stairwell.topY + eps || prop.position.y < stairwell.bottomY - eps)
+                {
+                    continue;
+                }
+
+                Rect rect = stairwell.opening;
                 if (point.x >= rect.xMin - eps && point.x <= rect.xMax + eps &&
                     point.y >= rect.yMin - eps && point.y <= rect.yMax + eps)
                 {

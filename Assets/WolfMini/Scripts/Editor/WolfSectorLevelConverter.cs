@@ -45,7 +45,7 @@ namespace WolfMini.EditorTools
             }
 
             PopulateFromGrid(target, source);
-            AddLowerStoreyWithStairwell(target);
+            AddStackedStoreysWithStairwells(target);
 
             EditorUtility.SetDirty(target);
             AssetDatabase.SaveAssets();
@@ -95,39 +95,80 @@ namespace WolfMini.EditorTools
         }
 
         /// <summary>
-        /// The lower storey and the stairwell that reaches it. The storey is an
-        /// exact copy of the whole upper floor one wall-height down — same
-        /// rooms, walls, doorways, props and enemies. The stairwell sits in the
-        /// start corridor (the hallway behind the first room's east door),
-        /// between the two side-door rows. Authored here because the repo grid
-        /// carries no vertical data.
+        /// The two extra storeys and the stair hub that links them. Each storey
+        /// is an exact copy of the whole authored floor — same rooms, walls,
+        /// doorways, props and enemies — one storey height below and above the
+        /// middle floor. The T-shaped start corridor becomes the hub: its west
+        /// arm carries stairs down to the lower storey, its east arm stairs up
+        /// to the top storey, so the T junction acts as the landing between
+        /// them. Authored here because the repo grid carries no vertical data.
         /// </summary>
-        public static void AddLowerStoreyWithStairwell(WolfSectorLevelDefinition target)
+        public static void AddStackedStoreysWithStairwells(WolfSectorLevelDefinition target)
         {
             const int corridorStyle = 8; // blue stone, same as the corridor walls
             const int hallStyle = 2;     // tan stone, same as the big south hall walls
             const int stairStepCount = 13;
-            float lowerY = -(WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness);
+            float storey = WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness;
+            float lowerY = -storey;
+            float upperY = storey;
 
-            DuplicateStoreyBelow(target, lowerY);
+            int sectorCount = target.sectors.Count;
+            int wallCount = target.walls.Count;
+            int doorwayCount = target.doorways.Count;
+            int propCount = target.props.Count;
+            int enemyCount = target.enemies.Count;
 
-            // The corridor spans cells x 33..35; the opening takes the middle
-            // cell column on z 7..9, leaving a one-cell walk-around strip on
-            // both sides. Stairs descend toward the south door at (34,13).
+            // The lower storey sits under the middle floor, so its walls close
+            // the slab band; the top storey has nothing above it.
+            DuplicateStorey(target, lowerY, "_L", WolfMiniConstants.FloorSlabThickness,
+                sectorCount, wallCount, doorwayCount, propCount, enemyCount);
+            DuplicateStorey(target, upperY, "_U", 0f,
+                sectorCount, wallCount, doorwayCount, propCount, enemyCount);
+
+            // The middle storey now carries the top storey: its walls run on up
+            // to the top floor plane, closing that slab band sideways too.
+            for (int i = 0; i < wallCount; i++)
+            {
+                target.walls[i].height += WolfMiniConstants.FloorSlabThickness;
+            }
+
+            // Stair hub in the T-bar of the start corridor (open cells
+            // x 28..40, z 1..3). Both stairs take the middle cell row z 2,
+            // leaving one-cell walk-around strips at z 1 and z 3, and both
+            // entries sit flush with the T junction (x 33..35) so it reads as
+            // the landing: step off west to descend, east to climb.
+
+            // West arm: stairs down to the lower storey. Top entry at the
+            // junction edge; the mouth opens west onto the arm's end cells.
             target.stairwells.Add(new StairwellSpec
             {
-                opening = new Rect(34 * Cell, 7 * Cell, Cell, 3 * Cell),
+                opening = new Rect(30 * Cell, 2 * Cell, 3 * Cell, Cell),
                 topY = 0f,
                 bottomY = lowerY,
-                alongZ = true,
-                descendSign = 1,
+                alongZ = false,
+                descendSign = -1,
+                stepCount = stairStepCount,
+                wallStyle = corridorStyle,
+                treadUvScale = 4f
+            });
+
+            // East arm: stairs up to the top storey — authored as a stairwell
+            // cut into the top storey's floor plane, its mouth opening west
+            // toward the junction on the middle floor.
+            target.stairwells.Add(new StairwellSpec
+            {
+                opening = new Rect(36 * Cell, 2 * Cell, 3 * Cell, Cell),
+                topY = upperY,
+                bottomY = 0f,
+                alongZ = false,
+                descendSign = -1,
                 stepCount = stairStepCount,
                 wallStyle = corridorStyle,
                 treadUvScale = 4f
             });
 
             // Return staircase in the big south hall (cells x 27..41, z 27..33):
-            // from the lower hall copy back up to the same hall on the upper
+            // from the lower hall copy back up to the same hall on the middle
             // floor. It sits in the hall's north-west part (cells x 28..30,
             // row z 28), clear of the chandelier row at z 30, both guards and
             // the entrance path from the north door; the mouth opens east
@@ -144,28 +185,44 @@ namespace WolfMini.EditorTools
                 treadUvScale = 4f
             });
 
-            // Minimal second-tier gallery in the big south hall: the upper hall
-            // floor becomes a walkable ring around this void, while the lower
-            // hall floor stays intact so the player can look down into it.
+            // Three-storey atrium in the big south hall: one void cuts the top
+            // hall floor, the middle ceiling and the middle hall floor, so both
+            // upper storeys become gallery rings around it, while the lower
+            // hall floor stays intact so the player can look all the way down.
             target.floorOpenings.Add(new FloorOpeningSpec
             {
                 opening = new Rect(31 * Cell, 28 * Cell, 8 * Cell, 5 * Cell),
-                topY = 0f,
+                topY = upperY,
                 bottomY = lowerY,
                 wallStyle = hallStyle
             });
         }
 
-        /// <summary>Clones every sector, wall, doorway, prop and enemy shifted down by <paramref name="offsetY"/>.</summary>
-        private static void DuplicateStoreyBelow(WolfSectorLevelDefinition target, float offsetY)
+        /// <summary>
+        /// Clones the first counts of sectors, walls, doorways, props and
+        /// enemies (the authored middle storey) shifted by <paramref name="offsetY"/>.
+        /// A storey that sits under another one passes the slab thickness as
+        /// <paramref name="extraWallHeight"/>: its walls then run on up to the
+        /// floor plane above, closing the slab band sideways so nothing lit
+        /// leaks through seam cracks between the storeys.
+        /// </summary>
+        private static void DuplicateStorey(
+            WolfSectorLevelDefinition target,
+            float offsetY,
+            string idSuffix,
+            float extraWallHeight,
+            int sectorCount,
+            int wallCount,
+            int doorwayCount,
+            int propCount,
+            int enemyCount)
         {
-            int sectorCount = target.sectors.Count;
             for (int i = 0; i < sectorCount; i++)
             {
                 SectorSpec sector = target.sectors[i];
                 target.sectors.Add(new SectorSpec
                 {
-                    id = $"{sector.id}_L",
+                    id = $"{sector.id}{idSuffix}",
                     floorY = sector.floorY + offsetY,
                     ceilingHeight = sector.ceilingHeight,
                     floorColor = sector.floorColor,
@@ -174,7 +231,6 @@ namespace WolfMini.EditorTools
                 });
             }
 
-            int wallCount = target.walls.Count;
             for (int i = 0; i < wallCount; i++)
             {
                 WallSegmentSpec wall = target.walls[i];
@@ -183,15 +239,11 @@ namespace WolfMini.EditorTools
                     start = wall.start,
                     end = wall.end,
                     baseY = wall.baseY + offsetY,
-                    // Lower walls run on up to the upper floor, closing the
-                    // slab band sideways so nothing lit leaks through seam
-                    // cracks between the storeys.
-                    height = wall.height + WolfMiniConstants.FloorSlabThickness,
+                    height = wall.height + extraWallHeight,
                     style = wall.style
                 });
             }
 
-            int doorwayCount = target.doorways.Count;
             for (int i = 0; i < doorwayCount; i++)
             {
                 DoorwaySpec doorway = target.doorways[i];
@@ -209,7 +261,6 @@ namespace WolfMini.EditorTools
                 });
             }
 
-            int propCount = target.props.Count;
             for (int i = 0; i < propCount; i++)
             {
                 LevelPropSpec prop = target.props[i];
@@ -221,7 +272,6 @@ namespace WolfMini.EditorTools
                 });
             }
 
-            int enemyCount = target.enemies.Count;
             for (int i = 0; i < enemyCount; i++)
             {
                 LevelEnemySpec enemy = target.enemies[i];
