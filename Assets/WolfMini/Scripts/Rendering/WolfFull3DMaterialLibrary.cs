@@ -42,6 +42,7 @@ namespace WolfMini.Rendering
         [SerializeField] private Material lampFloorReflectionCoolMaterial;
         [SerializeField] private Material lampWallReflectionWarmMaterial;
         [SerializeField] private Material lampWallReflectionCoolMaterial;
+        [SerializeField] private Material railMaterial;
 
         [Header("Lamp materials")]
         [SerializeField] private Material lampWarmCap;
@@ -110,6 +111,13 @@ namespace WolfMini.Rendering
         public Material LampFloorReflectionCoolMaterial { get => lampFloorReflectionCoolMaterial; set => lampFloorReflectionCoolMaterial = value; }
         public Material LampWallReflectionWarmMaterial { get => lampWallReflectionWarmMaterial; set => lampWallReflectionWarmMaterial = value; }
         public Material LampWallReflectionCoolMaterial { get => lampWallReflectionCoolMaterial; set => lampWallReflectionCoolMaterial = value; }
+
+        /// <summary>Metal of the gallery guard rails; falls back to plain grey so railings never render magenta.</summary>
+        public Material RailMaterial
+        {
+            get => railMaterial != null ? railMaterial : GetFallback("Rail", new Color(0.58f, 0.60f, 0.63f));
+            set => railMaterial = value;
+        }
 
         /// <summary>Target-look material for a wall value (e.g. blue stone, white stone), if assigned.</summary>
         public bool TryGetWallOverride(int wallValue, out Material material, out bool tileVertically)

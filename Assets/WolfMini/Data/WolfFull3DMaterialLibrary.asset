@@ -48,6 +48,7 @@ MonoBehaviour:
   lampFloorReflectionCoolMaterial: {fileID: 2100000, guid: f741533c31bb34ef5a54f3519245ae90, type: 2}
   lampWallReflectionWarmMaterial: {fileID: 2100000, guid: 0536d41abb83446df9a2d92725dc12d1, type: 2}
   lampWallReflectionCoolMaterial: {fileID: 2100000, guid: 68da380636f8c4499ad72c20c45a333c, type: 2}
+  railMaterial: {fileID: 2100000, guid: 80d202aa776b4f3da92dded923aceddb, type: 2}
   lampWarmCap: {fileID: 2100000, guid: 3ab7b1ba30aa5cf4297382fe683457a2, type: 2}
   lampGreenCap: {fileID: 2100000, guid: f31fb66de8a5a2e40b8c2e6d1d063e5b, type: 2}
   lampWarmBulb: {fileID: 2100000, guid: f2983ed3dd4481e44b67bd30f647de4b, type: 2}

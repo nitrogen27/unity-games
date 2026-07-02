@@ -319,6 +319,80 @@ namespace HelloWorldRoom.Editor.Tests
         }
 
         [Test]
+        public void AtriumBuildsRailingsOnBothGalleryTiers()
+        {
+            GameObject root = BuildConvertedSector();
+            try
+            {
+                Transform railings = FindDescendant(root.transform, "Atrium Railings");
+                Assert.That(railings, Is.Not.Null);
+                Assert.That(railings.GetComponent<MeshCollider>(), Is.Not.Null);
+                Mesh mesh = railings.GetComponent<MeshFilter>().sharedMesh;
+
+                float cell = WolfMiniConstants.CellSize;
+                float storey = WolfMiniConstants.WallHeight + WolfMiniConstants.FloorSlabThickness;
+                float halfRail = WolfSectorMeshBuilder.RailingTopRailWidth * 0.5f;
+
+                // East atrium edge, away from the hall stair: an unbroken top
+                // rail on the gallery side of the edge, on both gallery tiers.
+                float railX = 39 * cell + WolfSectorMeshBuilder.RailingInset;
+                float zMin = 28 * cell;
+                float zMax = 33 * cell;
+
+                Assert.That(
+                    HasHorizontalQuad(mesh, WolfSectorMeshBuilder.RailingGuardHeight, railX - halfRail, railX + halfRail, zMin, zMax),
+                    Is.True);
+                Assert.That(
+                    HasHorizontalQuad(mesh, storey + WolfSectorMeshBuilder.RailingGuardHeight, railX - halfRail, railX + halfRail, zMin, zMax),
+                    Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void AtriumRailingSkipsHallStairMouthButGuardsThePit()
+        {
+            GameObject root = BuildConvertedSector();
+            try
+            {
+                Mesh mesh = FindDescendant(root.transform, "Atrium Railings").GetComponent<MeshFilter>().sharedMesh;
+
+                float cell = WolfMiniConstants.CellSize;
+                float guardY = WolfSectorMeshBuilder.RailingGuardHeight;
+                float inset = WolfSectorMeshBuilder.RailingInset;
+                float halfRail = WolfSectorMeshBuilder.RailingTopRailWidth * 0.5f;
+
+                // West atrium edge on the middle tier: the rail stops at the
+                // hall stair mouth instead of hanging across the open shaft.
+                float railWestX = 31 * cell - inset;
+                Assert.That(
+                    HasHorizontalQuad(mesh, guardY, railWestX - halfRail, railWestX + halfRail, 29 * cell, 33 * cell),
+                    Is.True);
+                Assert.That(
+                    HasHorizontalQuad(mesh, guardY, railWestX - halfRail, railWestX + halfRail, 28 * cell, 33 * cell),
+                    Is.False);
+
+                // Both long sides of the stair pit are guarded at gallery
+                // level; the head end stays open as the stair entry.
+                float southRailZ = 28 * cell - inset;
+                float northRailZ = 29 * cell + inset;
+                Assert.That(
+                    HasHorizontalQuad(mesh, guardY, 28 * cell, 31 * cell, southRailZ - halfRail, southRailZ + halfRail),
+                    Is.True);
+                Assert.That(
+                    HasHorizontalQuad(mesh, guardY, 28 * cell, 31 * cell, northRailZ - halfRail, northRailZ + halfRail),
+                    Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
         public void Full3DMaterialLibraryKeepsTargetLookLightingMaterials()
         {
             WolfFull3DMaterialLibrary library = AssetDatabase.LoadAssetAtPath<WolfFull3DMaterialLibrary>(
@@ -332,6 +406,10 @@ namespace HelloWorldRoom.Editor.Tests
             Assert.That(library.LampFloorReflectionCoolMaterial, Is.Not.Null);
             Assert.That(library.LampWallReflectionWarmMaterial, Is.Not.Null);
             Assert.That(library.LampWallReflectionCoolMaterial, Is.Not.Null);
+
+            // RailMaterial falls back to a generated grey when unassigned, so
+            // assert the target-look asset itself is wired up.
+            Assert.That(library.RailMaterial.name, Is.EqualTo("RailMetal_Target"));
         }
 
         [Test]
@@ -425,6 +503,37 @@ namespace HelloWorldRoom.Editor.Tests
             foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>(true))
             {
                 if (renderer.name.Contains(token))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasHorizontalQuad(Mesh mesh, float y, float xMin, float xMax, float zMin, float zMax)
+        {
+            const float eps = 0.001f;
+            Vector3[] vertices = mesh.vertices;
+            for (int i = 0; i + 3 < vertices.Length; i += 4)
+            {
+                if (Mathf.Abs(vertices[i].y - y) > eps ||
+                    Mathf.Abs(vertices[i + 1].y - y) > eps ||
+                    Mathf.Abs(vertices[i + 2].y - y) > eps ||
+                    Mathf.Abs(vertices[i + 3].y - y) > eps)
+                {
+                    continue;
+                }
+
+                float quadXMin = Mathf.Min(vertices[i].x, vertices[i + 1].x, vertices[i + 2].x, vertices[i + 3].x);
+                float quadXMax = Mathf.Max(vertices[i].x, vertices[i + 1].x, vertices[i + 2].x, vertices[i + 3].x);
+                float quadZMin = Mathf.Min(vertices[i].z, vertices[i + 1].z, vertices[i + 2].z, vertices[i + 3].z);
+                float quadZMax = Mathf.Max(vertices[i].z, vertices[i + 1].z, vertices[i + 2].z, vertices[i + 3].z);
+
+                if (Mathf.Abs(quadXMin - xMin) <= eps &&
+                    Mathf.Abs(quadXMax - xMax) <= eps &&
+                    Mathf.Abs(quadZMin - zMin) <= eps &&
+                    Mathf.Abs(quadZMax - zMax) <= eps)
                 {
                     return true;
                 }

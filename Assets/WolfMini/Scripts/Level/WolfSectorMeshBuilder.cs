@@ -27,6 +27,21 @@ namespace WolfMini.Level
         // Covers both storeys: lamps use target-look realtime light rigs.
         [SerializeField] private int maxRealtimeLights = 96;
 
+        // Guard rails are human-scale furniture (like doors and actors), not
+        // world-scaled architecture: ~1 m of guard height reads right against
+        // the 1.75 m soldiers on the galleries.
+        public const float RailingInset = 0.11f;
+        public const float RailingGuardHeight = 0.98f;
+        public const float RailingTopRailWidth = 0.10f;
+        private const float RailingPostHeight = 1.06f;
+        private const float RailingPostSize = 0.08f;
+        private const float RailingPostCapSize = 0.14f;
+        private const float RailingPostCapHeight = 0.045f;
+        private const float RailingPostSpacing = 1.35f;
+        private const float RailingTopRailHeight = 0.07f;
+        private const float RailingBarSize = 0.034f;
+        private static readonly float[] RailingBarHeights = { 0.23f, 0.46f, 0.69f };
+
         private const int LampLightingMask = ~0;
         private const float PrimaryShadowStrength = 0.86f;
         private const float ReflectionBoundaryProbeHeight = 0.42f * WorldScale;
@@ -86,6 +101,7 @@ namespace WolfMini.Level
 
             Transform root = ResetGeneratedRoot();
             BuildLevelGeometry(root);
+            BuildRailings(root);
             BuildDoorways(root);
             Physics.SyncTransforms();
             BuildProps(root);
@@ -507,6 +523,200 @@ namespace WolfMini.Level
             {
                 EmitWall(buffer, wallSubmesh, overrideSubmeshes, overrideMaterials, slabEdge);
             }
+        }
+
+        /// <summary>
+        /// Metal guard rails on every gallery tier: around the atrium voids
+        /// (clipped at adjacent stair mouths, like the slab bands) and along
+        /// the pit sides of stairwells that descend out of such a gallery.
+        /// One combined mesh with the rail material; the mesh doubles as the
+        /// collider so the player cannot walk off a gallery edge while shots
+        /// still pass between the bars.
+        /// </summary>
+        private void BuildRailings(Transform parent)
+        {
+            var buffer = new WolfMeshBuffer(submeshCount: 1);
+            var postAnchors = new HashSet<Vector3Int>();
+
+            if (definition.floorOpenings != null)
+            {
+                foreach (FloorOpeningSpec opening in definition.floorOpenings)
+                {
+                    if (opening == null)
+                    {
+                        continue;
+                    }
+
+                    Rect o = opening.opening;
+                    foreach (float plane in FloorPlanesCutByOpening(opening))
+                    {
+                        AddOpeningEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), plane);
+                        AddOpeningEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, o.yMin), new Vector2(o.xMax, o.yMax), plane);
+                        AddOpeningEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), plane);
+                        AddOpeningEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, o.yMax), new Vector2(o.xMin, o.yMin), plane);
+                    }
+                }
+            }
+
+            AddStairwellPitRailings(buffer, postAnchors);
+
+            if (buffer.IsEmpty)
+            {
+                return;
+            }
+
+            GameObject railings = new GameObject("Atrium Railings");
+            railings.transform.SetParent(parent, false);
+            railings.isStatic = true;
+
+            Mesh mesh = buffer.ToMesh($"{definition.levelName}_Railings");
+            railings.AddComponent<MeshFilter>().sharedMesh = mesh;
+            railings.AddComponent<MeshRenderer>().sharedMaterial = materialLibrary.RailMaterial;
+            railings.AddComponent<MeshCollider>().sharedMesh = mesh;
+        }
+
+        private void AddOpeningEdgeRailings(WolfMeshBuffer buffer, HashSet<Vector3Int> postAnchors, Rect opening, Vector2 start, Vector2 end, float plane)
+        {
+            foreach (EdgeSegment segment in ClipOpeningEdgeByAdjacentStairwells(opening, start, end, plane))
+            {
+                AddRailingRun(buffer, postAnchors, segment.start, segment.end, plane);
+            }
+        }
+
+        /// <summary>
+        /// Guard rails along both long sides of a stair pit cut into a gallery
+        /// floor next to an atrium void. The head end stays open as the stair
+        /// entry; the mouth end borders the void where the gallery has no
+        /// floor to stand on, so no rail is needed there.
+        /// </summary>
+        private void AddStairwellPitRailings(WolfMeshBuffer buffer, HashSet<Vector3Int> postAnchors)
+        {
+            if (definition.stairwells == null)
+            {
+                return;
+            }
+
+            foreach (StairwellSpec stairwell in definition.stairwells)
+            {
+                if (stairwell == null || !StairwellBordersFloorOpening(stairwell))
+                {
+                    continue;
+                }
+
+                Rect o = stairwell.opening;
+                if (stairwell.alongZ)
+                {
+                    AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, o.yMax), new Vector2(o.xMin, o.yMin), stairwell.topY);
+                    AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, o.yMin), new Vector2(o.xMax, o.yMax), stairwell.topY);
+                }
+                else
+                {
+                    AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), stairwell.topY);
+                    AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), stairwell.topY);
+                }
+            }
+        }
+
+        private void AddPitEdgeRailings(WolfMeshBuffer buffer, HashSet<Vector3Int> postAnchors, Rect pit, Vector2 start, Vector2 end, float plane)
+        {
+            foreach (EdgeSegment segment in ClipStairwellEdgeByAdjacentFloorOpenings(pit, start, end, plane))
+            {
+                AddRailingRun(buffer, postAnchors, segment.start, segment.end, plane);
+            }
+        }
+
+        private bool StairwellBordersFloorOpening(StairwellSpec stairwell)
+        {
+            const float eps = 0.001f;
+            if (definition.floorOpenings == null)
+            {
+                return false;
+            }
+
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening != null &&
+                    stairwell.topY <= opening.topY + eps &&
+                    stairwell.topY > opening.bottomY + eps &&
+                    RectanglesTouchOnEdge(stairwell.opening, opening.opening, eps))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// One straight railing run standing on the gallery floor just inside
+        /// the guarded edge: posts with caps, a solid top rail and three thin
+        /// bars. The edge runs with the same winding as the slab edges, so the
+        /// gallery side is Cross(up, end - start). Post anchors are de-duplicated
+        /// across runs because collinear void and pit runs share their end posts.
+        /// </summary>
+        private static void AddRailingRun(WolfMeshBuffer buffer, HashSet<Vector3Int> postAnchors, Vector2 start, Vector2 end, float floorY)
+        {
+            Vector2 delta = end - start;
+            float length = delta.magnitude;
+            if (length < RailingPostSize * 2f)
+            {
+                return;
+            }
+
+            Vector2 direction = delta / length;
+            Vector2 lineStart = start + new Vector2(direction.y, -direction.x) * RailingInset;
+
+            Vector3 along = new Vector3(direction.x, 0f, direction.y);
+            Vector3 side = Vector3.Cross(Vector3.up, along);
+            Vector3 origin = new Vector3(lineStart.x, floorY, lineStart.y);
+            Vector3 center = origin + along * (length * 0.5f);
+
+            AddRailingBox(buffer, center + Vector3.up * (RailingGuardHeight - RailingTopRailHeight * 0.5f),
+                along, side, length, RailingTopRailWidth, RailingTopRailHeight);
+            foreach (float barHeight in RailingBarHeights)
+            {
+                AddRailingBox(buffer, center + Vector3.up * barHeight, along, side, length, RailingBarSize, RailingBarSize);
+            }
+
+            int posts = Mathf.Max(2, Mathf.CeilToInt(length / RailingPostSpacing) + 1);
+            for (int i = 0; i < posts; i++)
+            {
+                float t = i / (float)(posts - 1);
+                Vector3 basePosition = origin + along * (length * t);
+                var anchor = new Vector3Int(
+                    Mathf.RoundToInt(basePosition.x * 1000f),
+                    Mathf.RoundToInt(basePosition.y * 1000f),
+                    Mathf.RoundToInt(basePosition.z * 1000f));
+                if (!postAnchors.Add(anchor))
+                {
+                    continue;
+                }
+
+                AddRailingBox(buffer, basePosition + Vector3.up * (RailingPostHeight * 0.5f),
+                    along, side, RailingPostSize, RailingPostSize, RailingPostHeight);
+                AddRailingBox(buffer, basePosition + Vector3.up * (RailingPostHeight + RailingPostCapHeight * 0.5f),
+                    along, side, RailingPostCapSize, RailingPostCapSize, RailingPostCapHeight);
+            }
+        }
+
+        /// <summary>Axis box from an orthonormal (along, side, up) frame: long faces, end caps, top and bottom.</summary>
+        private static void AddRailingBox(WolfMeshBuffer buffer, Vector3 center, Vector3 along, Vector3 side, float length, float width, float height)
+        {
+            const int submesh = 0;
+            Vector3 a = along * (length * 0.5f);
+            Vector3 s = side * (width * 0.5f);
+            Vector3 h = Vector3.up * (height * 0.5f);
+
+            Rect sideUV = new Rect(0f, 0f, length, height);
+            Rect capUV = new Rect(0f, 0f, width, height);
+            Rect flatUV = new Rect(0f, 0f, length, width);
+
+            buffer.AddQuad(submesh, center - a + s - h, center + a + s - h, center + a + s + h, center - a + s + h, side, sideUV);
+            buffer.AddQuad(submesh, center + a - s - h, center - a - s - h, center - a - s + h, center + a - s + h, -side, sideUV);
+            buffer.AddQuad(submesh, center + a + s - h, center + a - s - h, center + a - s + h, center + a + s + h, along, capUV);
+            buffer.AddQuad(submesh, center - a - s - h, center - a + s - h, center - a + s + h, center - a - s + h, -along, capUV);
+            buffer.AddQuad(submesh, center - a + s + h, center + a + s + h, center + a - s + h, center - a - s + h, Vector3.up, flatUV);
+            buffer.AddQuad(submesh, center + a + s - h, center - a + s - h, center - a - s - h, center + a - s - h, Vector3.down, flatUV);
         }
 
         /// <summary>
@@ -1839,6 +2049,7 @@ namespace WolfMini.Level
             return transform.GetComponentInParent<WolfDoor>() != null ||
                 objectName.StartsWith("Door ", System.StringComparison.Ordinal) ||
                 objectName.Contains(" Door ", System.StringComparison.Ordinal) ||
+                objectName.Contains("Railings", System.StringComparison.Ordinal) ||
                 objectName.StartsWith("ceilLight", System.StringComparison.Ordinal) ||
                 objectName.StartsWith("chandelier", System.StringComparison.Ordinal) ||
                 objectName.Contains("reflection", System.StringComparison.OrdinalIgnoreCase) ||
