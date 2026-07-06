@@ -21,6 +21,22 @@ namespace HelloWorldRoom
         [SerializeField, Range(0f, 1f)] private float postAntialiasingSubpixelBlending = 0.72f;
         [SerializeField, Range(0.0312f, 0.333f)] private float postAntialiasingEdgeThreshold = 0.11f;
         [SerializeField, Range(0.0156f, 0.0833f)] private float postAntialiasingEdgeThresholdMin = 0.0312f;
+        [SerializeField] private bool enableCinematicPostProcess = true;
+        [SerializeField, Range(0.5f, 2.0f)] private float cinematicExposure = 1.0f;
+        [SerializeField, Range(0.8f, 1.6f)] private float cinematicContrast = 1.18f;
+        [SerializeField, Range(0f, 0.18f)] private float cinematicBlackPoint = 0.028f;
+        [SerializeField, Range(0.7f, 1.4f)] private float cinematicSaturation = 1.06f;
+        [SerializeField, Range(0f, 0.45f)] private float cinematicLocalContrast = 0.16f;
+        [SerializeField, Range(0.5f, 3.5f)] private float cinematicLocalRadius = 1.7f;
+        [SerializeField, Range(0.6f, 2.5f)] private float cinematicBloomThreshold = 1.15f;
+        [SerializeField, Range(0f, 1.5f)] private float cinematicBloomIntensity = 0.35f;
+        [SerializeField, Range(0f, 1f)] private float cinematicBloomKnee = 0.46f;
+        [SerializeField, Range(0.7f, 2.4f)] private float cinematicBloomScatter = 1.35f;
+        [SerializeField, Range(1, 5)] private int cinematicBloomIterations = 3;
+        [SerializeField, Range(1, 4)] private int cinematicBloomDownsample = 2;
+        [SerializeField, Range(0f, 0.35f)] private float cinematicVignette = 0.14f;
+        [SerializeField, Range(0f, 0.35f)] private float cinematicWarmHighlights = 0.17f;
+        [SerializeField, Range(0f, 0.2f)] private float cinematicCoolShadows = 0.045f;
 
         private void Awake()
         {
@@ -44,6 +60,8 @@ namespace HelloWorldRoom
             qualityLevel = Mathf.Max(0, qualityLevel);
             maxPixelLights = Mathf.Max(0, maxPixelLights);
             antiAliasingSamples = NormalizeAntiAliasingSamples(antiAliasingSamples);
+            cinematicBloomIterations = Mathf.Clamp(cinematicBloomIterations, 1, 5);
+            cinematicBloomDownsample = Mathf.Clamp(cinematicBloomDownsample, 1, 4);
         }
 #endif
 
@@ -110,6 +128,7 @@ namespace HelloWorldRoom
                 camera.allowMSAA = allowMsaa;
                 camera.useOcclusionCulling = true;
                 ApplyPostAntialiasing(camera);
+                ApplyCinematicPostProcess(camera);
             }
         }
 
@@ -136,6 +155,43 @@ namespace HelloWorldRoom
                 postAntialiasingEdgeThreshold,
                 postAntialiasingEdgeThresholdMin);
             postAntialiasing.enabled = true;
+        }
+
+        private void ApplyCinematicPostProcess(Camera camera)
+        {
+            WolfCinematicPostProcess cinematicPostProcess = camera.GetComponent<WolfCinematicPostProcess>();
+            if (!enableCinematicPostProcess)
+            {
+                if (cinematicPostProcess != null)
+                {
+                    cinematicPostProcess.enabled = false;
+                }
+
+                return;
+            }
+
+            if (cinematicPostProcess == null)
+            {
+                cinematicPostProcess = camera.gameObject.AddComponent<WolfCinematicPostProcess>();
+            }
+
+            cinematicPostProcess.Configure(
+                cinematicExposure,
+                cinematicContrast,
+                cinematicBlackPoint,
+                cinematicSaturation,
+                cinematicLocalContrast,
+                cinematicLocalRadius,
+                cinematicBloomThreshold,
+                cinematicBloomIntensity,
+                cinematicBloomKnee,
+                cinematicBloomScatter,
+                cinematicBloomIterations,
+                cinematicBloomDownsample,
+                cinematicVignette,
+                cinematicWarmHighlights,
+                cinematicCoolShadows);
+            cinematicPostProcess.enabled = true;
         }
 
         private static int NormalizeAntiAliasingSamples(int samples)

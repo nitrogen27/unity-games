@@ -45,12 +45,19 @@ namespace WolfMini.EditorTools
             var definition = AssetDatabase.LoadAssetAtPath<WolfSectorLevelDefinition>(WolfSectorLevelConverter.SectorAssetPath);
             WolfFull3DMaterialLibrary library = WolfFull3DImporter.EnsureMaterialLibrary();
 
-            // Ambient ported from WolfDynamicLightingSetup (warm trilight dusk).
+            // Warm, low-key ambient; local lamps and probes carry the cinematic contrast.
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.32f, 0.30f, 0.27f);
-            RenderSettings.ambientEquatorColor = new Color(0.26f, 0.24f, 0.21f);
-            RenderSettings.ambientGroundColor = new Color(0.20f, 0.19f, 0.17f);
-            RenderSettings.ambientIntensity = 0.68f;
+            RenderSettings.ambientSkyColor = new Color(0.23f, 0.215f, 0.19f);
+            RenderSettings.ambientEquatorColor = new Color(0.18f, 0.17f, 0.15f);
+            RenderSettings.ambientGroundColor = new Color(0.105f, 0.10f, 0.09f);
+            RenderSettings.ambientIntensity = 0.54f;
+            RenderSettings.reflectionIntensity = 0.92f;
+            RenderSettings.reflectionBounces = 1;
+            RenderSettings.defaultReflectionResolution = 256;
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.ExponentialSquared;
+            RenderSettings.fogDensity = 0.00055f;
+            RenderSettings.fogColor = new Color(0.19f, 0.205f, 0.22f);
 
             CreateLevelBuilder(definition, library);
             CreatePlayer(definition);
@@ -59,7 +66,11 @@ namespace WolfMini.EditorTools
             CreatePerformanceSettings();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
-            Debug.Log($"[WolfFull3D] Saved {ScenePath}. Enter Play Mode to generate and walk the level.");
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            Debug.Log($"[WolfFull3D] Saved {ScenePath} and set it as the enabled build scene. Enter Play Mode to generate and walk the level.");
         }
 
         [MenuItem("Tools/Wolf Full3D/Rebuild Level In Open Scene")]
@@ -153,10 +164,10 @@ namespace WolfMini.EditorTools
             GameObject directional = new GameObject("Full3D Directional Light");
             Light light = directional.AddComponent<Light>();
             light.type = LightType.Directional;
-            light.color = Color.white;
-            light.intensity = 0.30f;
+            light.color = new Color(1f, 0.88f, 0.66f);
+            light.intensity = 0.08f;
             light.shadows = LightShadows.None;
-            light.bounceIntensity = 0.2f;
+            light.bounceIntensity = 0.05f;
             directional.transform.rotation = Quaternion.Euler(55f, -45f, 0f);
         }
 
