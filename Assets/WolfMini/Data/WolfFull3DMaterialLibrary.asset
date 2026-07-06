@@ -38,6 +38,15 @@ MonoBehaviour:
   - wallValue: 7
     material: {fileID: 2100000, guid: cdceef8f2098e402c8b8bbf3cfa2f767, type: 2}
     tileVertically: 0
+  - wallValue: 3
+    material: {fileID: 2100000, guid: 2c3d23aee2ae4ba999221dc338c85b2e, type: 2}
+    tileVertically: 0
+  - wallValue: 4
+    material: {fileID: 2100000, guid: f01141a432df4a4ea267ff418ca05c57, type: 2}
+    tileVertically: 0
+  - wallValue: 6
+    material: {fileID: 2100000, guid: edc97261c523491aa41ad20fb1fff77d, type: 2}
+    tileVertically: 0
   doorFaceMaterial: {fileID: 2100000, guid: 8a7f3a38233154122a3831b1c089f10b, type: 2}
   doorJambMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}
   lampCapMaterial: {fileID: 2100000, guid: 6f29ee4ad2b664a69b8b342162739059, type: 2}
