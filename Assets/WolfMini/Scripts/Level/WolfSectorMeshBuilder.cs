@@ -59,6 +59,9 @@ namespace WolfMini.Level
         private const int SectorReflectionProbeResolution = 128;
         private const int AtriumReflectionProbeResolution = 256;
         private const float LocalProbeReceiverOffset = 0.006f * WorldScale;
+        private const float ReflectionBoundaryProbeHeight = 0.42f * WorldScale;
+        private const float ReflectionBoundaryInset = 0.18f * WorldScale;
+        private const float MinimumReflectionSize = 0.55f * WorldScale;
 
         public WolfSectorLevelDefinition Definition
         {
@@ -121,6 +124,7 @@ namespace WolfMini.Level
             Physics.SyncTransforms();
             BuildProps(root);
             BuildChandeliers(root);
+            BuildFloorOpeningLighting(root);
             BuildEnemies(root);
             ApplyLightingQuality();
             BuildReflectionProbes(root);
@@ -173,11 +177,11 @@ namespace WolfMini.Level
         private static void ApplyCinematicRenderSettings()
         {
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.205f, 0.220f, 0.235f);
-            RenderSettings.ambientEquatorColor = new Color(0.175f, 0.158f, 0.140f);
-            RenderSettings.ambientGroundColor = new Color(0.145f, 0.120f, 0.090f);
-            RenderSettings.ambientIntensity = 0.48f;
-            RenderSettings.reflectionIntensity = 0.92f;
+            RenderSettings.ambientSkyColor = new Color(0.310f, 0.290f, 0.250f);
+            RenderSettings.ambientEquatorColor = new Color(0.185f, 0.195f, 0.220f);
+            RenderSettings.ambientGroundColor = new Color(0.215f, 0.220f, 0.235f);
+            RenderSettings.ambientIntensity = 0.74f;
+            RenderSettings.reflectionIntensity = 0.86f;
             RenderSettings.reflectionBounces = 1;
             // Indoors there is no sky: surfaces outside every probe volume must
             // reflect darkness. The default procedural skybox fallback paints
@@ -1899,6 +1903,9 @@ namespace WolfMini.Level
             bulbRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes;
             DestroySafely(bulb.GetComponent<Collider>());
 
+            AddCeilingSpill(parent, name, basePosition, ceilingY, warm);
+            AddLampSurfaceReflections(parent, name, basePosition, ceilingY, warm);
+
             if (!withLight)
             {
                 return;
@@ -1907,19 +1914,292 @@ namespace WolfMini.Level
             AddLampLightRig(parent, name, basePosition, ceilingY, warm);
         }
 
+        private void AddCeilingSpill(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
+        {
+            Material material = warm ? materialLibrary.CeilingSpillWarmMaterial : materialLibrary.CeilingSpillCoolMaterial;
+            if (material == null)
+            {
+                return;
+            }
+
+            GameObject spill = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            spill.name = $"{name} ceiling spill {basePosition.x:0},{basePosition.z:0}";
+            spill.transform.SetParent(parent, true);
+            spill.transform.position = new Vector3(basePosition.x, ceilingY - 0.02f, basePosition.z);
+            spill.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            float diameter = (warm ? 3.8f : 3.2f) * WorldScale;
+            spill.transform.localScale = new Vector3(diameter, diameter, 1f);
+
+            Renderer renderer = spill.GetComponent<Renderer>();
+            renderer.sharedMaterial = material;
+            renderer.receiveShadows = false;
+            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            DestroySafely(spill.GetComponent<Collider>());
+        }
+
+        private void AddLampSurfaceReflections(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
+        {
+            Vector3 anchor = new Vector3(basePosition.x, ceilingY - 0.22f * WorldScale, basePosition.z);
+            Material floorMaterial = warm ? materialLibrary.LampFloorReflectionWarmMaterial : materialLibrary.LampFloorReflectionCoolMaterial;
+            Material wallMaterial = warm ? materialLibrary.LampWallReflectionWarmMaterial : materialLibrary.LampWallReflectionCoolMaterial;
+            string suffix = $"{basePosition.x:0},{basePosition.z:0}";
+
+            if (TryFindSceneSurface(anchor, Vector3.down, 24f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
+            {
+                float floorWidth = (warm ? 3.8f : 3.3f) * WorldScale;
+                float floorHeight = (warm ? 2.7f : 2.35f) * WorldScale;
+                CreateBoundedFloorReflectionQuad(
+                    parent,
+                    $"{name} floor reflection {suffix}",
+                    floorHit.point + floorHit.normal * 0.026f,
+                    floorHit.normal,
+                    floorMaterial,
+                    floorWidth,
+                    floorHeight);
+            }
+
+            Vector3 wallOrigin = anchor - Vector3.up * 0.34f * WorldScale;
+            Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
+            float maxDistance = (warm ? 7.2f : 6.4f) * WorldScale;
+            float wallWidth = (warm ? 4.0f : 3.5f) * WorldScale;
+            float wallHeight = (warm ? 1.9f : 1.65f) * WorldScale;
+            for (int i = 0; i < directions.Length; i++)
+            {
+                if (TryFindSceneSurface(wallOrigin, directions[i], maxDistance, SurfaceTarget.Wall, out RaycastHit wallHit))
+                {
+                    CreateSurfaceReflectionQuad(
+                        parent,
+                        $"{name} wall reflection {suffix}",
+                        wallHit.point + wallHit.normal * 0.024f,
+                        wallHit.normal,
+                        Vector3.up,
+                        wallMaterial,
+                        wallWidth,
+                        wallHeight);
+                }
+            }
+        }
+
+        private void BuildFloorOpeningLighting(Transform parent)
+        {
+            if (!buildLights || definition.floorOpenings == null || definition.floorOpenings.Count == 0)
+            {
+                return;
+            }
+
+            GameObject group = new GameObject("Atrium Lighting");
+            group.transform.SetParent(parent, false);
+
+            int index = 1;
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening == null)
+                {
+                    continue;
+                }
+
+                Rect rect = opening.opening;
+                Vector3 center = new Vector3(rect.center.x, 0f, rect.center.y);
+                float width = Mathf.Max(Cell, rect.width * 0.34f);
+                float depth = Mathf.Max(Cell, rect.height * 0.34f);
+                float radius = Mathf.Max(rect.width, rect.height) * 0.58f;
+                Color warm = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.46f);
+                Color cool = Color.Lerp(WolfLevelContent.CoolLampColor, Color.white, 0.58f);
+
+                CreateBoundedFloorReflectionQuad(
+                    group.transform,
+                    $"atrium floor reflection {index:00}",
+                    new Vector3(center.x, opening.bottomY + 0.028f, center.z),
+                    Vector3.up,
+                    materialLibrary.LampFloorReflectionWarmMaterial,
+                    width,
+                    depth);
+
+                Light lower = CreatePointLight(
+                    group.transform,
+                    $"atrium lower fill {index:00}",
+                    new Vector3(center.x, opening.bottomY + 1.25f * WorldScale, center.z),
+                    warm,
+                    0.34f,
+                    radius,
+                    LightShadows.Soft);
+                lower.shadowStrength = 0.24f;
+                lower.shadowResolution = UnityEngine.Rendering.LightShadowResolution.Medium;
+
+                CreatePointLight(
+                    group.transform,
+                    $"atrium vertical glow {index:00}",
+                    new Vector3(center.x, Mathf.Lerp(opening.bottomY, opening.topY, 0.52f), center.z),
+                    Color.Lerp(warm, cool, 0.35f),
+                    0.12f,
+                    radius * 0.82f,
+                    LightShadows.None);
+
+                Light upper = CreatePointLight(
+                    group.transform,
+                    $"atrium upper fill {index:00}",
+                    new Vector3(center.x, opening.topY + 1.35f * WorldScale, center.z),
+                    cool,
+                    0.18f,
+                    radius * 0.68f,
+                    LightShadows.Soft);
+                upper.shadowStrength = 0.16f;
+                upper.shadowResolution = UnityEngine.Rendering.LightShadowResolution.Medium;
+                index++;
+            }
+        }
+
+        private void CreateBoundedFloorReflectionQuad(
+            Transform parent,
+            string name,
+            Vector3 position,
+            Vector3 normal,
+            Material material,
+            float width,
+            float height)
+        {
+            Vector3 safeNormal = normal.sqrMagnitude > 0.001f ? normal.normalized : Vector3.up;
+            Vector3 xAxis = Vector3.ProjectOnPlane(Vector3.right, safeNormal);
+            if (xAxis.sqrMagnitude < 0.001f)
+            {
+                xAxis = Vector3.ProjectOnPlane(Vector3.forward, safeNormal);
+            }
+
+            xAxis.Normalize();
+            Vector3 zAxis = Vector3.Cross(safeNormal, xAxis).normalized;
+            float positiveX = FindReflectionBoundaryExtent(position, safeNormal, xAxis, width * 0.5f);
+            float negativeX = FindReflectionBoundaryExtent(position, safeNormal, -xAxis, width * 0.5f);
+            float positiveZ = FindReflectionBoundaryExtent(position, safeNormal, zAxis, height * 0.5f);
+            float negativeZ = FindReflectionBoundaryExtent(position, safeNormal, -zAxis, height * 0.5f);
+            float isolatedWidth = positiveX + negativeX;
+            float isolatedHeight = positiveZ + negativeZ;
+            if (isolatedWidth < MinimumReflectionSize || isolatedHeight < MinimumReflectionSize)
+            {
+                return;
+            }
+
+            Vector3 isolatedCenter = position +
+                xAxis * ((positiveX - negativeX) * 0.5f) +
+                zAxis * ((positiveZ - negativeZ) * 0.5f);
+            CreateSurfaceReflectionQuad(parent, name, isolatedCenter, safeNormal, zAxis, material, isolatedWidth, isolatedHeight);
+        }
+
+        private float FindReflectionBoundaryExtent(Vector3 center, Vector3 normal, Vector3 direction, float requestedExtent)
+        {
+            Vector3 origin = center + normal * ReflectionBoundaryProbeHeight;
+            float probeDistance = requestedExtent + ReflectionBoundaryInset + 0.08f * WorldScale;
+            if (!TryFindSceneSurface(origin, direction.normalized, probeDistance, SurfaceTarget.Wall, out RaycastHit hit))
+            {
+                return requestedExtent;
+            }
+
+            return Mathf.Clamp(hit.distance - ReflectionBoundaryInset, MinimumReflectionSize * 0.5f, requestedExtent);
+        }
+
+        private bool TryFindSceneSurface(Vector3 origin, Vector3 direction, float maxDistance, SurfaceTarget target, out RaycastHit bestHit)
+        {
+            RaycastHit[] hits = Physics.RaycastAll(origin, direction, maxDistance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+            bestHit = default;
+            float bestDistance = float.PositiveInfinity;
+            for (int i = 0; i < hits.Length; i++)
+            {
+                RaycastHit hit = hits[i];
+                if (hit.collider == null || hit.distance >= bestDistance || ShouldSkipReflectionSurface(hit.transform))
+                {
+                    continue;
+                }
+
+                float upDot = Vector3.Dot(hit.normal.normalized, Vector3.up);
+                if (target == SurfaceTarget.Floor && upDot < 0.55f)
+                {
+                    continue;
+                }
+
+                if (target == SurfaceTarget.Wall && Mathf.Abs(upDot) > 0.35f)
+                {
+                    continue;
+                }
+
+                bestHit = hit;
+                bestDistance = hit.distance;
+            }
+
+            return bestDistance < float.PositiveInfinity;
+        }
+
+        private static bool ShouldSkipReflectionSurface(Transform transform)
+        {
+            if (transform == null)
+            {
+                return true;
+            }
+
+            string objectName = transform.gameObject.name;
+            return transform.GetComponentInParent<WolfDoor>() != null ||
+                objectName.StartsWith("Door ", System.StringComparison.Ordinal) ||
+                objectName.Contains(" Door ", System.StringComparison.Ordinal) ||
+                objectName.StartsWith("ceilLight", System.StringComparison.Ordinal) ||
+                objectName.StartsWith("chandelier", System.StringComparison.Ordinal) ||
+                objectName.Contains("reflection", System.StringComparison.OrdinalIgnoreCase) ||
+                objectName.Contains("spill", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void CreateSurfaceReflectionQuad(
+            Transform parent,
+            string name,
+            Vector3 position,
+            Vector3 normal,
+            Vector3 localUpAxis,
+            Material material,
+            float width,
+            float height)
+        {
+            if (material == null)
+            {
+                return;
+            }
+
+            GameObject reflection = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            reflection.name = name;
+            reflection.transform.SetParent(parent, true);
+            reflection.transform.position = position;
+            Vector3 safeNormal = normal.sqrMagnitude > 0.001f ? normal.normalized : Vector3.forward;
+            Vector3 safeUp = Vector3.ProjectOnPlane(localUpAxis, safeNormal);
+            if (safeUp.sqrMagnitude < 0.001f)
+            {
+                safeUp = Vector3.ProjectOnPlane(Vector3.up, safeNormal);
+            }
+            if (safeUp.sqrMagnitude < 0.001f)
+            {
+                safeUp = Vector3.right;
+            }
+
+            reflection.transform.rotation = Quaternion.LookRotation(safeNormal, safeUp.normalized);
+            reflection.transform.localScale = new Vector3(width, height, 1f);
+            Renderer renderer = reflection.GetComponent<Renderer>();
+            renderer.sharedMaterial = material;
+            renderer.receiveShadows = false;
+            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            DestroySafely(reflection.GetComponent<Collider>());
+        }
+
         private void AddLampLightRig(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
         {
             // A coincident unshadowed component approximates first-bounce light
             // from the visible bulb without introducing a sourceless fill.
-            float primaryIntensity = warm ? 2.90f : 2.30f;
-            float bounceIntensity = warm ? 0.50f : 0.40f;
+            float primaryIntensity = warm ? 2.15f : 1.90f;
+            float bounceIntensity = warm ? 0.32f : 0.29f;
             Color color = warm
                 ? WolfLevelContent.WarmLampColor
                 : Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.18f);
             Vector3 anchor = new Vector3(basePosition.x, ceilingY - 0.16f * WorldScale, basePosition.z);
             Vector3 lightPosition = anchor - Vector3.up * 0.06f * WorldScale;
             Color lightColor = Color.Lerp(color, Color.white, 0.08f);
-            float lightRange = (warm ? 13.5f : 12.2f) * WorldScale;
+            float lightRange = (warm ? 10.0f : 9.2f) * WorldScale;
             string suffix = $"{basePosition.x:0},{basePosition.z:0}";
 
             Light primary = CreatePointLight(
@@ -2048,14 +2328,14 @@ namespace WolfMini.Level
 
             Vector3 lightPosition = centerAt((upperRingY + lowerRingY) * 0.5f);
             Color lightColor = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.08f);
-            float lightRange = 14f * WorldScale;
+            float lightRange = 10.5f * WorldScale;
 
             Light primary = CreatePointLight(
                 anchor,
                 $"Atrium chandelier light {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                2.9f,
+                1.85f,
                 lightRange,
                 LightShadows.Soft);
             primary.shadowStrength = PrimaryShadowStrength;
@@ -2069,7 +2349,7 @@ namespace WolfMini.Level
                 $"Atrium chandelier ceiling bounce {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                0.8f,
+                0.36f,
                 lightRange,
                 LightShadows.None);
         }
@@ -2170,7 +2450,7 @@ namespace WolfMini.Level
             QualitySettings.shadowDistance = Mathf.Max(QualitySettings.shadowDistance, 42f * WorldScale);
             QualitySettings.realtimeReflectionProbes = true;
             QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
-            RenderSettings.reflectionIntensity = Mathf.Max(RenderSettings.reflectionIntensity, 0.92f);
+            RenderSettings.reflectionIntensity = Mathf.Max(RenderSettings.reflectionIntensity, 0.86f);
             RenderSettings.defaultReflectionResolution = Mathf.Max(RenderSettings.defaultReflectionResolution, AtriumReflectionProbeResolution);
         }
 
@@ -2399,6 +2679,12 @@ namespace WolfMini.Level
             {
                 DestroyImmediate(value);
             }
+        }
+
+        private enum SurfaceTarget
+        {
+            Floor,
+            Wall
         }
     }
 }

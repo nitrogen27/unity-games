@@ -889,12 +889,12 @@ public static class WolfDynamicLightingSetup
 
     private static void EnhanceReflectiveMaterials()
     {
-        SetMaterialSurface("BlueWall_Target", 0.0f, 0.64f, 0.82f, 0.88f, 0.78f);
+        SetMaterialSurface("BlueWall_Target", 0.0f, 0.58f, 0.76f, 0.88f, 0.78f);
         SetMaterialSurface("WhiteStoneWall_Target", 0.0f, 0.48f, 0.0f, 0.72f, 0.70f);
         SetMaterialSurface("WhiteStoneWall_Dark_Target", 0.0f, 0.48f, 0.0f, 0.72f, 0.70f);
         SetMaterialSurface("DoorTeal_Target", 0.34f, 0.54f, 0.68f, 0.62f, 0.45f);
-        SetMaterialSurface("FloorTile_Target", 0.0f, 0.68f, 1.0f, 1.0f, 1.0f);
-        SetMaterialSurface("CeilingPanel_Target", 0.18f, 0.42f, 0.42f, 0.68f, 0.65f);
+        SetMaterialSurface("FloorTile_Target", 0.0f, 0.78f, 1.0f, 1.0f, 1.0f);
+        SetMaterialSurface("CeilingPanel_Target", 0.0f, 0.36f, 0.34f, 0.58f, 0.52f);
         SetMaterialSurface("DarkMetalTrim_Target", 0.34f, 0.38f, 0.48f, 0.40f, 0.46f);
         SetMaterialSurface("PrisonCellDoor_Target", 0.18f, 0.55f, 0.72f, 0.85f, 0.90f);
         WolfTargetMaterialSetup.ConfigureDoorTargetMaterial();
@@ -982,7 +982,7 @@ public static class WolfDynamicLightingSetup
 
         TuneTargetMaterial(
             "FloorTile_Target",
-            new Color(0.85f, 0.85f, 0.82f, 1f),
+            new Color(0.98f, 0.92f, 0.82f, 1f),
             Color.black,
             0.08f,
             0.0f,
@@ -992,13 +992,13 @@ public static class WolfDynamicLightingSetup
 
         TuneTargetMaterial(
             "CeilingPanel_Target",
-            new Color(0.15f, 0.155f, 0.15f, 1f),
+            new Color(0.29f, 0.30f, 0.31f, 1f),
             Color.black,
             0.18f,
             0.0f,
             0f,
-            0.68f,
-            0.65f);
+            0.58f,
+            0.52f);
 
         TuneTargetMaterial(
             "DarkMetalTrim_Target",

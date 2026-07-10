@@ -28,8 +28,8 @@ namespace WolfMini.EditorTools
 
         private static readonly Vector3 AtriumCameraPosition = new Vector3(124.2f, WolfMiniConstants.EyeHeight + 4.65f, 118f);
         private static readonly Vector3 AtriumLookAt = new Vector3(108f, 3f, 99f);
-        private static readonly Vector3 CorridorCameraPosition = new Vector3(106.2f, WolfMiniConstants.EyeHeight, 23.4f);
-        private static readonly Vector3 CorridorLookAt = new Vector3(136.0f, WolfMiniConstants.EyeHeight, 23.4f);
+        private static readonly Vector3 CorridorCameraPosition = new Vector3(102.6f, WolfMiniConstants.EyeHeight, 9.0f);
+        private static readonly Vector3 CorridorLookAt = new Vector3(145.0f, WolfMiniConstants.EyeHeight + 0.80f, 9.0f);
 
         private static int frames;
 

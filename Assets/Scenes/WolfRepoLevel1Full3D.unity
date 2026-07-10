@@ -20,10 +20,10 @@ RenderSettings:
   m_FogDensity: 0.0009
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.205, g: 0.22, b: 0.235, a: 1}
-  m_AmbientEquatorColor: {r: 0.175, g: 0.158, b: 0.14, a: 1}
-  m_AmbientGroundColor: {r: 0.145, g: 0.12, b: 0.09, a: 1}
-  m_AmbientIntensity: 0.48
+  m_AmbientSkyColor: {r: 0.31, g: 0.29, b: 0.25, a: 1}
+  m_AmbientEquatorColor: {r: 0.185, g: 0.195, b: 0.22, a: 1}
+  m_AmbientGroundColor: {r: 0.215, g: 0.22, b: 0.235, a: 1}
+  m_AmbientIntensity: 0.74
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
@@ -35,7 +35,7 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 256
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 0.92
+  m_ReflectionIntensity: 0.86
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
   m_UseRadianceAmbientProbe: 0
@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &69764165
+--- !u!1 &137153742
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,22 +127,159 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 69764167}
-  - component: {fileID: 69764166}
+  - component: {fileID: 137153747}
+  - component: {fileID: 137153743}
+  - component: {fileID: 137153746}
+  - component: {fileID: 137153745}
+  - component: {fileID: 137153744}
+  m_Layer: 0
+  m_Name: First Person Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!20 &137153743
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137153742}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.05
+  far clip plane: 260
+  field of view: 58
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: 3
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 0
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!114 &137153744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137153742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d11576beb16413282819c6c5ece3ace, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfCinematicPostProcess
+  exposure: 0.94
+  contrast: 1.06
+  blackPoint: 0.002
+  saturation: 1.04
+  localContrast: 0.09
+  localRadius: 1.7
+  shadowLift: 0.13
+  bloomThreshold: 1.15
+  bloomIntensity: 0.28
+  bloomKnee: 0.46
+  bloomScatter: 1.35
+  bloomIterations: 3
+  bloomDownsample: 2
+  vignette: 0.07
+  warmHighlights: 0.055
+  coolShadows: 0.045
+--- !u!114 &137153745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137153742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d527bc4818cfef645be826ac6695f9cd, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfDeferredPostAntiAliasing
+  subpixelBlending: 0.72
+  edgeThreshold: 0.11
+  edgeThresholdMin: 0.0312
+--- !u!81 &137153746
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137153742}
+  m_Enabled: 1
+--- !u!4 &137153747
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137153742}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.68, z: 0}
+  m_LocalScale: {x: 0.99999976, y: 1, z: 0.99999976}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 460384169}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &237966575
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 237966577}
+  - component: {fileID: 237966576}
   m_Layer: 0
   m_Name: Full3D Directional Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!108 &69764166
+  m_IsActive: 1
+--- !u!108 &237966576
 Light:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 69764165}
+  m_GameObject: {fileID: 237966575}
   m_Enabled: 1
   serializedVersion: 13
   m_Type: 1
@@ -201,13 +338,13 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
---- !u!4 &69764167
+--- !u!4 &237966577
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 69764165}
+  m_GameObject: {fileID: 237966575}
   serializedVersion: 2
   m_LocalRotation: {x: 0.4266001, y: -0.3394444, z: 0.17670357, w: 0.81949115}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -216,7 +353,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &203875718
+--- !u!1 &284190706
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -224,116 +361,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 203875720}
-  - component: {fileID: 203875719}
-  m_Layer: 0
-  m_Name: Wolf Full3D HUD
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &203875719
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 203875718}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1f449fe0e407a948898dbc4192ddedf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfHud
-  faceTexture: {fileID: 2800000, guid: 2dd1177c752872543a2866a0141baf0c, type: 3}
-  weaponTexture: {fileID: 2800000, guid: e17363a09ab2f0f4a82aaede43f0fd00, type: 3}
-  keyTexture: {fileID: 2800000, guid: 88229ea890896e74eadba33809b23127, type: 3}
-  floor: 1
-  score: 0
-  lives: 3
-  room: 1
-  health: 100
-  ammo: 8
-  demoText: DEMO
-  showHint: 0
-  showFps: 1
-  fpsRefreshInterval: 0.25
-  lowFpsThreshold: 30
---- !u!4 &203875720
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 203875718}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &441755071
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 441755073}
-  - component: {fileID: 441755072}
-  m_Layer: 0
-  m_Name: Wolf Sector Level Builder
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &441755072
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441755071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2b5f21ae5d7d4d828363178cead750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Level.WolfSectorMeshBuilder
-  definition: {fileID: 11400000, guid: 937401f7623e846218bc93ce976bc9c7, type: 2}
-  materialLibrary: {fileID: 11400000, guid: cd0993046da8247ecb933968824bb2b1, type: 2}
-  buildOnStart: 1
-  buildLights: 1
-  maxRealtimeLights: 96
-  buildReflectionProbes: 1
---- !u!4 &441755073
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 441755071}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &892709316
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 892709318}
-  - component: {fileID: 892709317}
+  - component: {fileID: 284190708}
+  - component: {fileID: 284190707}
   m_Layer: 0
   m_Name: Wolf Performance Settings
   m_TagString: Untagged
@@ -341,17 +370,17 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &892709317
+--- !u!114 &284190707
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 892709316}
+  m_GameObject: {fileID: 284190706}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4897967b17c1c4d6b855fc77b846df30, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfPerformanceSettings
   targetFrameRate: 60
   qualityLevel: 2
@@ -369,29 +398,29 @@ MonoBehaviour:
   postAntialiasingEdgeThreshold: 0.11
   postAntialiasingEdgeThresholdMin: 0.0312
   enableCinematicPostProcess: 1
-  cinematicExposure: 1
-  cinematicContrast: 1.12
-  cinematicBlackPoint: 0.01
-  cinematicSaturation: 1.06
-  cinematicLocalContrast: 0.12
+  cinematicExposure: 0.94
+  cinematicContrast: 1.06
+  cinematicBlackPoint: 0.002
+  cinematicSaturation: 1.04
+  cinematicLocalContrast: 0.09
   cinematicLocalRadius: 1.7
-  cinematicShadowLift: 0.1
-  cinematicBloomThreshold: 1.05
-  cinematicBloomIntensity: 0.45
+  cinematicShadowLift: 0.13
+  cinematicBloomThreshold: 1.15
+  cinematicBloomIntensity: 0.28
   cinematicBloomKnee: 0.46
   cinematicBloomScatter: 1.35
   cinematicBloomIterations: 3
   cinematicBloomDownsample: 2
-  cinematicVignette: 0.1
-  cinematicWarmHighlights: 0.17
+  cinematicVignette: 0.07
+  cinematicWarmHighlights: 0.055
   cinematicCoolShadows: 0.045
---- !u!4 &892709318
+--- !u!4 &284190708
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 892709316}
+  m_GameObject: {fileID: 284190706}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -400,7 +429,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1123934727
+--- !u!1 &460384165
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -408,10 +437,10 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1123934731}
-  - component: {fileID: 1123934730}
-  - component: {fileID: 1123934729}
-  - component: {fileID: 1123934728}
+  - component: {fileID: 460384169}
+  - component: {fileID: 460384168}
+  - component: {fileID: 460384167}
+  - component: {fileID: 460384166}
   m_Layer: 0
   m_Name: Wolf Full3D Player
   m_TagString: Untagged
@@ -419,30 +448,30 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1123934728
+--- !u!114 &460384166
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123934727}
+  m_GameObject: {fileID: 460384165}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ceca2fb53050844286bbb5364fdcd93, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfPlayerInteractor
-  playerCamera: {fileID: 1511917590}
+  playerCamera: {fileID: 137153743}
   range: 4.32
   interactionMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &1123934729
+--- !u!114 &460384167
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123934727}
+  m_GameObject: {fileID: 460384165}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7161829a032a48342b53437da8f78ffd, type: 3}
@@ -452,16 +481,16 @@ MonoBehaviour:
   runSpeed: 12.599999
   jumpHeight: 1.98
   gravity: -32.399998
-  playerCamera: {fileID: 1511917590}
+  playerCamera: {fileID: 137153743}
   mouseSensitivity: 2.2
   maxPitch: 45
---- !u!143 &1123934730
+--- !u!143 &460384168
 CharacterController:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123934727}
+  m_GameObject: {fileID: 460384165}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -480,23 +509,23 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0.875, z: 0}
---- !u!4 &1123934731
+--- !u!4 &460384169
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1123934727}
+  m_GameObject: {fileID: 460384165}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 106.2, y: 0, z: 23.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1511917594}
+  - {fileID: 137153747}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1511917589
+--- !u!1 &1165439405
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -504,141 +533,112 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1511917594}
-  - component: {fileID: 1511917590}
-  - component: {fileID: 1511917593}
-  - component: {fileID: 1511917592}
-  - component: {fileID: 1511917591}
+  - component: {fileID: 1165439407}
+  - component: {fileID: 1165439406}
   m_Layer: 0
-  m_Name: First Person Camera
-  m_TagString: MainCamera
+  m_Name: Wolf Full3D HUD
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!20 &1511917590
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1511917589}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.05
-  far clip plane: 260
-  field of view: 58
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: 0
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: 3
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 0
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!114 &1511917591
+--- !u!114 &1165439406
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1511917589}
+  m_GameObject: {fileID: 1165439405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d11576beb16413282819c6c5ece3ace, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfCinematicPostProcess
-  exposure: 1
-  contrast: 1.12
-  blackPoint: 0.01
-  saturation: 1.06
-  localContrast: 0.12
-  localRadius: 1.7
-  shadowLift: 0.1
-  bloomThreshold: 1.05
-  bloomIntensity: 0.45
-  bloomKnee: 0.46
-  bloomScatter: 1.35
-  bloomIterations: 3
-  bloomDownsample: 2
-  vignette: 0.1
-  warmHighlights: 0.17
-  coolShadows: 0.045
---- !u!114 &1511917592
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1511917589}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d527bc4818cfef645be826ac6695f9cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfDeferredPostAntiAliasing
-  subpixelBlending: 0.72
-  edgeThreshold: 0.11
-  edgeThresholdMin: 0.0312
---- !u!81 &1511917593
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1511917589}
-  m_Enabled: 1
---- !u!4 &1511917594
+  m_Script: {fileID: 11500000, guid: f1f449fe0e407a948898dbc4192ddedf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfHud
+  faceTexture: {fileID: 2800000, guid: 2dd1177c752872543a2866a0141baf0c, type: 3}
+  weaponTexture: {fileID: 2800000, guid: e17363a09ab2f0f4a82aaede43f0fd00, type: 3}
+  keyTexture: {fileID: 2800000, guid: 88229ea890896e74eadba33809b23127, type: 3}
+  floor: 1
+  score: 0
+  lives: 3
+  room: 1
+  health: 100
+  ammo: 8
+  demoText: DEMO
+  showHint: 0
+  showFps: 1
+  fpsRefreshInterval: 0.25
+  lowFpsThreshold: 30
+--- !u!4 &1165439407
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1511917589}
+  m_GameObject: {fileID: 1165439405}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.68, z: 0}
-  m_LocalScale: {x: 0.99999976, y: 1, z: 0.99999976}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1123934731}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2119313736
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2119313738}
+  - component: {fileID: 2119313737}
+  m_Layer: 0
+  m_Name: Wolf Sector Level Builder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2119313737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119313736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2b5f21ae5d7d4d828363178cead750f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WolfMini.Level.WolfSectorMeshBuilder
+  definition: {fileID: 11400000, guid: 937401f7623e846218bc93ce976bc9c7, type: 2}
+  materialLibrary: {fileID: 11400000, guid: cd0993046da8247ecb933968824bb2b1, type: 2}
+  buildOnStart: 1
+  buildLights: 1
+  maxRealtimeLights: 96
+  buildReflectionProbes: 1
+--- !u!4 &2119313738
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119313736}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 441755073}
-  - {fileID: 1123934731}
-  - {fileID: 203875720}
-  - {fileID: 69764167}
-  - {fileID: 892709318}
+  - {fileID: 2119313738}
+  - {fileID: 460384169}
+  - {fileID: 1165439407}
+  - {fileID: 237966577}
+  - {fileID: 284190708}

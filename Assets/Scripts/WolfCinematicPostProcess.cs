@@ -10,21 +10,21 @@ namespace HelloWorldRoom
     {
         private const string ShaderName = "Hidden/Wolf/CinematicPost";
 
-        [SerializeField, Range(0.5f, 2.0f)] private float exposure = 1.0f;
-        [SerializeField, Range(0.8f, 1.6f)] private float contrast = 1.12f;
-        [SerializeField, Range(0.0f, 0.18f)] private float blackPoint = 0.010f;
-        [SerializeField, Range(0.7f, 1.4f)] private float saturation = 1.06f;
-        [SerializeField, Range(0f, 0.45f)] private float localContrast = 0.12f;
+        [SerializeField, Range(0.5f, 2.0f)] private float exposure = 0.94f;
+        [SerializeField, Range(0.8f, 1.6f)] private float contrast = 1.06f;
+        [SerializeField, Range(0.0f, 0.18f)] private float blackPoint = 0.002f;
+        [SerializeField, Range(0.7f, 1.4f)] private float saturation = 1.04f;
+        [SerializeField, Range(0f, 0.45f)] private float localContrast = 0.09f;
         [SerializeField, Range(0.5f, 3.5f)] private float localRadius = 1.7f;
-        [SerializeField, Range(0f, 0.18f)] private float shadowLift = 0.10f;
-        [SerializeField, Range(0.6f, 2.5f)] private float bloomThreshold = 1.05f;
-        [SerializeField, Range(0f, 1.5f)] private float bloomIntensity = 0.45f;
+        [SerializeField, Range(0f, 0.18f)] private float shadowLift = 0.13f;
+        [SerializeField, Range(0.6f, 2.5f)] private float bloomThreshold = 1.15f;
+        [SerializeField, Range(0f, 1.5f)] private float bloomIntensity = 0.28f;
         [SerializeField, Range(0f, 1.0f)] private float bloomKnee = 0.46f;
         [SerializeField, Range(0.7f, 2.4f)] private float bloomScatter = 1.35f;
         [SerializeField, Range(1, 5)] private int bloomIterations = 3;
         [SerializeField, Range(1, 4)] private int bloomDownsample = 2;
-        [SerializeField, Range(0f, 0.35f)] private float vignette = 0.10f;
-        [SerializeField, Range(0f, 0.35f)] private float warmHighlights = 0.17f;
+        [SerializeField, Range(0f, 0.35f)] private float vignette = 0.07f;
+        [SerializeField, Range(0f, 0.35f)] private float warmHighlights = 0.055f;
         [SerializeField, Range(0f, 0.2f)] private float coolShadows = 0.045f;
 
         private static readonly int ExposureId = Shader.PropertyToID("_Exposure");
