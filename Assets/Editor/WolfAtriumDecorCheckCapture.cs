@@ -159,6 +159,10 @@ namespace WolfMini.EditorTools
                 Shoot(camera, rig, new Vector3(102.6f, eye, 108f), new Vector3(102.6f, 1.8f, 97.2f), "atrium_portrait");
                 Shoot(camera, rig, new Vector3(140f, eye, 102.6f), new Vector3(151.2f, 1.8f, 102.6f), "atrium_eagle");
                 Shoot(camera, rig, new Vector3(124.2f, eye + 4.65f, 118f), new Vector3(108f, 3f, 99f), "atrium_wide");
+                // Chandelier hangs over the void center (126, 109.8): one shot
+                // at top-gallery eye level, one from the atrium floor below.
+                Shoot(camera, rig, new Vector3(123f, eye + 4.65f, 117.4f), new Vector3(126f, 6.1f, 109.8f), "atrium_chandelier");
+                Shoot(camera, rig, new Vector3(119.5f, eye - 4.65f, 103.5f), new Vector3(126f, 5.6f, 109.8f), "atrium_chandelier_low");
 
                 Debug.Log($"[WolfAtriumDecor] Saved decor check screens to {OutputFolder}/atrium_*.png");
             }

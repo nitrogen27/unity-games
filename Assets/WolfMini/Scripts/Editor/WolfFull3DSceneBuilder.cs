@@ -47,17 +47,17 @@ namespace WolfMini.EditorTools
 
             // Warm, low-key ambient; local lamps and probes carry the cinematic contrast.
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.23f, 0.215f, 0.19f);
-            RenderSettings.ambientEquatorColor = new Color(0.18f, 0.17f, 0.15f);
-            RenderSettings.ambientGroundColor = new Color(0.105f, 0.10f, 0.09f);
-            RenderSettings.ambientIntensity = 0.54f;
+            RenderSettings.ambientSkyColor = new Color(0.205f, 0.220f, 0.235f);
+            RenderSettings.ambientEquatorColor = new Color(0.175f, 0.158f, 0.140f);
+            RenderSettings.ambientGroundColor = new Color(0.145f, 0.120f, 0.090f);
+            RenderSettings.ambientIntensity = 0.48f;
             RenderSettings.reflectionIntensity = 0.92f;
             RenderSettings.reflectionBounces = 1;
             RenderSettings.defaultReflectionResolution = 256;
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogDensity = 0.00055f;
-            RenderSettings.fogColor = new Color(0.19f, 0.205f, 0.22f);
+            RenderSettings.fogDensity = 0.0009f;
+            RenderSettings.fogColor = new Color(0.070f, 0.080f, 0.092f);
 
             CreateLevelBuilder(definition, library);
             CreatePlayer(definition);

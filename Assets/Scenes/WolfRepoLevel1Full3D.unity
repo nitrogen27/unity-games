@@ -15,15 +15,15 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
   m_Fog: 1
-  m_FogColor: {r: 0.19, g: 0.205, b: 0.22, a: 1}
+  m_FogColor: {r: 0.07, g: 0.08, b: 0.092, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.00055
+  m_FogDensity: 0.0009
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.23, g: 0.215, b: 0.19, a: 1}
-  m_AmbientEquatorColor: {r: 0.18, g: 0.17, b: 0.15, a: 1}
-  m_AmbientGroundColor: {r: 0.105, g: 0.1, b: 0.09, a: 1}
-  m_AmbientIntensity: 0.54
+  m_AmbientSkyColor: {r: 0.205, g: 0.22, b: 0.235, a: 1}
+  m_AmbientEquatorColor: {r: 0.175, g: 0.158, b: 0.14, a: 1}
+  m_AmbientGroundColor: {r: 0.145, g: 0.12, b: 0.09, a: 1}
+  m_AmbientIntensity: 0.48
   m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
@@ -370,18 +370,19 @@ MonoBehaviour:
   postAntialiasingEdgeThresholdMin: 0.0312
   enableCinematicPostProcess: 1
   cinematicExposure: 1
-  cinematicContrast: 1.18
-  cinematicBlackPoint: 0.028
+  cinematicContrast: 1.12
+  cinematicBlackPoint: 0.01
   cinematicSaturation: 1.06
-  cinematicLocalContrast: 0.16
+  cinematicLocalContrast: 0.12
   cinematicLocalRadius: 1.7
-  cinematicBloomThreshold: 1.15
-  cinematicBloomIntensity: 0.35
+  cinematicShadowLift: 0.1
+  cinematicBloomThreshold: 1.05
+  cinematicBloomIntensity: 0.45
   cinematicBloomKnee: 0.46
   cinematicBloomScatter: 1.35
   cinematicBloomIterations: 3
   cinematicBloomDownsample: 2
-  cinematicVignette: 0.14
+  cinematicVignette: 0.1
   cinematicWarmHighlights: 0.17
   cinematicCoolShadows: 0.045
 --- !u!4 &892709318
@@ -578,19 +579,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d11576beb16413282819c6c5ece3ace, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HelloWorldRoom.WolfCinematicPostProcess
-  exposure: 1.18
-  contrast: 1.18
-  blackPoint: 0.028
+  exposure: 1
+  contrast: 1.12
+  blackPoint: 0.01
   saturation: 1.06
-  localContrast: 0.16
+  localContrast: 0.12
   localRadius: 1.7
-  bloomThreshold: 1.02
-  bloomIntensity: 0.56
+  shadowLift: 0.1
+  bloomThreshold: 1.05
+  bloomIntensity: 0.45
   bloomKnee: 0.46
   bloomScatter: 1.35
   bloomIterations: 3
   bloomDownsample: 2
-  vignette: 0.14
+  vignette: 0.1
   warmHighlights: 0.17
   coolShadows: 0.045
 --- !u!114 &1511917592

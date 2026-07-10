@@ -45,7 +45,7 @@ namespace WolfMini.Level
         private static readonly float[] RailingBarHeights = { 0.23f, 0.46f, 0.69f };
 
         private const int LampLightingMask = ~0;
-        private const float PrimaryShadowStrength = 0.86f;
+        private const float PrimaryShadowStrength = 0.64f;
         // Environment reflection probes: local receiver renderers keep floor
         // and ceiling bounds small enough for Unity to bind nearby box-projected
         // probes. Probe boxes hug the room interior — a box that pokes through
@@ -120,6 +120,7 @@ namespace WolfMini.Level
             BuildDoorways(root);
             Physics.SyncTransforms();
             BuildProps(root);
+            BuildChandeliers(root);
             BuildEnemies(root);
             ApplyLightingQuality();
             BuildReflectionProbes(root);
@@ -172,10 +173,10 @@ namespace WolfMini.Level
         private static void ApplyCinematicRenderSettings()
         {
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.23f, 0.215f, 0.19f);
-            RenderSettings.ambientEquatorColor = new Color(0.18f, 0.17f, 0.15f);
-            RenderSettings.ambientGroundColor = new Color(0.105f, 0.10f, 0.09f);
-            RenderSettings.ambientIntensity = 0.54f;
+            RenderSettings.ambientSkyColor = new Color(0.205f, 0.220f, 0.235f);
+            RenderSettings.ambientEquatorColor = new Color(0.175f, 0.158f, 0.140f);
+            RenderSettings.ambientGroundColor = new Color(0.145f, 0.120f, 0.090f);
+            RenderSettings.ambientIntensity = 0.48f;
             RenderSettings.reflectionIntensity = 0.92f;
             RenderSettings.reflectionBounces = 1;
             // Indoors there is no sky: surfaces outside every probe volume must
@@ -186,8 +187,8 @@ namespace WolfMini.Level
             RenderSettings.defaultReflectionResolution = AtriumReflectionProbeResolution;
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogDensity = 0.00055f;
-            RenderSettings.fogColor = new Color(0.19f, 0.205f, 0.22f);
+            RenderSettings.fogDensity = 0.0009f;
+            RenderSettings.fogColor = new Color(0.070f, 0.080f, 0.092f);
 
             foreach (Light light in Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude))
             {
@@ -1908,29 +1909,221 @@ namespace WolfMini.Level
 
         private void AddLampLightRig(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
         {
-            // One shadowed light per fixture: every lit surface must trace
-            // back to a visible bulb. Fill/bounce helpers painted walls with a
-            // sourceless white wash, so the bulb carries the full intensity.
-            float baseIntensity = warm ? 2.70f : 2.12f;
+            // A coincident unshadowed component approximates first-bounce light
+            // from the visible bulb without introducing a sourceless fill.
+            float primaryIntensity = warm ? 2.90f : 2.30f;
+            float bounceIntensity = warm ? 0.50f : 0.40f;
             Color color = warm
                 ? WolfLevelContent.WarmLampColor
                 : Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.18f);
             Vector3 anchor = new Vector3(basePosition.x, ceilingY - 0.16f * WorldScale, basePosition.z);
+            Vector3 lightPosition = anchor - Vector3.up * 0.06f * WorldScale;
+            Color lightColor = Color.Lerp(color, Color.white, 0.08f);
+            float lightRange = (warm ? 13.5f : 12.2f) * WorldScale;
             string suffix = $"{basePosition.x:0},{basePosition.z:0}";
 
             Light primary = CreatePointLight(
                 parent,
                 $"{name} light {suffix}",
-                anchor - Vector3.up * 0.06f * WorldScale,
-                Color.Lerp(color, Color.white, 0.20f),
-                baseIntensity,
-                (warm ? 18.5f : 16.8f) * WorldScale,
+                lightPosition,
+                lightColor,
+                primaryIntensity,
+                lightRange,
                 LightShadows.Soft);
             primary.shadowStrength = PrimaryShadowStrength;
             primary.shadowBias = 0.035f;
             primary.shadowNormalBias = 0.24f;
             primary.shadowNearPlane = 0.12f;
             primary.shadowResolution = UnityEngine.Rendering.LightShadowResolution.High;
+
+            CreatePointLight(
+                parent,
+                $"{name} ceiling bounce {suffix}",
+                lightPosition,
+                lightColor,
+                bounceIntensity,
+                lightRange,
+                LightShadows.None);
+        }
+
+        /// <summary>
+        /// Hangs a two-tier candle chandelier over every void wide enough to
+        /// read as an atrium. The void drops all storey ceiling lamps, so the
+        /// chandelier is the single light source of the open space.
+        /// </summary>
+        private void BuildChandeliers(Transform parent)
+        {
+            if (definition.floorOpenings == null)
+            {
+                return;
+            }
+
+            foreach (FloorOpeningSpec opening in definition.floorOpenings)
+            {
+                if (opening == null || Mathf.Min(opening.opening.width, opening.opening.height) < 4f * WorldScale)
+                {
+                    continue;
+                }
+
+                AddAtriumChandelier(parent, opening);
+            }
+        }
+
+        private void AddAtriumChandelier(Transform parent, FloorOpeningSpec opening)
+        {
+            Vector2 center = opening.opening.center;
+            float ceilingY = CeilingYAt(new Vector3(center.x, opening.topY + 0.1f, center.y));
+
+            GameObject root = new GameObject($"Atrium chandelier {center.x:0},{center.y:0}");
+            root.transform.SetParent(parent, true);
+            root.transform.position = new Vector3(center.x, ceilingY, center.y);
+            Transform anchor = root.transform;
+
+            Material metal = materialLibrary.RailMaterial;
+            Material darkMetal = materialLibrary.LampCapMaterial != null ? materialLibrary.LampCapMaterial : metal;
+            Material glow = materialLibrary.LampGlowMaterial != null ? materialLibrary.LampGlowMaterial : materialLibrary.LampWarmBulb;
+
+            // The big ring targets the top gallery's eye band; the ring radius
+            // shrinks for narrower voids so candles never overhang the slabs.
+            float upperRadius = Mathf.Min(1.5f * WorldScale, 0.16f * Mathf.Min(opening.opening.width, opening.opening.height));
+            float lowerRadius = upperRadius * 0.62f;
+            float hubY = ceilingY - 0.75f * WorldScale;
+            float upperRingY = hubY - 0.52f * WorldScale;
+            float lowerRingY = upperRingY - 0.58f * WorldScale;
+            float bowlY = lowerRingY - 0.22f * WorldScale;
+            Vector3 centerAt(float y) => new Vector3(center.x, y, center.y);
+
+            CreateChandelierPart(PrimitiveType.Cylinder, "Chandelier mount", anchor, centerAt(ceilingY - 0.045f), new Vector3(0.76f, 0.045f, 0.76f), darkMetal, true);
+            CreateChandelierRod(anchor, "Chandelier stem", centerAt(ceilingY), centerAt(hubY), 0.05f, metal);
+            CreateChandelierPart(PrimitiveType.Cylinder, "Chandelier hub", anchor, centerAt(hubY), new Vector3(0.34f, 0.17f, 0.34f), darkMetal, true);
+            // The bowl dish hangs straight under the point light: it stays a
+            // non-caster so the light keeps its pool on the atrium floor.
+            CreateChandelierRod(anchor, "Chandelier drop rod", centerAt(hubY), centerAt(bowlY), 0.035f, metal);
+            CreateChandelierPart(PrimitiveType.Cylinder, "Chandelier bowl dish", anchor, centerAt(bowlY), new Vector3(1.0f, 0.10f, 1.0f), darkMetal, false);
+            CreateChandelierPart(PrimitiveType.Sphere, "Chandelier bowl lens", anchor, centerAt(bowlY - 0.10f), new Vector3(0.86f, 0.30f, 0.86f), glow, false);
+
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 8f;
+                var direction = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                CreateChandelierRod(
+                    anchor,
+                    $"Chandelier suspension {i:00}",
+                    centerAt(hubY - 0.05f) + direction * 0.28f,
+                    centerAt(upperRingY + 0.08f) + direction * (upperRadius - 0.06f),
+                    0.03f,
+                    metal);
+                CreateChandelierRod(
+                    anchor,
+                    $"Chandelier band strut {i:00}",
+                    centerAt(upperRingY - 0.08f) + direction * upperRadius,
+                    centerAt(upperRingY - 0.34f) + direction * upperRadius,
+                    0.025f,
+                    metal);
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = (i + 0.5f) * Mathf.PI * 2f / 6f;
+                var direction = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                CreateChandelierRod(
+                    anchor,
+                    $"Chandelier tier rod {i:00}",
+                    centerAt(upperRingY - 0.30f) + direction * (upperRadius * 0.86f),
+                    centerAt(lowerRingY + 0.06f) + direction * (lowerRadius * 0.98f),
+                    0.028f,
+                    metal);
+            }
+
+            CreateChandelierRing(anchor, "Chandelier upper band", centerAt(upperRingY), upperRadius, 0.16f, 0.20f, 28, darkMetal);
+            CreateChandelierRing(anchor, "Chandelier upper trim band", centerAt(upperRingY - 0.34f), upperRadius, 0.08f, 0.12f, 28, metal);
+            CreateChandelierRing(anchor, "Chandelier lower band", centerAt(lowerRingY), lowerRadius, 0.13f, 0.16f, 22, darkMetal);
+            CreateChandelierCandles(anchor, "Chandelier upper", centerAt(upperRingY + 0.08f), upperRadius, 16, 0.46f, darkMetal, glow);
+            CreateChandelierCandles(anchor, "Chandelier lower", centerAt(lowerRingY + 0.065f), lowerRadius, 10, 0.40f, darkMetal, glow);
+
+            if (!buildLights)
+            {
+                return;
+            }
+
+            Vector3 lightPosition = centerAt((upperRingY + lowerRingY) * 0.5f);
+            Color lightColor = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.08f);
+            float lightRange = 14f * WorldScale;
+
+            Light primary = CreatePointLight(
+                anchor,
+                $"Atrium chandelier light {center.x:0},{center.y:0}",
+                lightPosition,
+                lightColor,
+                2.9f,
+                lightRange,
+                LightShadows.Soft);
+            primary.shadowStrength = PrimaryShadowStrength;
+            primary.shadowBias = 0.035f;
+            primary.shadowNormalBias = 0.24f;
+            primary.shadowNearPlane = 0.12f;
+            primary.shadowResolution = UnityEngine.Rendering.LightShadowResolution.High;
+
+            CreatePointLight(
+                anchor,
+                $"Atrium chandelier ceiling bounce {center.x:0},{center.y:0}",
+                lightPosition,
+                lightColor,
+                0.8f,
+                lightRange,
+                LightShadows.None);
+        }
+
+        private void CreateChandelierRing(Transform anchor, string name, Vector3 center, float radius, float height, float thickness, int segments, Material material)
+        {
+            float segmentLength = 2f * Mathf.PI * radius / segments + thickness * 0.4f;
+            for (int i = 0; i < segments; i++)
+            {
+                float angle = i * Mathf.PI * 2f / segments;
+                Vector3 position = center + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+                var tangent = new Vector3(-Mathf.Sin(angle), 0f, Mathf.Cos(angle));
+                GameObject segment = CreateChandelierPart(PrimitiveType.Cube, $"{name} {i:00}", anchor, position, new Vector3(thickness, height, segmentLength), material, true);
+                segment.transform.rotation = Quaternion.LookRotation(tangent, Vector3.up);
+            }
+        }
+
+        private void CreateChandelierCandles(Transform anchor, string name, Vector3 ringTop, float radius, int count, float tubeHeight, Material cup, Material glow)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                // Half-step offset keeps candles clear of the suspension rods.
+                float angle = (i + 0.5f) * Mathf.PI * 2f / count;
+                Vector3 basePosition = ringTop + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+                CreateChandelierPart(PrimitiveType.Cylinder, $"{name} cup {i:00}", anchor, basePosition + Vector3.up * 0.05f, new Vector3(0.13f, 0.05f, 0.13f), cup, true);
+                CreateChandelierPart(PrimitiveType.Cylinder, $"{name} candle {i:00}", anchor, basePosition + Vector3.up * (0.10f + tubeHeight * 0.5f), new Vector3(0.095f, tubeHeight * 0.5f, 0.095f), glow, false);
+            }
+        }
+
+        private void CreateChandelierRod(Transform anchor, string name, Vector3 from, Vector3 to, float radius, Material material)
+        {
+            Vector3 delta = to - from;
+            GameObject rod = CreateChandelierPart(PrimitiveType.Cylinder, name, anchor, (from + to) * 0.5f, new Vector3(radius * 2f, delta.magnitude * 0.5f, radius * 2f), material, true);
+            rod.transform.rotation = Quaternion.FromToRotation(Vector3.up, delta.normalized);
+        }
+
+        private GameObject CreateChandelierPart(PrimitiveType type, string name, Transform anchor, Vector3 position, Vector3 scale, Material material, bool castShadows)
+        {
+            GameObject part = GameObject.CreatePrimitive(type);
+            part.name = name;
+            part.transform.SetParent(anchor, true);
+            part.transform.position = position;
+            part.transform.localScale = scale;
+            Renderer renderer = part.GetComponent<Renderer>();
+            renderer.sharedMaterial = material;
+            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbesAndSkybox;
+            renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes;
+            if (!castShadows)
+            {
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+
+            DestroySafely(part.GetComponent<Collider>());
+            return part;
         }
 
         private Light CreatePointLight(Transform parent, string name, Vector3 position, Color color, float intensity, float range, LightShadows shadows)

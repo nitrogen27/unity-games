@@ -121,6 +121,7 @@ Shader "Hidden/Wolf/CinematicPost"
             float _Saturation;
             float _LocalContrast;
             float _LocalRadius;
+            float _ShadowLift;
             float _BloomIntensity;
             float _Vignette;
             float _WarmHighlights;
@@ -182,6 +183,10 @@ Shader "Hidden/Wolf/CinematicPost"
                 color += tex2D(_BloomTex, uv).rgb * _BloomIntensity;
                 color = GradeSplitTone(color * _Exposure);
                 color = Aces(color);
+
+                float liftLuma = Luma(color);
+                float liftMask = (1.0 - smoothstep(0.22, 0.78, liftLuma)) * smoothstep(0.004, 0.05, liftLuma);
+                color += (1.0 - color) * (_ShadowLift * liftMask);
 
                 color = max(color - _BlackPoint, 0.0) / max(1.0 - _BlackPoint, 0.0001);
                 color = (color - 0.5) * _Contrast + 0.5;
