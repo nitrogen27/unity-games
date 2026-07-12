@@ -45,6 +45,7 @@ namespace WolfMini.EditorTools
             }
 
             PopulateFromGrid(target, source);
+            PrepareScissorStairRoom(target);
             AddStackedStoreysWithStairwells(target);
 
             EditorUtility.SetDirty(target);
@@ -95,13 +96,121 @@ namespace WolfMini.EditorTools
         }
 
         /// <summary>
-        /// The two extra storeys and the stair hub that links them. Each storey
+        /// Widens the dead-end room across the T-corridor from the spawn room
+        /// (cells x 37..41, z 5..8) by one cell east so the classic scissor
+        /// stairwell fits with a full-cell landing strip beyond the flights at
+        /// both ends: the east wall moves out one cell and both long walls
+        /// stretch to meet it. Also hangs a ceiling lamp over each end of the
+        /// landing lane. Must run before the storey duplication so every
+        /// storey inherits the bigger, lit room.
+        /// </summary>
+        public static void PrepareScissorStairRoom(WolfSectorLevelDefinition target)
+        {
+            const float eps = 0.01f;
+            float oldEast = 41 * Cell;
+            float newEast = 42 * Cell;
+            float south = 5 * Cell;
+            float north = 8 * Cell;
+
+            SectorSpec room = null;
+            int areaIndex = -1;
+            var oldArea = new Rect(37 * Cell, south, 4 * Cell, 3 * Cell);
+            foreach (SectorSpec sector in target.sectors)
+            {
+                for (int i = 0; i < sector.floorAreas.Count; i++)
+                {
+                    Rect area = sector.floorAreas[i];
+                    if (Mathf.Abs(area.xMin - oldArea.xMin) < eps && Mathf.Abs(area.yMin - oldArea.yMin) < eps &&
+                        Mathf.Abs(area.width - oldArea.width) < eps && Mathf.Abs(area.height - oldArea.height) < eps)
+                    {
+                        room = sector;
+                        areaIndex = i;
+                        break;
+                    }
+                }
+
+                if (room != null)
+                {
+                    break;
+                }
+            }
+
+            var eastWalls = new List<WallSegmentSpec>();
+            var longWalls = new List<WallSegmentSpec>();
+            foreach (WallSegmentSpec wall in target.walls)
+            {
+                bool horizontal = Mathf.Abs(wall.start.y - wall.end.y) < eps;
+                if (!horizontal &&
+                    Mathf.Abs(wall.start.x - oldEast) < eps && Mathf.Abs(wall.end.x - oldEast) < eps &&
+                    wall.start.y > south - eps && wall.start.y < north + eps &&
+                    wall.end.y > south - eps && wall.end.y < north + eps)
+                {
+                    eastWalls.Add(wall);
+                    continue;
+                }
+
+                if (horizontal &&
+                    (Mathf.Abs(wall.start.y - south) < eps || Mathf.Abs(wall.start.y - north) < eps) &&
+                    (Mathf.Abs(wall.start.x - oldEast) < eps || Mathf.Abs(wall.end.x - oldEast) < eps) &&
+                    Mathf.Min(wall.start.x, wall.end.x) > 37 * Cell - eps)
+                {
+                    longWalls.Add(wall);
+                }
+            }
+
+            if (room == null || eastWalls.Count == 0 || longWalls.Count != 2)
+            {
+                Debug.LogError("[WolfSector] Scissor stair room not found where expected: " +
+                               $"floor area {(room == null ? "missing" : "found")}, {eastWalls.Count} east wall segment(s), " +
+                               $"{longWalls.Count} long wall end(s). Room left unchanged.");
+                return;
+            }
+
+            room.floorAreas[areaIndex] = new Rect(oldArea.xMin, oldArea.yMin, 5 * Cell, oldArea.height);
+
+            foreach (WallSegmentSpec wall in eastWalls)
+            {
+                wall.start = new Vector2(newEast, wall.start.y);
+                wall.end = new Vector2(newEast, wall.end.y);
+            }
+
+            foreach (WallSegmentSpec wall in longWalls)
+            {
+                if (Mathf.Abs(wall.start.x - oldEast) < eps)
+                {
+                    wall.start = new Vector2(newEast, wall.start.y);
+                }
+                else
+                {
+                    wall.end = new Vector2(newEast, wall.end.y);
+                }
+            }
+
+            // One lamp over each end of the landing lane: the doorside
+            // landing and the far strip where the flights' mouths open.
+            target.props.Add(new LevelPropSpec
+            {
+                position = new Vector3(37.5f * Cell, 0f, 6.5f * Cell),
+                typeIndex = WolfLevelContent.CeilLightTypeIndex
+            });
+            target.props.Add(new LevelPropSpec
+            {
+                position = new Vector3(40.5f * Cell, 0f, 6.5f * Cell),
+                typeIndex = WolfLevelContent.CeilLightTypeIndex
+            });
+        }
+
+        /// <summary>
+        /// The two extra storeys and the stairs that link them. Each storey
         /// is an exact copy of the whole authored floor — same rooms, walls,
         /// doorways, props and enemies — one storey height below and above the
         /// middle floor. The T-shaped start corridor becomes the hub: its west
         /// arm carries stairs down to the lower storey, its east arm stairs up
         /// to the top storey, so the T junction acts as the landing between
-        /// them. Authored here because the repo grid carries no vertical data.
+        /// them. A classic scissor stairwell in the widened room east of the
+        /// corridor (see <see cref="PrepareScissorStairRoom"/>) links the same
+        /// storeys in one room. Authored here because the repo grid carries no
+        /// vertical data.
         /// </summary>
         public static void AddStackedStoreysWithStairwells(WolfSectorLevelDefinition target)
         {
@@ -183,6 +292,48 @@ namespace WolfMini.EditorTools
                 stepCount = stairStepCount,
                 wallStyle = hallStyle,
                 treadUvScale = 4f
+            });
+
+            // Classic scissor stairwell in the widened dead-end room across
+            // the corridor from the spawn room (cells x 37..42, z 5..8, see
+            // PrepareScissorStairRoom). Two straight full-storey flights run
+            // head-to-head in the outer one-cell lanes while the middle lane
+            // stays intact on every storey as the landing in front of the
+            // door: climb the south flight out of the lower storey, U-turn
+            // across the landing, and the north flight up to the top storey
+            // starts right there. Full-cell strips at both ends carry the
+            // stair entries past the flights.
+
+            // South lane: lower flight. Its head tread lies flush with the
+            // middle floor at the west end by the door; the mouth opens east
+            // onto the lower storey's end strip.
+            target.stairwells.Add(new StairwellSpec
+            {
+                opening = new Rect(38 * Cell, 5 * Cell, 3 * Cell, Cell),
+                topY = 0f,
+                bottomY = lowerY,
+                alongZ = false,
+                descendSign = 1,
+                stepCount = stairStepCount,
+                wallStyle = corridorStyle,
+                treadUvScale = 4f,
+                guardPitSides = true
+            });
+
+            // North lane: upper flight, mirrored head-to-head. Its mouth sits
+            // beside the south flight's head on the middle floor; the head
+            // tops out at the east end of the top storey.
+            target.stairwells.Add(new StairwellSpec
+            {
+                opening = new Rect(38 * Cell, 7 * Cell, 3 * Cell, Cell),
+                topY = upperY,
+                bottomY = 0f,
+                alongZ = false,
+                descendSign = -1,
+                stepCount = stairStepCount,
+                wallStyle = corridorStyle,
+                treadUvScale = 4f,
+                guardPitSides = true
             });
 
             // Three-storey atrium in the big south hall: one void cuts the top

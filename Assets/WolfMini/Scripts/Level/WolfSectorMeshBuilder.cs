@@ -62,6 +62,31 @@ namespace WolfMini.Level
         private const float ReflectionBoundaryProbeHeight = 0.42f * WorldScale;
         private const float ReflectionBoundaryInset = 0.18f * WorldScale;
         private const float MinimumReflectionSize = 0.55f * WorldScale;
+        private const int AtriumBannerWallStyle = 3;
+        private const int AtriumStoneWallStyle = 1;
+        private const float DecorOverlayOffset = 0.006f * WorldScale;
+
+        // Atrium gallery fixtures from the reference bunker: torch sconces on
+        // the gallery walls, recessed downlights across the hall ceiling and
+        // skirting niche lights around the sunken floor. Fixture bodies are
+        // human-scale furniture (like railings); placement probes walk the
+        // void perimeter and raycast into the galleries, so only real hall
+        // walls receive fixtures and doorways stay clear.
+        private const float SconceGlowHeight = 2.15f;
+        private const float SconceSpacing = 1.4f * Cell;
+        private const float SconceMinimumGap = 0.75f * Cell;
+        private const float NicheGlowHeight = 0.55f;
+        private const float NicheSpacing = 0.68f * Cell;
+        private const float NicheMinimumGap = 0.35f * Cell;
+        private const float PerimeterProbeInset = 0.4f * Cell;
+        private const float PerimeterProbeReach = 4.6f * Cell;
+        private const float DownlightRowSpacing = 1.35f * Cell;
+        private const float DownlightRowInset = 0.55f * Cell;
+        private const float DownlightChandelierClearance = 1.65f * Cell;
+        private const float DownlightPropClearance = 1.0f * Cell;
+        private const float CorridorDownlightSpacing = 3.2f * Cell;
+        private const float CorridorMinimumLength = 9.0f * Cell;
+        private const float CorridorMinimumAspect = 3.2f;
 
         public WolfSectorLevelDefinition Definition
         {
@@ -123,6 +148,7 @@ namespace WolfMini.Level
             BuildDoorways(root);
             Physics.SyncTransforms();
             BuildProps(root);
+            BuildLongCorridorDownlights(root);
             BuildChandeliers(root);
             BuildFloorOpeningLighting(root);
             BuildEnemies(root);
@@ -180,10 +206,10 @@ namespace WolfMini.Level
             // Trilight split follows the reference frame: bright floor (sky
             // term), luminous cobalt walls (equator term) and a near-black
             // ceiling (ground term) that only the lamp pools light up.
-            RenderSettings.ambientSkyColor = new Color(0.340f, 0.315f, 0.270f);
-            RenderSettings.ambientEquatorColor = new Color(0.240f, 0.260f, 0.320f);
-            RenderSettings.ambientGroundColor = new Color(0.105f, 0.110f, 0.130f);
-            RenderSettings.ambientIntensity = 0.88f;
+            RenderSettings.ambientSkyColor = new Color(0.440f, 0.395f, 0.325f);
+            RenderSettings.ambientEquatorColor = new Color(0.340f, 0.335f, 0.350f);
+            RenderSettings.ambientGroundColor = new Color(0.095f, 0.090f, 0.090f);
+            RenderSettings.ambientIntensity = 0.98f;
             RenderSettings.reflectionIntensity = 1.0f;
             RenderSettings.reflectionBounces = 1;
             // Indoors there is no sky: surfaces outside every probe volume must
@@ -418,8 +444,8 @@ namespace WolfMini.Level
             // Keep the floor predominantly dielectric: the reference reads as
             // polished stone, with tight lamp streaks instead of tinted metal
             // reflections. Direct lights and probes provide the response.
-            polishedFloorMaterial.SetFloat("_Glossiness", 0.84f);
-            polishedFloorMaterial.SetFloat("_GlossMapScale", 0.84f);
+            polishedFloorMaterial.SetFloat("_Glossiness", 0.90f);
+            polishedFloorMaterial.SetFloat("_GlossMapScale", 0.90f);
             polishedFloorMaterial.SetFloat("_Metallic", 0f);
             return polishedFloorMaterial;
         }
@@ -827,10 +853,12 @@ namespace WolfMini.Level
         }
 
         /// <summary>
-        /// Guard rails along both long sides of a stair pit cut into a gallery
-        /// floor next to an atrium void. The head end stays open as the stair
-        /// entry; the mouth end borders the void where the gallery has no
-        /// floor to stand on, so no rail is needed there.
+        /// Guard rails along both long sides of a stair pit cut into a walkable
+        /// floor: next to an atrium void, or in a stair room when the spec asks
+        /// for guarded pit sides. The head end always stays open as the stair
+        /// entry. Over the mouth the gallery case needs no rail (the void has
+        /// no floor to stand on there), while a stair-room pit is bordered by
+        /// walkable floor on the top storey, so its mouth edge gets one.
         /// </summary>
         private void AddStairwellPitRailings(WolfMeshBuffer buffer, HashSet<Vector3Int> postAnchors)
         {
@@ -841,7 +869,7 @@ namespace WolfMini.Level
 
             foreach (StairwellSpec stairwell in definition.stairwells)
             {
-                if (stairwell == null || !StairwellBordersFloorOpening(stairwell))
+                if (stairwell == null || !(stairwell.guardPitSides || StairwellBordersFloorOpening(stairwell)))
                 {
                     continue;
                 }
@@ -856,6 +884,39 @@ namespace WolfMini.Level
                 {
                     AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, o.yMin), new Vector2(o.xMax, o.yMin), stairwell.topY);
                     AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, o.yMax), new Vector2(o.xMin, o.yMax), stairwell.topY);
+                }
+
+                if (!stairwell.guardPitSides)
+                {
+                    continue;
+                }
+
+                // Rail over the mouth, wound so the guarded side is the
+                // walkable floor the mouth opens away from on the top storey.
+                int sign = stairwell.descendSign >= 0 ? 1 : -1;
+                if (stairwell.alongZ)
+                {
+                    float zMouth = sign > 0 ? o.yMax : o.yMin;
+                    if (sign > 0)
+                    {
+                        AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMax, zMouth), new Vector2(o.xMin, zMouth), stairwell.topY);
+                    }
+                    else
+                    {
+                        AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(o.xMin, zMouth), new Vector2(o.xMax, zMouth), stairwell.topY);
+                    }
+                }
+                else
+                {
+                    float xMouth = sign > 0 ? o.xMax : o.xMin;
+                    if (sign > 0)
+                    {
+                        AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(xMouth, o.yMin), new Vector2(xMouth, o.yMax), stairwell.topY);
+                    }
+                    else
+                    {
+                        AddPitEdgeRailings(buffer, postAnchors, o, new Vector2(xMouth, o.yMax), new Vector2(xMouth, o.yMin), stairwell.topY);
+                    }
                 }
             }
         }
@@ -1329,6 +1390,20 @@ namespace WolfMini.Level
         {
             if (materialLibrary.TryGetWallOverride(wall.style, out Material overrideMaterial, out bool overrideTiles))
             {
+                // The banner is a material overlay, not a square wall decal
+                // with stone baked behind it. Build the regular stone wall
+                // continuously, then float the alpha-cut banner a few
+                // millimetres toward the room so its margins have no seam.
+                if (wall.style == AtriumBannerWallStyle &&
+                    materialLibrary.TryGetWallOverride(AtriumStoneWallStyle, out Material stoneMaterial, out _))
+                {
+                    int stoneSubmesh = GetOverrideSubmesh(overrideSubmeshes, overrideMaterials, stoneMaterial);
+                    int bannerSubmesh = GetOverrideSubmesh(overrideSubmeshes, overrideMaterials, overrideMaterial);
+                    AddRepeatingWall(buffer, stoneSubmesh, wall);
+                    AddFeatureOverlayWall(buffer, bannerSubmesh, wall, DecorOverlayOffset);
+                    return;
+                }
+
                 int submesh = GetOverrideSubmesh(overrideSubmeshes, overrideMaterials, overrideMaterial);
                 if (overrideTiles)
                 {
@@ -1651,6 +1726,34 @@ namespace WolfMini.Level
             else
             {
                 AddWallQuad(buffer, trimSubmesh, wall.start, direction, normal, 0f, length, wall.baseY + panelHeight, wall.baseY + wall.height, bandUV);
+            }
+        }
+
+        private static void AddFeatureOverlayWall(WolfMeshBuffer buffer, int submesh, WallSegmentSpec wall, float offset)
+        {
+            if (!TryGetSegmentFrame(wall, out Vector2 direction, out float length, out Vector3 normal))
+            {
+                return;
+            }
+
+            Vector2 shiftedOrigin = wall.start + new Vector2(normal.x, normal.z) * offset;
+            float panelHeight = Mathf.Min(wall.height, Cell);
+            for (float along = 0f; along < length - 0.001f; along += Cell)
+            {
+                float pieceEnd = Mathf.Min(along + Cell, length);
+                float widthFraction = (pieceEnd - along) / Cell;
+                Rect panelUV = new Rect(0f, 0f, widthFraction, 1f);
+                AddWallQuad(
+                    buffer,
+                    submesh,
+                    shiftedOrigin,
+                    direction,
+                    normal,
+                    along,
+                    pieceEnd,
+                    wall.baseY,
+                    wall.baseY + panelHeight,
+                    panelUV);
             }
         }
 
@@ -2084,8 +2187,8 @@ namespace WolfMini.Level
                 float width = Mathf.Max(Cell, rect.width * 0.34f);
                 float depth = Mathf.Max(Cell, rect.height * 0.34f);
                 float radius = Mathf.Max(rect.width, rect.height) * 0.58f;
-                Color warm = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.46f);
-                Color cool = Color.Lerp(WolfLevelContent.CoolLampColor, Color.white, 0.58f);
+                Color warm = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.14f);
+                Color cool = Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.48f);
 
                 Renderer atriumPool = CreateBoundedFloorReflectionQuad(
                     group.transform,
@@ -2105,7 +2208,7 @@ namespace WolfMini.Level
                     $"atrium lower fill {index:00}",
                     new Vector3(center.x, opening.bottomY + 1.25f * WorldScale, center.z),
                     warm,
-                    0.42f,
+                    0.82f,
                     radius,
                     LightShadows.Soft);
                 lower.shadowStrength = 0.24f;
@@ -2116,7 +2219,7 @@ namespace WolfMini.Level
                     $"atrium vertical glow {index:00}",
                     new Vector3(center.x, Mathf.Lerp(opening.bottomY, opening.topY, 0.52f), center.z),
                     Color.Lerp(warm, cool, 0.35f),
-                    0.16f,
+                    0.38f,
                     radius * 0.82f,
                     LightShadows.None);
 
@@ -2125,13 +2228,725 @@ namespace WolfMini.Level
                     $"atrium upper fill {index:00}",
                     new Vector3(center.x, opening.topY + 1.35f * WorldScale, center.z),
                     cool,
-                    0.24f,
+                    0.68f,
                     radius * 0.68f,
                     LightShadows.Soft);
                 upper.shadowStrength = 0.16f;
                 upper.shadowResolution = UnityEngine.Rendering.LightShadowResolution.Medium;
+
+                BuildAtriumCeilingDownlights(group.transform, opening);
+                BuildAtriumWallSconces(group.transform, opening);
+                BuildAtriumNicheLights(group.transform, opening);
                 index++;
             }
+        }
+
+        /// <summary>
+        /// One recessed downlight row follows the atrium perimeter. The former
+        /// per-sector grid duplicated lights wherever sector floor rectangles
+        /// overlapped and filled the void centre with white hotspots. A single
+        /// inset ring leaves the chandelier as the focal source and matches the
+        /// regular gallery-edge rows in the reference.
+        /// </summary>
+        private void BuildAtriumCeilingDownlights(Transform parent, FloorOpeningSpec opening)
+        {
+            Rect rect = opening.opening;
+            float maximumInset = Mathf.Max(0f, Mathf.Min(rect.width, rect.height) * 0.5f - 0.25f * Cell);
+            float inset = Mathf.Min(DownlightRowInset, maximumInset);
+            Rect row = new Rect(
+                rect.xMin + inset,
+                rect.yMin + inset,
+                rect.width - inset * 2f,
+                rect.height - inset * 2f);
+            float ceilingY = CeilingYAt(new Vector3(rect.center.x, opening.topY + 0.1f, rect.center.y));
+
+            foreach (Vector2 at in EnumerateCenteredRectPerimeter(row, DownlightRowSpacing))
+            {
+                if (Vector2.Distance(at, rect.center) < DownlightChandelierClearance ||
+                    !HasTopStoreyCeilingAt(at, opening.topY) ||
+                    HasCeilingLampPropNear(at, opening.topY))
+                {
+                    continue;
+                }
+
+                AddAtriumDownlight(parent, at, ceilingY);
+            }
+        }
+
+        private static IEnumerable<Vector2> EnumerateCenteredRectPerimeter(Rect rect, float spacing)
+        {
+            foreach (Vector2 point in EnumerateCenteredSegment(
+                new Vector2(rect.xMin, rect.yMin),
+                new Vector2(rect.xMax, rect.yMin),
+                spacing))
+            {
+                yield return point;
+            }
+
+            foreach (Vector2 point in EnumerateCenteredSegment(
+                new Vector2(rect.xMin, rect.yMax),
+                new Vector2(rect.xMax, rect.yMax),
+                spacing))
+            {
+                yield return point;
+            }
+
+            foreach (Vector2 point in EnumerateCenteredSegment(
+                new Vector2(rect.xMin, rect.yMin),
+                new Vector2(rect.xMin, rect.yMax),
+                spacing))
+            {
+                yield return point;
+            }
+
+            foreach (Vector2 point in EnumerateCenteredSegment(
+                new Vector2(rect.xMax, rect.yMin),
+                new Vector2(rect.xMax, rect.yMax),
+                spacing))
+            {
+                yield return point;
+            }
+        }
+
+        private static IEnumerable<Vector2> EnumerateCenteredSegment(Vector2 start, Vector2 end, float spacing)
+        {
+            float length = Vector2.Distance(start, end);
+            if (length < 0.01f)
+            {
+                yield break;
+            }
+
+            int count = Mathf.Max(1, Mathf.RoundToInt(length / spacing));
+            Vector2 direction = (end - start) / length;
+            float step = length / count;
+            for (int i = 0; i < count; i++)
+            {
+                yield return start + direction * ((i + 0.5f) * step);
+            }
+        }
+
+        private bool HasTopStoreyCeilingAt(Vector2 point, float floorY)
+        {
+            foreach (SectorSpec sector in definition.sectors)
+            {
+                if (Mathf.Abs(sector.floorY - floorY) > 0.01f)
+                {
+                    continue;
+                }
+
+                foreach (Rect area in sector.floorAreas)
+                {
+                    if (area.Contains(point))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool HasCeilingLampPropNear(Vector2 at, float floorY)
+        {
+            foreach (LevelPropSpec prop in definition.props)
+            {
+                if (prop == null ||
+                    (prop.typeIndex != WolfLevelContent.CeilLightTypeIndex && prop.typeIndex != WolfLevelContent.ChandelierTypeIndex))
+                {
+                    continue;
+                }
+
+                if (Mathf.Abs(prop.position.y - floorY) > 0.5f)
+                {
+                    continue;
+                }
+
+                if (Vector2.Distance(new Vector2(prop.position.x, prop.position.z), at) < DownlightPropClearance)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Long authored corridors otherwise inherit only the occasional map
+        /// prop lamp and fall to black between fixtures. A restrained recessed
+        /// row supplies the repeating pools visible in the reference while
+        /// short rooms keep their original hand-authored lighting.
+        /// </summary>
+        private void BuildLongCorridorDownlights(Transform parent)
+        {
+            if (!buildLights || definition.sectors == null)
+            {
+                return;
+            }
+
+            GameObject group = new GameObject("Long Corridor Downlights");
+            group.transform.SetParent(parent, false);
+
+            foreach (SectorSpec sector in definition.sectors)
+            {
+                foreach (Rect area in sector.floorAreas)
+                {
+                    bool alongX = area.width >= area.height;
+                    float length = alongX ? area.width : area.height;
+                    float width = alongX ? area.height : area.width;
+                    if (length < CorridorMinimumLength ||
+                        width <= 0.01f ||
+                        length / width < CorridorMinimumAspect ||
+                        !ConnectsToStairwell(area, sector.floorY))
+                    {
+                        continue;
+                    }
+
+                    foreach (Vector2 at in EnumerateCenteredSegment(
+                        alongX ? new Vector2(area.xMin, area.center.y) : new Vector2(area.center.x, area.yMin),
+                        alongX ? new Vector2(area.xMax, area.center.y) : new Vector2(area.center.x, area.yMax),
+                        CorridorDownlightSpacing))
+                    {
+                        if (IsInsideVerticalOpening(at, sector.floorY))
+                        {
+                            continue;
+                        }
+
+                        bool needsFixture = !HasCeilingLampPropNear(at, sector.floorY);
+                        AddCorridorDownlight(group.transform, at, sector.floorY + sector.ceilingHeight, needsFixture);
+                    }
+                }
+            }
+
+            if (group.transform.childCount == 0)
+            {
+                DestroySafely(group);
+            }
+        }
+
+        private bool ConnectsToStairwell(Rect area, float floorY)
+        {
+            if (definition.stairwells == null)
+            {
+                return false;
+            }
+
+            const float eps = 0.001f;
+            foreach (StairwellSpec stairwell in definition.stairwells)
+            {
+                if (stairwell != null &&
+                    floorY >= stairwell.bottomY - eps &&
+                    floorY <= stairwell.topY + eps &&
+                    area.Overlaps(stairwell.opening))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool IsInsideVerticalOpening(Vector2 at, float floorY)
+        {
+            const float eps = 0.001f;
+            if (definition.floorOpenings != null)
+            {
+                foreach (FloorOpeningSpec opening in definition.floorOpenings)
+                {
+                    if (opening != null && floorY >= opening.bottomY - eps && floorY <= opening.topY + eps && opening.opening.Contains(at))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            if (definition.stairwells != null)
+            {
+                foreach (StairwellSpec stairwell in definition.stairwells)
+                {
+                    if (stairwell != null && floorY >= stairwell.bottomY - eps && floorY <= stairwell.topY + eps && stairwell.opening.Contains(at))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private void AddCorridorDownlight(Transform parent, Vector2 at, float ceilingY, bool createFixture)
+        {
+            string suffix = $"{at.x:0.0},{at.y:0.0},{ceilingY:0.0}";
+            Color corridorLightColor = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.22f);
+            if (createFixture)
+            {
+                Material darkMetal = materialLibrary.LampCapMaterial != null ? materialLibrary.LampCapMaterial : materialLibrary.RailMaterial;
+                Material glow = materialLibrary.LampGlowMaterial != null ? materialLibrary.LampGlowMaterial : materialLibrary.LampWarmBulb;
+
+                CreateChandelierPart(
+                    PrimitiveType.Cylinder,
+                    $"Corridor downlight ring {suffix}",
+                    parent,
+                    new Vector3(at.x, ceilingY - 0.030f * WorldScale, at.y),
+                    new Vector3(0.22f, 0.020f, 0.22f) * WorldScale,
+                    darkMetal,
+                    false);
+                GameObject lens = CreateChandelierPart(
+                    PrimitiveType.Cylinder,
+                    $"Corridor downlight lens {suffix}",
+                    parent,
+                    new Vector3(at.x, ceilingY - 0.060f * WorldScale, at.y),
+                    new Vector3(0.13f, 0.014f, 0.13f) * WorldScale,
+                    glow,
+                    false);
+                TintEmissiveRenderer(lens.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 1.05f);
+            }
+
+            Renderer spill = CreateSurfaceReflectionQuad(
+                parent,
+                $"Corridor downlight ceiling spill {suffix}",
+                new Vector3(at.x, ceilingY - 0.018f, at.y),
+                Vector3.down,
+                Vector3.forward,
+                materialLibrary.CeilingSpillWarmMaterial,
+                1.25f * WorldScale,
+                1.25f * WorldScale);
+            BoostOverlay(
+                spill,
+                new Color(1f, 0.78f, 0.48f, 0.18f),
+                new Color(0.10f, 0.050f, 0.014f, 1f));
+
+            if (TryFindSceneSurface(new Vector3(at.x, ceilingY - 0.4f, at.y), Vector3.down, 12f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
+            {
+                Renderer pool = CreateBoundedFloorReflectionQuad(
+                    parent,
+                    $"Corridor downlight floor reflection {suffix}",
+                    floorHit.point + floorHit.normal * 0.026f,
+                    floorHit.normal,
+                    materialLibrary.LampFloorReflectionWarmMaterial,
+                    1.20f * WorldScale,
+                    1.85f * WorldScale);
+                BoostOverlay(
+                    pool,
+                    new Color(1f, 0.76f, 0.43f, 0.38f),
+                    new Color(0.16f, 0.072f, 0.018f, 1f));
+            }
+
+            CreateSpotLight(
+                parent,
+                $"Corridor downlight light {suffix}",
+                new Vector3(at.x, ceilingY - 0.16f * WorldScale, at.y),
+                Vector3.down,
+                corridorLightColor,
+                createFixture ? 2.55f : 2.0f,
+                4.8f * WorldScale,
+                72f,
+                LightShadows.None);
+            CreatePointLight(
+                parent,
+                $"Corridor downlight bounce {suffix}",
+                new Vector3(at.x, ceilingY - 0.20f * WorldScale, at.y),
+                corridorLightColor,
+                createFixture ? 0.36f : 0.62f,
+                5.8f * WorldScale,
+                LightShadows.None);
+        }
+
+        private void AddAtriumDownlight(Transform parent, Vector2 at, float ceilingY)
+        {
+            string suffix = $"{at.x:0.0},{at.y:0.0}";
+            Material darkMetal = materialLibrary.LampCapMaterial != null ? materialLibrary.LampCapMaterial : materialLibrary.RailMaterial;
+            Material glow = materialLibrary.LampGlowMaterial != null ? materialLibrary.LampGlowMaterial : materialLibrary.LampWarmBulb;
+
+            CreateChandelierPart(
+                PrimitiveType.Cylinder,
+                $"Atrium downlight ring {suffix}",
+                parent,
+                new Vector3(at.x, ceilingY - 0.030f * WorldScale, at.y),
+                new Vector3(0.24f, 0.020f, 0.24f) * WorldScale,
+                darkMetal,
+                false);
+            GameObject lens = CreateChandelierPart(
+                PrimitiveType.Cylinder,
+                $"Atrium downlight lens {suffix}",
+                parent,
+                new Vector3(at.x, ceilingY - 0.062f * WorldScale, at.y),
+                new Vector3(0.14f, 0.014f, 0.14f) * WorldScale,
+                glow,
+                false);
+            TintEmissiveRenderer(lens.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 1.15f);
+
+            Renderer spill = CreateSurfaceReflectionQuad(
+                parent,
+                $"Atrium downlight ceiling spill {suffix}",
+                new Vector3(at.x, ceilingY - 0.018f, at.y),
+                Vector3.down,
+                Vector3.forward,
+                materialLibrary.CeilingSpillWarmMaterial,
+                1.45f * WorldScale,
+                1.45f * WorldScale);
+            BoostOverlay(
+                spill,
+                new Color(1f, 0.78f, 0.48f, 0.20f),
+                new Color(0.12f, 0.064f, 0.020f, 1f));
+
+            if (TryFindSceneSurface(new Vector3(at.x, ceilingY - 0.4f, at.y), Vector3.down, 24f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
+            {
+                Renderer pool = CreateBoundedFloorReflectionQuad(
+                    parent,
+                    $"Atrium downlight floor reflection {suffix}",
+                    floorHit.point + floorHit.normal * 0.026f,
+                    floorHit.normal,
+                    materialLibrary.LampFloorReflectionWarmMaterial,
+                    1.45f * WorldScale,
+                    2.60f * WorldScale);
+                BoostOverlay(
+                    pool,
+                    new Color(1f, 0.76f, 0.44f, 0.43f),
+                    new Color(0.18f, 0.082f, 0.020f, 1f));
+            }
+
+            CreateSpotLight(
+                parent,
+                $"Atrium downlight light {suffix}",
+                new Vector3(at.x, ceilingY - 0.18f * WorldScale, at.y),
+                Vector3.down,
+                WolfLevelContent.WarmLampColor,
+                3.15f,
+                4.2f * WorldScale,
+                66f,
+                LightShadows.None);
+            CreatePointLight(
+                parent,
+                $"Atrium downlight soft fill {suffix}",
+                new Vector3(at.x, ceilingY - 0.22f * WorldScale, at.y),
+                WolfLevelContent.WarmLampColor,
+                0.16f,
+                2.8f * WorldScale,
+                LightShadows.None);
+        }
+
+        /// <summary>
+        /// Warm torch sconces on the gallery walls of every storey the void
+        /// crosses. Probes start inside the void and raycast outward, so the
+        /// sconce lands on whatever real wall bounds the gallery; hits outside
+        /// the hall (rays escaping through doorways) are rejected.
+        /// </summary>
+        private void BuildAtriumWallSconces(Transform parent, FloorOpeningSpec opening)
+        {
+            var placed = new List<Vector3>();
+            foreach (float floorY in CollectStoreyFloors(opening))
+            {
+                List<Rect> areas = CollectStoreyHallAreas(floorY, opening.opening);
+                float glowY = floorY + SconceGlowHeight;
+                foreach ((Vector3 origin, Vector3 outward) in EnumerateOpeningPerimeterProbes(opening.opening, glowY, SconceSpacing))
+                {
+                    if (!TryFindHallWall(origin, outward, areas, out RaycastHit hit) ||
+                        IsTooClose(placed, hit.point, SconceMinimumGap))
+                    {
+                        continue;
+                    }
+
+                    placed.Add(hit.point);
+                    AddAtriumWallSconce(parent, hit.point, hit.normal, glowY);
+                }
+            }
+        }
+
+        private void AddAtriumWallSconce(Transform parent, Vector3 wallPoint, Vector3 normal, float glowY)
+        {
+            string suffix = $"{wallPoint.x:0},{wallPoint.z:0},{glowY:0}";
+            Material darkMetal = materialLibrary.LampCapMaterial != null ? materialLibrary.LampCapMaterial : materialLibrary.RailMaterial;
+            Material glow = materialLibrary.LampGlowMaterial != null ? materialLibrary.LampGlowMaterial : materialLibrary.LampWarmBulb;
+            Vector3 At(float outOffset, float y) => new Vector3(wallPoint.x + normal.x * outOffset, y, wallPoint.z + normal.z * outOffset);
+
+            GameObject plate = CreateChandelierPart(
+                PrimitiveType.Cube,
+                $"Atrium sconce plate {suffix}",
+                parent,
+                At(0.04f, glowY),
+                new Vector3(0.28f, 0.72f, 0.08f),
+                darkMetal,
+                false);
+            plate.transform.rotation = Quaternion.LookRotation(normal, Vector3.up);
+            GameObject lampBody = CreateChandelierPart(
+                PrimitiveType.Cube,
+                $"Atrium sconce body {suffix}",
+                parent,
+                At(0.13f, glowY),
+                new Vector3(0.20f, 0.48f, 0.12f),
+                darkMetal,
+                false);
+            lampBody.transform.rotation = plate.transform.rotation;
+            GameObject lampGlow = CreateChandelierPart(
+                PrimitiveType.Cube,
+                $"Atrium sconce glow {suffix}",
+                parent,
+                At(0.205f, glowY + 0.035f),
+                new Vector3(0.13f, 0.29f, 0.065f),
+                glow,
+                false);
+            lampGlow.transform.rotation = plate.transform.rotation;
+            TintEmissiveRenderer(lampGlow.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 1.05f);
+
+            Material wash = materialLibrary.LampWallReflectionWarmMaterial;
+            Renderer up = CreateSurfaceReflectionQuad(
+                parent,
+                $"Atrium sconce wall reflection up {suffix}",
+                At(0.02f, glowY + 0.72f),
+                normal,
+                Vector3.up,
+                wash,
+                1.45f,
+                1.55f);
+            BoostOverlay(
+                up,
+                new Color(1f, 0.70f, 0.36f, 0.31f),
+                new Color(0.135f, 0.060f, 0.013f, 1f));
+            Renderer down = CreateSurfaceReflectionQuad(
+                parent,
+                $"Atrium sconce wall reflection down {suffix}",
+                At(0.02f, glowY - 0.64f),
+                normal,
+                Vector3.up,
+                wash,
+                1.20f,
+                1.10f);
+            BoostOverlay(
+                down,
+                new Color(1f, 0.68f, 0.34f, 0.25f),
+                new Color(0.090f, 0.040f, 0.009f, 1f));
+
+            if (TryFindSceneSurface(At(0.34f, glowY - 0.45f), Vector3.down, 8f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
+            {
+                Renderer pool = CreateBoundedFloorReflectionQuad(
+                    parent,
+                    $"Atrium sconce floor reflection {suffix}",
+                    floorHit.point + floorHit.normal * 0.027f,
+                    floorHit.normal,
+                    materialLibrary.LampFloorReflectionWarmMaterial,
+                    1.90f,
+                    3.00f);
+                BoostOverlay(
+                    pool,
+                    new Color(1f, 0.74f, 0.40f, 0.42f),
+                    new Color(0.17f, 0.076f, 0.018f, 1f));
+            }
+
+            CreatePointLight(
+                parent,
+                $"Atrium sconce light {suffix}",
+                At(0.42f, glowY + 0.04f),
+                WolfLevelContent.WarmLampColor,
+                1.28f,
+                3.0f * WorldScale,
+                LightShadows.None);
+        }
+
+        /// <summary>
+        /// Small skirting niche lights on the walls bounding the sunken atrium
+        /// floor — the row of warm squares along the base walls in the
+        /// reference. Emissive lenses plus floor pools only; no realtime
+        /// lights, so a dense row stays free.
+        /// </summary>
+        private void BuildAtriumNicheLights(Transform parent, FloorOpeningSpec opening)
+        {
+            List<Rect> areas = CollectStoreyHallAreas(opening.bottomY, opening.opening);
+            if (areas.Count == 0)
+            {
+                return;
+            }
+
+            float glowY = opening.bottomY + NicheGlowHeight;
+            var placed = new List<Vector3>();
+            foreach ((Vector3 origin, Vector3 outward) in EnumerateOpeningPerimeterProbes(opening.opening, glowY, NicheSpacing))
+            {
+                if (!TryFindHallWall(origin, outward, areas, out RaycastHit hit) ||
+                    IsTooClose(placed, hit.point, NicheMinimumGap))
+                {
+                    continue;
+                }
+
+                placed.Add(hit.point);
+                AddAtriumNicheLight(parent, hit.point, hit.normal);
+            }
+        }
+
+        private void AddAtriumNicheLight(Transform parent, Vector3 wallPoint, Vector3 normal)
+        {
+            string suffix = $"{wallPoint.x:0},{wallPoint.z:0}";
+            Material darkMetal = materialLibrary.LampCapMaterial != null ? materialLibrary.LampCapMaterial : materialLibrary.RailMaterial;
+            Material glow = materialLibrary.LampGlowMaterial != null ? materialLibrary.LampGlowMaterial : materialLibrary.LampWarmBulb;
+
+            GameObject frame = CreateChandelierPart(
+                PrimitiveType.Cube,
+                $"Atrium niche frame {suffix}",
+                parent,
+                wallPoint + normal * 0.018f,
+                new Vector3(0.42f, 0.26f, 0.035f),
+                darkMetal,
+                false);
+            frame.transform.rotation = Quaternion.LookRotation(normal, Vector3.up);
+            GameObject lens = CreateChandelierPart(
+                PrimitiveType.Cube,
+                $"Atrium niche glow {suffix}",
+                parent,
+                wallPoint + normal * 0.032f,
+                new Vector3(0.32f, 0.16f, 0.03f),
+                glow,
+                false);
+            lens.transform.rotation = frame.transform.rotation;
+            TintEmissiveRenderer(lens.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 0.72f);
+
+            Vector3 probeStart = wallPoint + normal * 0.30f;
+            if (TryFindSceneSurface(probeStart, Vector3.down, 4f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
+            {
+                Renderer pool = CreateBoundedFloorReflectionQuad(
+                    parent,
+                    $"Atrium niche floor reflection {suffix}",
+                    floorHit.point + floorHit.normal * 0.024f,
+                    floorHit.normal,
+                    materialLibrary.LampFloorReflectionWarmMaterial,
+                    1.15f,
+                    1.80f);
+                BoostOverlay(
+                    pool,
+                    new Color(1f, 0.72f, 0.36f, 0.34f),
+                    new Color(0.11f, 0.048f, 0.011f, 1f));
+            }
+        }
+
+        /// <summary>Distinct storey floor heights whose sectors border the opening.</summary>
+        private List<float> CollectStoreyFloors(FloorOpeningSpec opening)
+        {
+            var storeys = new List<float>();
+            foreach (SectorSpec sector in definition.sectors)
+            {
+                if (sector.floorY < opening.bottomY - 0.01f || sector.floorY > opening.topY + 0.01f)
+                {
+                    continue;
+                }
+
+                bool overlaps = false;
+                foreach (Rect area in sector.floorAreas)
+                {
+                    if (area.Overlaps(opening.opening))
+                    {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps)
+                {
+                    continue;
+                }
+
+                bool known = false;
+                foreach (float storey in storeys)
+                {
+                    if (Mathf.Abs(storey - sector.floorY) < 0.01f)
+                    {
+                        known = true;
+                        break;
+                    }
+                }
+
+                if (!known)
+                {
+                    storeys.Add(sector.floorY);
+                }
+            }
+
+            return storeys;
+        }
+
+        private List<Rect> CollectStoreyHallAreas(float floorY, Rect opening)
+        {
+            var areas = new List<Rect>();
+            foreach (SectorSpec sector in definition.sectors)
+            {
+                if (Mathf.Abs(sector.floorY - floorY) > 0.05f)
+                {
+                    continue;
+                }
+
+                foreach (Rect area in sector.floorAreas)
+                {
+                    if (area.Overlaps(opening))
+                    {
+                        areas.Add(area);
+                    }
+                }
+            }
+
+            return areas;
+        }
+
+        private static IEnumerable<(Vector3 origin, Vector3 outward)> EnumerateOpeningPerimeterProbes(Rect rect, float y, float spacing)
+        {
+            var sides = new (Vector2 a, Vector2 b, Vector2 outward)[]
+            {
+                (new Vector2(rect.xMin, rect.yMin), new Vector2(rect.xMax, rect.yMin), Vector2.down),
+                (new Vector2(rect.xMin, rect.yMax), new Vector2(rect.xMax, rect.yMax), Vector2.up),
+                (new Vector2(rect.xMin, rect.yMin), new Vector2(rect.xMin, rect.yMax), Vector2.left),
+                (new Vector2(rect.xMax, rect.yMin), new Vector2(rect.xMax, rect.yMax), Vector2.right),
+            };
+            foreach ((Vector2 a, Vector2 b, Vector2 outward) in sides)
+            {
+                float length = Vector2.Distance(a, b);
+                if (length < 0.01f)
+                {
+                    continue;
+                }
+
+                Vector2 direction = (b - a) / length;
+                int count = Mathf.Max(1, Mathf.RoundToInt(length / spacing));
+                for (int i = 0; i < count; i++)
+                {
+                    Vector2 at = a + direction * ((i + 0.5f) * (length / count)) - outward * PerimeterProbeInset;
+                    yield return (new Vector3(at.x, y, at.y), new Vector3(outward.x, 0f, outward.y));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Wall probe for atrium fixtures: mesh-collider walls only (prop and
+        /// actor capsules are skipped) and the hit must stay inside the hall
+        /// footprint, so probes escaping through a doorway place nothing.
+        /// </summary>
+        private bool TryFindHallWall(Vector3 origin, Vector3 outward, List<Rect> areas, out RaycastHit hit)
+        {
+            if (!TryFindSceneSurface(origin, outward, PerimeterProbeReach, SurfaceTarget.Wall, out hit) ||
+                !(hit.collider is MeshCollider))
+            {
+                return false;
+            }
+
+            foreach (Rect area in areas)
+            {
+                const float pad = 0.75f;
+                if (hit.point.x >= area.xMin - pad && hit.point.x <= area.xMax + pad &&
+                    hit.point.z >= area.yMin - pad && hit.point.z <= area.yMax + pad)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsTooClose(List<Vector3> placed, Vector3 point, float minimumGap)
+        {
+            float sqrGap = minimumGap * minimumGap;
+            foreach (Vector3 at in placed)
+            {
+                if ((at - point).sqrMagnitude < sqrGap)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private Renderer CreateBoundedFloorReflectionQuad(
@@ -2287,19 +3102,34 @@ namespace WolfMini.Level
             renderer.SetPropertyBlock(properties);
         }
 
+        private static void TintEmissiveRenderer(Renderer renderer, Color color, float emissionStrength)
+        {
+            if (renderer == null)
+            {
+                return;
+            }
+
+            var properties = new MaterialPropertyBlock();
+            Color visibleColor = Color.Lerp(color, Color.white, 0.48f);
+            Color warmEmission = new Color(1f, 0.42f, 0.10f);
+            properties.SetColor("_Color", visibleColor);
+            properties.SetColor("_EmissionColor", warmEmission * (emissionStrength * 0.82f));
+            renderer.SetPropertyBlock(properties);
+        }
+
         private void AddLampLightRig(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
         {
             // A coincident unshadowed component approximates first-bounce light
             // from the visible bulb without introducing a sourceless fill.
-            float primaryIntensity = warm ? 2.65f : 2.35f;
-            float bounceIntensity = warm ? 0.42f : 0.38f;
+            float primaryIntensity = warm ? 2.35f : 2.05f;
+            float bounceIntensity = warm ? 0.48f : 0.42f;
             Color color = warm
                 ? WolfLevelContent.WarmLampColor
-                : Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.18f);
+                : Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.62f);
             Vector3 anchor = new Vector3(basePosition.x, ceilingY - 0.16f * WorldScale, basePosition.z);
             Vector3 lightPosition = anchor - Vector3.up * 0.06f * WorldScale;
-            Color lightColor = Color.Lerp(color, Color.white, 0.08f);
-            float lightRange = (warm ? 10.0f : 9.2f) * WorldScale;
+            Color lightColor = Color.Lerp(color, Color.white, 0.04f);
+            float lightRange = (warm ? 7.8f : 7.1f) * WorldScale;
             string suffix = $"{basePosition.x:0},{basePosition.z:0}";
 
             Light primary = CreatePointLight(
@@ -2322,7 +3152,7 @@ namespace WolfMini.Level
                 lightPosition,
                 lightColor,
                 bounceIntensity,
-                lightRange,
+                4.4f * WorldScale,
                 LightShadows.None);
         }
 
@@ -2380,7 +3210,8 @@ namespace WolfMini.Level
             // non-caster so the light keeps its pool on the atrium floor.
             CreateChandelierRod(anchor, "Chandelier drop rod", centerAt(hubY), centerAt(bowlY), 0.035f, metal);
             CreateChandelierPart(PrimitiveType.Cylinder, "Chandelier bowl dish", anchor, centerAt(bowlY), new Vector3(1.0f, 0.10f, 1.0f), darkMetal, false);
-            CreateChandelierPart(PrimitiveType.Sphere, "Chandelier bowl lens", anchor, centerAt(bowlY - 0.10f), new Vector3(0.86f, 0.30f, 0.86f), glow, false);
+            GameObject bowlLens = CreateChandelierPart(PrimitiveType.Sphere, "Chandelier bowl lens", anchor, centerAt(bowlY - 0.10f), new Vector3(0.86f, 0.30f, 0.86f), glow, false);
+            TintEmissiveRenderer(bowlLens.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 1.35f);
 
             for (int i = 0; i < 8; i++)
             {
@@ -2435,7 +3266,7 @@ namespace WolfMini.Level
                 $"Atrium chandelier light {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                2.15f,
+                2.75f,
                 lightRange,
                 LightShadows.Soft);
             primary.shadowStrength = PrimaryShadowStrength;
@@ -2449,7 +3280,7 @@ namespace WolfMini.Level
                 $"Atrium chandelier ceiling bounce {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                0.44f,
+                1.30f,
                 lightRange,
                 LightShadows.None);
         }
@@ -2475,7 +3306,8 @@ namespace WolfMini.Level
                 float angle = (i + 0.5f) * Mathf.PI * 2f / count;
                 Vector3 basePosition = ringTop + new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
                 CreateChandelierPart(PrimitiveType.Cylinder, $"{name} cup {i:00}", anchor, basePosition + Vector3.up * 0.05f, new Vector3(0.13f, 0.05f, 0.13f), cup, true);
-                CreateChandelierPart(PrimitiveType.Cylinder, $"{name} candle {i:00}", anchor, basePosition + Vector3.up * (0.10f + tubeHeight * 0.5f), new Vector3(0.095f, tubeHeight * 0.5f, 0.095f), glow, false);
+                GameObject candle = CreateChandelierPart(PrimitiveType.Cylinder, $"{name} candle {i:00}", anchor, basePosition + Vector3.up * (0.10f + tubeHeight * 0.5f), new Vector3(0.095f, tubeHeight * 0.5f, 0.095f), glow, false);
+                TintEmissiveRenderer(candle.GetComponent<Renderer>(), WolfLevelContent.WarmLampColor, 1.55f);
             }
         }
 
@@ -2513,6 +3345,29 @@ namespace WolfMini.Level
             lightObject.transform.position = position;
             Light light = lightObject.AddComponent<Light>();
             light.type = LightType.Point;
+            ConfigureGeneratedLight(light, color, intensity, range, shadows);
+            return light;
+        }
+
+        private Light CreateSpotLight(
+            Transform parent,
+            string name,
+            Vector3 position,
+            Vector3 direction,
+            Color color,
+            float intensity,
+            float range,
+            float spotAngle,
+            LightShadows shadows)
+        {
+            GameObject lightObject = new GameObject(name);
+            lightObject.transform.SetParent(parent, true);
+            lightObject.transform.position = position;
+            lightObject.transform.rotation = Quaternion.LookRotation(direction.normalized, Vector3.forward);
+            Light light = lightObject.AddComponent<Light>();
+            light.type = LightType.Spot;
+            light.spotAngle = spotAngle;
+            light.innerSpotAngle = spotAngle * 0.58f;
             ConfigureGeneratedLight(light, color, intensity, range, shadows);
             return light;
         }

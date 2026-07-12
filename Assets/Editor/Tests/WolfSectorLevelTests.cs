@@ -144,9 +144,10 @@ namespace HelloWorldRoom.Editor.Tests
 
             Assert.That(sector.TryValidate(out List<string> errors), Is.True, string.Join("\n", errors));
 
-            // Three ways between the storeys: down in the corridor's west arm,
-            // up in its east arm, and back up in the big south hall.
-            Assert.That(sector.stairwells, Has.Count.EqualTo(3));
+            // Five ways between the storeys: down in the corridor's west arm,
+            // up in its east arm, back up in the big south hall, and the
+            // scissor pair in the stair room east of the corridor.
+            Assert.That(sector.stairwells, Has.Count.EqualTo(5));
 
             // The whole floor is duplicated twice: same rooms, walls, doors
             // and content one storey below and one above.
@@ -239,11 +240,95 @@ namespace HelloWorldRoom.Editor.Tests
             Assert.That(hallOpening.yMin, Is.GreaterThanOrEqualTo(28 * cell - 0.001f));
             Assert.That(hallOpening.yMax, Is.LessThanOrEqualTo(30 * cell + 0.001f));
 
+            // The scissor pair shares the stair room (cells x 37..42, z 5..8):
+            // full-storey flights in the outer one-cell lanes with the middle
+            // lane left as the landing. The lower flight's head and the upper
+            // flight's mouth meet at the west end on the middle floor, and
+            // both pits ask for guard railings.
+            StairwellSpec lowerFlight = sector.stairwells[3];
+            Assert.That(lowerFlight.topY, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(lowerFlight.bottomY, Is.EqualTo(-storey).Within(0.001f));
+            Assert.That(lowerFlight.opening.xMin, Is.EqualTo(38 * cell).Within(0.001f));
+            Assert.That(lowerFlight.opening.xMax, Is.EqualTo(41 * cell).Within(0.001f));
+            Assert.That(lowerFlight.opening.yMin, Is.EqualTo(5 * cell).Within(0.001f));
+            Assert.That(lowerFlight.opening.yMax, Is.EqualTo(6 * cell).Within(0.001f));
+            Assert.That(lowerFlight.descendSign, Is.EqualTo(1));
+            Assert.That(lowerFlight.guardPitSides, Is.True);
+
+            StairwellSpec upperFlight = sector.stairwells[4];
+            Assert.That(upperFlight.topY, Is.EqualTo(storey).Within(0.001f));
+            Assert.That(upperFlight.bottomY, Is.EqualTo(0f).Within(0.001f));
+            Assert.That(upperFlight.opening.xMin, Is.EqualTo(38 * cell).Within(0.001f));
+            Assert.That(upperFlight.opening.xMax, Is.EqualTo(41 * cell).Within(0.001f));
+            Assert.That(upperFlight.opening.yMin, Is.EqualTo(7 * cell).Within(0.001f));
+            Assert.That(upperFlight.opening.yMax, Is.EqualTo(8 * cell).Within(0.001f));
+            Assert.That(upperFlight.descendSign, Is.EqualTo(-1));
+            Assert.That(upperFlight.guardPitSides, Is.True);
+
             // The hall atrium spans all three storeys: one void from the top
             // hall floor down, with only the lower hall floor intact under it.
             Assert.That(sector.floorOpenings, Has.Count.EqualTo(1));
             Assert.That(sector.floorOpenings[0].topY, Is.EqualTo(storey).Within(0.001f));
             Assert.That(sector.floorOpenings[0].bottomY, Is.EqualTo(-storey).Within(0.001f));
+        }
+
+        [Test]
+        public void ScissorStairRoomGrowsOneCellEastWithLamps()
+        {
+            float cell = WolfMiniConstants.CellSize;
+            int props = sector.props.Count;
+
+            WolfSectorLevelConverter.PrepareScissorStairRoom(sector);
+
+            // The stair room's floor area now spans cells x 37..42.
+            bool found = false;
+            Rect area = default;
+            foreach (SectorSpec spec in sector.sectors)
+            {
+                foreach (Rect floorArea in spec.floorAreas)
+                {
+                    if (Mathf.Abs(floorArea.xMin - 37 * cell) < 0.01f &&
+                        Mathf.Abs(floorArea.yMin - 5 * cell) < 0.01f)
+                    {
+                        area = floorArea;
+                        found = true;
+                    }
+                }
+            }
+
+            Assert.That(found, Is.True, "Stair room floor area is missing.");
+            Assert.That(area.width, Is.EqualTo(5 * cell).Within(0.001f));
+            Assert.That(area.height, Is.EqualTo(3 * cell).Within(0.001f));
+
+            // No wall face remains on the old east line inside the room; the
+            // moved east wall closes the new line over the full room depth.
+            float movedLength = 0f;
+            foreach (WallSegmentSpec wall in sector.walls)
+            {
+                bool vertical = Mathf.Abs(wall.start.x - wall.end.x) < 0.01f;
+                if (!vertical ||
+                    wall.start.y < 5 * cell - 0.01f || wall.start.y > 8 * cell + 0.01f ||
+                    wall.end.y < 5 * cell - 0.01f || wall.end.y > 8 * cell + 0.01f)
+                {
+                    continue;
+                }
+
+                Assert.That(Mathf.Abs(wall.start.x - 41 * cell), Is.GreaterThan(0.01f),
+                    "A wall face survived on the old east line.");
+                if (Mathf.Abs(wall.start.x - 42 * cell) < 0.01f)
+                {
+                    movedLength += Mathf.Abs(wall.end.y - wall.start.y);
+                }
+            }
+
+            Assert.That(movedLength, Is.EqualTo(3 * cell).Within(0.01f));
+
+            // Two ceiling lamps light the landing lane, and the level still
+            // validates with the widened room.
+            Assert.That(sector.props, Has.Count.EqualTo(props + 2));
+            Assert.That(sector.props[props].typeIndex, Is.EqualTo(WolfLevelContent.CeilLightTypeIndex));
+            Assert.That(sector.props[props + 1].typeIndex, Is.EqualTo(WolfLevelContent.CeilLightTypeIndex));
+            Assert.That(sector.TryValidate(out List<string> errors), Is.True, string.Join("\n", errors));
         }
 
         [Test]

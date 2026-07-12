@@ -48,7 +48,7 @@ MonoBehaviour:
     - serializedVersion: 2
       x: 133.2
       y: 18
-      width: 14.4
+      width: 18
       height: 10.799999
     floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
     ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
@@ -525,7 +525,7 @@ MonoBehaviour:
     - serializedVersion: 2
       x: 133.2
       y: 18
-      width: 14.4
+      width: 18
       height: 10.799999
     floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
     ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
@@ -1002,7 +1002,7 @@ MonoBehaviour:
     - serializedVersion: 2
       x: 133.2
       y: 18
-      width: 14.4
+      width: 18
       height: 10.799999
     floorColor: {r: 0.4392157, g: 0.4392157, b: 0.4392157, a: 1}
     ceilingColor: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 1}
@@ -1541,13 +1541,13 @@ MonoBehaviour:
     baseY: 0
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 21.599998}
-    end: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 21.599998}
+    end: {x: 151.2, y: 18}
     baseY: 0
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 28.8}
-    end: {x: 147.59999, y: 25.199999}
+  - start: {x: 151.2, y: 28.8}
+    end: {x: 151.2, y: 25.199999}
     baseY: 0
     height: 4.6499996
     style: 8
@@ -1611,7 +1611,7 @@ MonoBehaviour:
     baseY: 0
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 18}
     end: {x: 144, y: 18}
     baseY: 0
     height: 4.6499996
@@ -1811,8 +1811,8 @@ MonoBehaviour:
     baseY: 0
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 25.199999}
-    end: {x: 147.59999, y: 21.599998}
+  - start: {x: 151.2, y: 25.199999}
+    end: {x: 151.2, y: 21.599998}
     baseY: 0
     height: 4.6499996
     style: 9
@@ -1892,7 +1892,7 @@ MonoBehaviour:
     height: 4.6499996
     style: 8
   - start: {x: 133.2, y: 28.8}
-    end: {x: 147.59999, y: 28.8}
+    end: {x: 151.2, y: 28.8}
     baseY: 0
     height: 4.6499996
     style: 8
@@ -4336,13 +4336,13 @@ MonoBehaviour:
     baseY: -4.6499996
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 21.599998}
-    end: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 21.599998}
+    end: {x: 151.2, y: 18}
     baseY: -4.6499996
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 28.8}
-    end: {x: 147.59999, y: 25.199999}
+  - start: {x: 151.2, y: 28.8}
+    end: {x: 151.2, y: 25.199999}
     baseY: -4.6499996
     height: 4.6499996
     style: 8
@@ -4406,7 +4406,7 @@ MonoBehaviour:
     baseY: -4.6499996
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 18}
     end: {x: 144, y: 18}
     baseY: -4.6499996
     height: 4.6499996
@@ -4606,8 +4606,8 @@ MonoBehaviour:
     baseY: -4.6499996
     height: 4.6499996
     style: 8
-  - start: {x: 147.59999, y: 25.199999}
-    end: {x: 147.59999, y: 21.599998}
+  - start: {x: 151.2, y: 25.199999}
+    end: {x: 151.2, y: 21.599998}
     baseY: -4.6499996
     height: 4.6499996
     style: 9
@@ -4687,7 +4687,7 @@ MonoBehaviour:
     height: 4.6499996
     style: 8
   - start: {x: 133.2, y: 28.8}
-    end: {x: 147.59999, y: 28.8}
+    end: {x: 151.2, y: 28.8}
     baseY: -4.6499996
     height: 4.6499996
     style: 8
@@ -7131,13 +7131,13 @@ MonoBehaviour:
     baseY: 4.6499996
     height: 4.2
     style: 8
-  - start: {x: 147.59999, y: 21.599998}
-    end: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 21.599998}
+    end: {x: 151.2, y: 18}
     baseY: 4.6499996
     height: 4.2
     style: 8
-  - start: {x: 147.59999, y: 28.8}
-    end: {x: 147.59999, y: 25.199999}
+  - start: {x: 151.2, y: 28.8}
+    end: {x: 151.2, y: 25.199999}
     baseY: 4.6499996
     height: 4.2
     style: 8
@@ -7201,7 +7201,7 @@ MonoBehaviour:
     baseY: 4.6499996
     height: 4.2
     style: 8
-  - start: {x: 147.59999, y: 18}
+  - start: {x: 151.2, y: 18}
     end: {x: 144, y: 18}
     baseY: 4.6499996
     height: 4.2
@@ -7401,8 +7401,8 @@ MonoBehaviour:
     baseY: 4.6499996
     height: 4.2
     style: 8
-  - start: {x: 147.59999, y: 25.199999}
-    end: {x: 147.59999, y: 21.599998}
+  - start: {x: 151.2, y: 25.199999}
+    end: {x: 151.2, y: 21.599998}
     baseY: 4.6499996
     height: 4.2
     style: 9
@@ -7482,7 +7482,7 @@ MonoBehaviour:
     height: 4.2
     style: 8
   - start: {x: 133.2, y: 28.8}
-    end: {x: 147.59999, y: 28.8}
+    end: {x: 151.2, y: 28.8}
     baseY: 4.6499996
     height: 4.2
     style: 8
@@ -10439,6 +10439,7 @@ MonoBehaviour:
     descendSign: -1
     stepCount: 13
     wallStyle: 8
+    guardPitSides: 0
     wallThickness: 0.45
     treadUvScale: 4
   - opening:
@@ -10453,6 +10454,7 @@ MonoBehaviour:
     descendSign: -1
     stepCount: 13
     wallStyle: 8
+    guardPitSides: 0
     wallThickness: 0.45
     treadUvScale: 4
   - opening:
@@ -10467,6 +10469,37 @@ MonoBehaviour:
     descendSign: 1
     stepCount: 13
     wallStyle: 2
+    guardPitSides: 0
+    wallThickness: 0.45
+    treadUvScale: 4
+  - opening:
+      serializedVersion: 2
+      x: 136.8
+      y: 18
+      width: 10.799999
+      height: 3.6
+    topY: 0
+    bottomY: -4.6499996
+    alongZ: 0
+    descendSign: 1
+    stepCount: 13
+    wallStyle: 8
+    guardPitSides: 1
+    wallThickness: 0.45
+    treadUvScale: 4
+  - opening:
+      serializedVersion: 2
+      x: 136.8
+      y: 25.199999
+      width: 10.799999
+      height: 3.6
+    topY: 4.6499996
+    bottomY: 0
+    alongZ: 0
+    descendSign: -1
+    stepCount: 13
+    wallStyle: 8
+    guardPitSides: 1
     wallThickness: 0.45
     treadUvScale: 4
   floorOpenings:
@@ -10843,6 +10876,12 @@ MonoBehaviour:
   - position: {x: 124.2, y: 0, z: 5.3999996}
     typeIndex: 24
     typeName: 
+  - position: {x: 135, y: 0, z: 23.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 145.8, y: 0, z: 23.4}
+    typeIndex: 14
+    typeName: 
   - position: {x: 106.2, y: -4.6499996, z: 199.79999}
     typeIndex: 12
     typeName: 
@@ -11206,6 +11245,12 @@ MonoBehaviour:
   - position: {x: 124.2, y: -4.6499996, z: 5.3999996}
     typeIndex: 24
     typeName: 
+  - position: {x: 135, y: -4.6499996, z: 23.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 145.8, y: -4.6499996, z: 23.4}
+    typeIndex: 14
+    typeName: 
   - position: {x: 106.2, y: 4.6499996, z: 199.79999}
     typeIndex: 12
     typeName: 
@@ -11568,6 +11613,12 @@ MonoBehaviour:
     typeName: 
   - position: {x: 124.2, y: 4.6499996, z: 5.3999996}
     typeIndex: 24
+    typeName: 
+  - position: {x: 135, y: 4.6499996, z: 23.4}
+    typeIndex: 14
+    typeName: 
+  - position: {x: 145.8, y: 4.6499996, z: 23.4}
+    typeIndex: 14
     typeName: 
   enemies:
   - position: {x: 120.6, y: 0, z: 196.2}

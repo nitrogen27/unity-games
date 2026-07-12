@@ -293,6 +293,15 @@ namespace WolfMini.Level
         /// <summary>Wall style of the shaft side walls; matches the surrounding room walls.</summary>
         public int wallStyle = 1;
 
+        /// <summary>
+        /// Guard the pit edges on the top floor with railings even when the
+        /// stairwell does not border an atrium void: stair-room pits are
+        /// surrounded by walkable floor, so their long sides and the drop
+        /// over the mouth need rails. The head end always stays open as the
+        /// stair entry.
+        /// </summary>
+        public bool guardPitSides;
+
         /// <summary>Thickness of the shaft walls (one brick), so their tops and ends read as solid masonry.</summary>
         public float wallThickness = 0.45f;
 
