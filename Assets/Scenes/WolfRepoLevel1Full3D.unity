@@ -398,22 +398,23 @@ MonoBehaviour:
   postAntialiasingEdgeThreshold: 0.11
   postAntialiasingEdgeThresholdMin: 0.0312
   enableCinematicPostProcess: 1
-  cinematicExposure: 1.05
-  cinematicContrast: 1.16
-  cinematicBlackPoint: 0.008
-  cinematicSaturation: 1.2
-  cinematicLocalContrast: 0.16
-  cinematicLocalRadius: 1.7
-  cinematicShadowLift: 0.075
-  cinematicBloomThreshold: 1.05
-  cinematicBloomIntensity: 0.46
-  cinematicBloomKnee: 0.42
-  cinematicBloomScatter: 1.25
+  cinematicExposure: 1.16
+  cinematicContrast: 1.18
+  cinematicBlackPoint: 0.006
+  cinematicSaturation: 1.23
+  cinematicLocalContrast: 0.2
+  cinematicLocalRadius: 3.1
+  cinematicShadowLift: 0.08
+  cinematicHighlightPunch: 0.2
+  cinematicBloomThreshold: 0.95
+  cinematicBloomIntensity: 0.52
+  cinematicBloomKnee: 0.48
+  cinematicBloomScatter: 1.3
   cinematicBloomIterations: 3
   cinematicBloomDownsample: 2
-  cinematicVignette: 0.075
-  cinematicWarmHighlights: 0.095
-  cinematicCoolShadows: 0.055
+  cinematicVignette: 0.05
+  cinematicWarmHighlights: 0.1
+  cinematicCoolShadows: 0.045
 --- !u!4 &284190708
 Transform:
   m_ObjectHideFlags: 0

@@ -10,21 +10,22 @@ namespace HelloWorldRoom
     {
         private const string ShaderName = "Hidden/Wolf/CinematicPost";
 
-        [SerializeField, Range(0.5f, 2.0f)] private float exposure = 0.94f;
-        [SerializeField, Range(0.8f, 1.6f)] private float contrast = 1.06f;
-        [SerializeField, Range(0.0f, 0.18f)] private float blackPoint = 0.002f;
-        [SerializeField, Range(0.7f, 1.4f)] private float saturation = 1.04f;
-        [SerializeField, Range(0f, 0.45f)] private float localContrast = 0.09f;
-        [SerializeField, Range(0.5f, 3.5f)] private float localRadius = 1.7f;
-        [SerializeField, Range(0f, 0.18f)] private float shadowLift = 0.13f;
-        [SerializeField, Range(0.6f, 2.5f)] private float bloomThreshold = 1.15f;
-        [SerializeField, Range(0f, 1.5f)] private float bloomIntensity = 0.28f;
-        [SerializeField, Range(0f, 1.0f)] private float bloomKnee = 0.46f;
-        [SerializeField, Range(0.7f, 2.4f)] private float bloomScatter = 1.35f;
+        [SerializeField, Range(0.5f, 2.0f)] private float exposure = 1.16f;
+        [SerializeField, Range(0.8f, 1.6f)] private float contrast = 1.18f;
+        [SerializeField, Range(0.0f, 0.18f)] private float blackPoint = 0.006f;
+        [SerializeField, Range(0.7f, 1.4f)] private float saturation = 1.23f;
+        [SerializeField, Range(0f, 0.45f)] private float localContrast = 0.20f;
+        [SerializeField, Range(0.5f, 3.5f)] private float localRadius = 3.1f;
+        [SerializeField, Range(0f, 0.18f)] private float shadowLift = 0.08f;
+        [SerializeField, Range(0f, 0.35f)] private float highlightPunch = 0.20f;
+        [SerializeField, Range(0.6f, 2.5f)] private float bloomThreshold = 0.95f;
+        [SerializeField, Range(0f, 1.5f)] private float bloomIntensity = 0.52f;
+        [SerializeField, Range(0f, 1.0f)] private float bloomKnee = 0.48f;
+        [SerializeField, Range(0.7f, 2.4f)] private float bloomScatter = 1.30f;
         [SerializeField, Range(1, 5)] private int bloomIterations = 3;
         [SerializeField, Range(1, 4)] private int bloomDownsample = 2;
-        [SerializeField, Range(0f, 0.35f)] private float vignette = 0.07f;
-        [SerializeField, Range(0f, 0.35f)] private float warmHighlights = 0.055f;
+        [SerializeField, Range(0f, 0.35f)] private float vignette = 0.05f;
+        [SerializeField, Range(0f, 0.35f)] private float warmHighlights = 0.10f;
         [SerializeField, Range(0f, 0.2f)] private float coolShadows = 0.045f;
 
         private static readonly int ExposureId = Shader.PropertyToID("_Exposure");
@@ -34,6 +35,7 @@ namespace HelloWorldRoom
         private static readonly int LocalContrastId = Shader.PropertyToID("_LocalContrast");
         private static readonly int LocalRadiusId = Shader.PropertyToID("_LocalRadius");
         private static readonly int ShadowLiftId = Shader.PropertyToID("_ShadowLift");
+        private static readonly int HighlightPunchId = Shader.PropertyToID("_HighlightPunch");
         private static readonly int BloomThresholdId = Shader.PropertyToID("_BloomThreshold");
         private static readonly int BloomIntensityId = Shader.PropertyToID("_BloomIntensity");
         private static readonly int BloomKneeId = Shader.PropertyToID("_BloomKnee");
@@ -54,6 +56,7 @@ namespace HelloWorldRoom
             float targetLocalContrast,
             float targetLocalRadius,
             float targetShadowLift,
+            float targetHighlightPunch,
             float targetBloomThreshold,
             float targetBloomIntensity,
             float targetBloomKnee,
@@ -71,6 +74,7 @@ namespace HelloWorldRoom
             localContrast = Mathf.Clamp(targetLocalContrast, 0.0f, 0.45f);
             localRadius = Mathf.Clamp(targetLocalRadius, 0.5f, 3.5f);
             shadowLift = Mathf.Clamp(targetShadowLift, 0.0f, 0.18f);
+            highlightPunch = Mathf.Clamp(targetHighlightPunch, 0.0f, 0.35f);
             bloomThreshold = Mathf.Clamp(targetBloomThreshold, 0.6f, 2.5f);
             bloomIntensity = Mathf.Clamp(targetBloomIntensity, 0.0f, 1.5f);
             bloomKnee = Mathf.Clamp01(targetBloomKnee);
@@ -148,6 +152,7 @@ namespace HelloWorldRoom
             material.SetFloat(LocalContrastId, localContrast);
             material.SetFloat(LocalRadiusId, localRadius);
             material.SetFloat(ShadowLiftId, shadowLift);
+            material.SetFloat(HighlightPunchId, highlightPunch);
             material.SetFloat(BloomThresholdId, bloomThreshold);
             material.SetFloat(BloomIntensityId, bloomIntensity);
             material.SetFloat(BloomKneeId, bloomKnee);

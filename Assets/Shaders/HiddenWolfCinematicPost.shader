@@ -122,6 +122,7 @@ Shader "Hidden/Wolf/CinematicPost"
             float _LocalContrast;
             float _LocalRadius;
             float _ShadowLift;
+            float _HighlightPunch;
             float _BloomIntensity;
             float _Vignette;
             float _WarmHighlights;
@@ -183,6 +184,13 @@ Shader "Hidden/Wolf/CinematicPost"
                 color += tex2D(_BloomTex, uv).rgb * _BloomIntensity;
                 color = GradeSplitTone(color * _Exposure);
                 color = Aces(color);
+
+                // Raise polished-stone and lamp highlights without washing the
+                // room midtones. This supplies the bright shoulder visible in
+                // the reference while ACES still protects emissive bulbs.
+                float highlightLuma = Luma(color);
+                float highlightMask = smoothstep(0.34, 0.82, highlightLuma);
+                color += color * (1.0 - color) * (_HighlightPunch * highlightMask);
 
                 float liftLuma = Luma(color);
                 float liftMask = (1.0 - smoothstep(0.22, 0.78, liftLuma)) * smoothstep(0.004, 0.05, liftLuma);

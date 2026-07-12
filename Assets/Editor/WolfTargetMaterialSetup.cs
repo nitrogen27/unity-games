@@ -23,6 +23,7 @@ public static class WolfTargetMaterialSetup
         SetupBlueWallTargetTextureImports();
 
         SetupWhiteStoneWallTextureImports();
+        SetupDetailedBannerTextureImports();
 
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_Albedo.png", TextureImporterType.Default, true, TextureWrapMode.Clamp);
         SetupTextureImport($"{TextureRoot}/DoorTeal/DoorTeal_Target_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Clamp);
@@ -53,6 +54,7 @@ public static class WolfTargetMaterialSetup
 
         CreateBlueWallTargetMaterial();
         CreateWhiteStoneWallTargetMaterials();
+        ConfigureDetailedBannerMaterial();
 
         CreateMaterial(
             "DoorTeal_Target",
@@ -159,6 +161,16 @@ public static class WolfTargetMaterialSetup
         Debug.Log("White stone wall target materials created/updated.");
     }
 
+    [MenuItem("Tools/Wolf Target Look/Setup Detailed Atrium Banner Material")]
+    public static void SetupDetailedAtriumBannerMaterial()
+    {
+        SetupDetailedBannerTextureImports();
+        AssetDatabase.Refresh();
+        ConfigureDetailedBannerMaterial();
+
+        Debug.Log("Detailed atrium banner material created/updated.");
+    }
+
     private static void SetupBlueWallTargetTextureImports()
     {
         string root = $"{TextureRoot}/BlueWall";
@@ -178,6 +190,22 @@ public static class WolfTargetMaterialSetup
         SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_AO.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
         SetupTextureImport($"{StoneWallTextureRoot}/StoneWall_WhiteLarge_Height.png", TextureImporterType.Default, false, TextureWrapMode.Repeat);
+    }
+
+    private static void SetupDetailedBannerTextureImports()
+    {
+        string root = $"{TextureRoot}/AtriumDecor";
+        SetupTextureImport($"{root}/AtriumBanner_Detailed_Cutout.png", TextureImporterType.Default, true, TextureWrapMode.Clamp);
+        SetupTextureImport($"{root}/AtriumBanner_Detailed_Normal.png", TextureImporterType.NormalMap, false, TextureWrapMode.Clamp);
+        SetupTextureImport($"{root}/AtriumBanner_Detailed_MetallicSmoothness.png", TextureImporterType.Default, false, TextureWrapMode.Clamp);
+        SetupTextureImport($"{root}/AtriumBanner_Detailed_AO.png", TextureImporterType.Default, false, TextureWrapMode.Clamp);
+
+        var cutoutImporter = AssetImporter.GetAtPath($"{root}/AtriumBanner_Detailed_Cutout.png") as TextureImporter;
+        if (cutoutImporter != null && !cutoutImporter.alphaIsTransparency)
+        {
+            cutoutImporter.alphaIsTransparency = true;
+            cutoutImporter.SaveAndReimport();
+        }
     }
 
     private static void SetupTextureImport(
@@ -247,21 +275,21 @@ public static class WolfTargetMaterialSetup
         SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
         SetFloatIfHas(mat, "_ZWrite", 1.0f);
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.58f);
-        SetFloatIfHas(mat, "_Glossiness", 0.58f);
-        SetFloatIfHas(mat, "_GlossMapScale", 0.76f);
+        SetFloatIfHas(mat, "_Smoothness", 0.62f);
+        SetFloatIfHas(mat, "_Glossiness", 0.62f);
+        SetFloatIfHas(mat, "_GlossMapScale", 0.86f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
-        SetFloatIfHas(mat, "_BumpScale", 0.20f);
-        SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
+        SetFloatIfHas(mat, "_BumpScale", 0.38f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.20f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.88f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.78f);
+        SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 0.92f);
 
         SetKeyword(mat, "_NORMALMAP", normal != null);
         SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
         SetKeyword(mat, "_PARALLAXMAP", false);
         SetKeyword(mat, "_EMISSION", false);
-        ConfigureStandardReflectionKeywords(mat, 0.88f, 0.78f);
+        ConfigureStandardReflectionKeywords(mat, 1.0f, 0.92f);
         mat.DisableKeyword("_METALLICSPECGLOSSMAP");
         mat.DisableKeyword("_SPECGLOSSMAP");
 
@@ -296,6 +324,58 @@ public static class WolfTargetMaterialSetup
             $"{MaterialRoot}/{WhiteStoneWallDarkTargetName}.mat",
             new Color(0.82f, 0.80f, 0.76f, 1f),
             Color.black);
+    }
+
+    private static void ConfigureDetailedBannerMaterial()
+    {
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>($"{MaterialRoot}/AtriumBannerWall_Target.mat");
+        if (mat == null)
+        {
+            Debug.LogWarning("Missing AtriumBannerWall_Target material.");
+            return;
+        }
+
+        string root = $"{TextureRoot}/AtriumDecor";
+        Texture2D albedo = LoadTexture($"{root}/AtriumBanner_Detailed_Cutout.png");
+        Texture2D normal = LoadTexture($"{root}/AtriumBanner_Detailed_Normal.png");
+        Texture2D metallicSmoothness = LoadTexture($"{root}/AtriumBanner_Detailed_MetallicSmoothness.png");
+        Texture2D occlusion = LoadTexture($"{root}/AtriumBanner_Detailed_AO.png");
+
+        SetTextureIfHas(mat, "_BaseMap", albedo);
+        SetTextureIfHas(mat, "_MainTex", albedo);
+        SetTextureIfHas(mat, "_BumpMap", normal);
+        SetTextureIfHas(mat, "_MetallicGlossMap", metallicSmoothness);
+        SetTextureIfHas(mat, "_OcclusionMap", occlusion);
+        SetTextureIfHas(mat, "_EmissionMap", null);
+        SetKeyword(mat, "_NORMALMAP", normal != null);
+        SetKeyword(mat, "_METALLICGLOSSMAP", metallicSmoothness != null);
+        SetKeyword(mat, "_EMISSION", false);
+        SetKeyword(mat, "_ALPHATEST_ON", true);
+        SetKeyword(mat, "_ALPHABLEND_ON", false);
+        SetKeyword(mat, "_ALPHAPREMULTIPLY_ON", false);
+        SetColorIfHas(mat, "_Color", Color.white);
+        SetColorIfHas(mat, "_BaseColor", Color.white);
+        SetColorIfHas(mat, "_EmissionColor", Color.black);
+        SetFloatIfHas(mat, "_Metallic", 0.0f);
+        SetFloatIfHas(mat, "_Mode", 1.0f);
+        SetFloatIfHas(mat, "_SrcBlend", (float)UnityEngine.Rendering.BlendMode.One);
+        SetFloatIfHas(mat, "_DstBlend", (float)UnityEngine.Rendering.BlendMode.Zero);
+        SetFloatIfHas(mat, "_ZWrite", 1.0f);
+        SetFloatIfHas(mat, "_Cutoff", 0.18f);
+        SetFloatIfHas(mat, "_Smoothness", 0.45f);
+        SetFloatIfHas(mat, "_Glossiness", 0.45f);
+        SetFloatIfHas(mat, "_GlossMapScale", 1.0f);
+        SetFloatIfHas(mat, "_BumpScale", 0.72f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.58f);
+        SetFloatIfHas(mat, "_GlossyReflections", 1.0f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
+        ConfigureStandardReflectionKeywords(mat, 1.0f, 1.0f);
+        mat.SetOverrideTag("RenderType", "TransparentCutout");
+        mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+        mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+
+        EditorUtility.SetDirty(mat);
+        AssetDatabase.SaveAssets();
     }
 
     private static void CreateWhiteStoneWallTileMaterial(string materialName, Color tint, Color emissionTint)
@@ -345,16 +425,16 @@ public static class WolfTargetMaterialSetup
         mat.DisableKeyword("_SPECGLOSSMAP");
 
         SetFloatIfHas(mat, "_Metallic", 0.0f);
-        SetFloatIfHas(mat, "_Smoothness", 0.48f);
-        SetFloatIfHas(mat, "_Glossiness", 0.48f);
+        SetFloatIfHas(mat, "_Smoothness", 0.56f);
+        SetFloatIfHas(mat, "_Glossiness", 0.56f);
         SetFloatIfHas(mat, "_GlossMapScale", 0.0f);
         SetFloatIfHas(mat, "_SmoothnessTextureChannel", 0.0f);
-        SetFloatIfHas(mat, "_BumpScale", 0.18f);
-        SetFloatIfHas(mat, "_OcclusionStrength", 0.0f);
+        SetFloatIfHas(mat, "_BumpScale", 0.42f);
+        SetFloatIfHas(mat, "_OcclusionStrength", 0.30f);
         SetFloatIfHas(mat, "_Parallax", 0.0f);
-        SetFloatIfHas(mat, "_GlossyReflections", 0.72f);
-        SetFloatIfHas(mat, "_SpecularHighlights", 0.70f);
-        ConfigureStandardReflectionKeywords(mat, 0.72f, 0.70f);
+        SetFloatIfHas(mat, "_GlossyReflections", 0.90f);
+        SetFloatIfHas(mat, "_SpecularHighlights", 1.0f);
+        ConfigureStandardReflectionKeywords(mat, 0.90f, 1.0f);
         SetColorIfHas(mat, "_Color", tint);
         SetColorIfHas(mat, "_BaseColor", tint);
         SetColorIfHas(mat, "_EmissionColor", emissionTint);
@@ -495,22 +575,26 @@ public static class WolfTargetMaterialSetup
         Texture metallicSmoothness = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_MetallicSmoothness.png");
         Texture height = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_Height.png");
 
-        SetColorIfHas(material, "_Color", new Color(0.98f, 0.92f, 0.82f, 1f));
-        SetColorIfHas(material, "_BaseColor", new Color(0.98f, 0.92f, 0.82f, 1f));
+        // The reference floor is charcoal stone whose high smoothness carries
+        // warm lamp streaks. A near-white tint clips the direct light and hides
+        // both the tile albedo and the reflections.
+        SetColorIfHas(material, "_Color", new Color(0.68f, 0.63f, 0.56f, 1f));
+        SetColorIfHas(material, "_BaseColor", new Color(0.68f, 0.63f, 0.56f, 1f));
         SetColorIfHas(material, "_EmissionColor", Color.black);
         SetTextureIfHas(material, "_BaseMap", albedo);
         SetTextureIfHas(material, "_MainTex", albedo);
         SetTextureIfHas(material, "_BumpMap", normal);
         SetTextureIfHas(material, "_MetallicGlossMap", metallicSmoothness);
-        SetTextureIfHas(material, "_OcclusionMap", null);
+        Texture occlusion = LoadTexture($"{TextureRoot}/FloorTile/FloorTile_Target_AO.png");
+        SetTextureIfHas(material, "_OcclusionMap", occlusion);
         SetTextureIfHas(material, "_EmissionMap", null);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.0f);
         SetFloatIfHas(material, "_Smoothness", 0.78f);
         SetFloatIfHas(material, "_Glossiness", 0.78f);
         SetFloatIfHas(material, "_GlossMapScale", 1.0f);
-        SetFloatIfHas(material, "_OcclusionStrength", 0.0f);
-        SetFloatIfHas(material, "_BumpScale", 0.08f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.28f);
+        SetFloatIfHas(material, "_BumpScale", 0.16f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
         SetFloatIfHas(material, "_GlossyReflections", 1.0f);
         SetFloatIfHas(material, "_SpecularHighlights", 1.0f);
@@ -528,7 +612,7 @@ public static class WolfTargetMaterialSetup
     {
         Texture height = LoadTexture($"{TextureRoot}/CeilingPanel/CeilingPanel_Target_Height.png");
 
-        Color ceilingTint = new Color(0.29f, 0.30f, 0.31f, 1f);
+        Color ceilingTint = new Color(0.26f, 0.27f, 0.28f, 1f);
 
         SetColorIfHas(material, "_Color", ceilingTint);
         SetColorIfHas(material, "_BaseColor", ceilingTint);
@@ -536,17 +620,17 @@ public static class WolfTargetMaterialSetup
         SetTextureIfHas(material, "_EmissionMap", null);
         SetTextureIfHas(material, "_ParallaxMap", height);
         SetFloatIfHas(material, "_Metallic", 0.0f);
-        SetFloatIfHas(material, "_Smoothness", 0.36f);
-        SetFloatIfHas(material, "_Glossiness", 0.36f);
-        SetFloatIfHas(material, "_GlossMapScale", 0.34f);
-        SetFloatIfHas(material, "_OcclusionStrength", 0.0f);
-        SetFloatIfHas(material, "_BumpScale", 0.18f);
+        SetFloatIfHas(material, "_Smoothness", 0.46f);
+        SetFloatIfHas(material, "_Glossiness", 0.46f);
+        SetFloatIfHas(material, "_GlossMapScale", 0.50f);
+        SetFloatIfHas(material, "_OcclusionStrength", 0.35f);
+        SetFloatIfHas(material, "_BumpScale", 0.30f);
         SetFloatIfHas(material, "_Parallax", 0.0f);
-        SetFloatIfHas(material, "_GlossyReflections", 0.58f);
-        SetFloatIfHas(material, "_SpecularHighlights", 0.52f);
+        SetFloatIfHas(material, "_GlossyReflections", 0.78f);
+        SetFloatIfHas(material, "_SpecularHighlights", 0.75f);
         SetKeyword(material, "_EMISSION", false);
         SetKeyword(material, "_PARALLAXMAP", false);
-        ConfigureStandardReflectionKeywords(material, 0.58f, 0.52f);
+        ConfigureStandardReflectionKeywords(material, 0.78f, 0.75f);
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
     }
 
