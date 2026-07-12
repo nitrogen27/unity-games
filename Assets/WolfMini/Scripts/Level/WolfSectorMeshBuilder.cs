@@ -177,11 +177,14 @@ namespace WolfMini.Level
         private static void ApplyCinematicRenderSettings()
         {
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.310f, 0.290f, 0.250f);
-            RenderSettings.ambientEquatorColor = new Color(0.185f, 0.195f, 0.220f);
-            RenderSettings.ambientGroundColor = new Color(0.215f, 0.220f, 0.235f);
-            RenderSettings.ambientIntensity = 0.74f;
-            RenderSettings.reflectionIntensity = 0.86f;
+            // Trilight split follows the reference frame: bright floor (sky
+            // term), luminous cobalt walls (equator term) and a near-black
+            // ceiling (ground term) that only the lamp pools light up.
+            RenderSettings.ambientSkyColor = new Color(0.340f, 0.315f, 0.270f);
+            RenderSettings.ambientEquatorColor = new Color(0.240f, 0.260f, 0.320f);
+            RenderSettings.ambientGroundColor = new Color(0.105f, 0.110f, 0.130f);
+            RenderSettings.ambientIntensity = 0.88f;
+            RenderSettings.reflectionIntensity = 1.0f;
             RenderSettings.reflectionBounces = 1;
             // Indoors there is no sky: surfaces outside every probe volume must
             // reflect darkness. The default procedural skybox fallback paints
@@ -354,7 +357,7 @@ namespace WolfMini.Level
                 return;
             }
 
-            Material material = ceiling ? materialLibrary.CeilingMaterial : materialLibrary.FloorMaterial;
+            Material material = ceiling ? GetPolishedCeilingMaterial() : GetPolishedFloorMaterial();
             if (material == null)
             {
                 return;
@@ -379,8 +382,72 @@ namespace WolfMini.Level
             renderer.sharedMaterial = material;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = true;
-            renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.BlendProbesAndSkybox;
+            // The reference ceiling carries direct lamp streaks but does not
+            // mirror entire blue rooms. Keep probes on the polished floor and
+            // let point-light specular drive the ceiling response.
+            renderer.reflectionProbeUsage = ceiling
+                ? UnityEngine.Rendering.ReflectionProbeUsage.Off
+                : UnityEngine.Rendering.ReflectionProbeUsage.BlendProbesAndSkybox;
             renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes;
+        }
+
+        private Material polishedFloorMaterial;
+        private Material polishedCeilingMaterial;
+
+        // Runtime copies give the receivers a controlled polished response
+        // without touching the authored .mat assets. The floor reads local
+        // probes; the ceiling is driven by direct lamp specular only.
+        private Material GetPolishedFloorMaterial()
+        {
+            if (polishedFloorMaterial != null)
+            {
+                return polishedFloorMaterial;
+            }
+
+            if (materialLibrary.FloorMaterial == null)
+            {
+                return null;
+            }
+
+            polishedFloorMaterial = new Material(materialLibrary.FloorMaterial)
+            {
+                name = "Wolf polished floor (runtime)",
+                hideFlags = HideFlags.DontSave
+            };
+            polishedFloorMaterial.DisableKeyword("_METALLICGLOSSMAP");
+            // Keep the floor predominantly dielectric: the reference reads as
+            // polished stone, with tight lamp streaks instead of tinted metal
+            // reflections. Direct lights and probes provide the response.
+            polishedFloorMaterial.SetFloat("_Glossiness", 0.84f);
+            polishedFloorMaterial.SetFloat("_GlossMapScale", 0.84f);
+            polishedFloorMaterial.SetFloat("_Metallic", 0f);
+            return polishedFloorMaterial;
+        }
+
+        private Material GetPolishedCeilingMaterial()
+        {
+            if (polishedCeilingMaterial != null)
+            {
+                return polishedCeilingMaterial;
+            }
+
+            if (materialLibrary.CeilingMaterial == null)
+            {
+                return null;
+            }
+
+            polishedCeilingMaterial = new Material(materialLibrary.CeilingMaterial)
+            {
+                name = "Wolf polished ceiling (runtime)",
+                hideFlags = HideFlags.DontSave
+            };
+            polishedCeilingMaterial.DisableKeyword("_METALLICGLOSSMAP");
+            // Bright, narrow specular pools around each fixture on an otherwise
+            // dark ceiling; near-zero metallic avoids broad blue wall bands.
+            polishedCeilingMaterial.SetFloat("_Glossiness", 0.82f);
+            polishedCeilingMaterial.SetFloat("_GlossMapScale", 0.82f);
+            polishedCeilingMaterial.SetFloat("_Metallic", 0f);
+            return polishedCeilingMaterial;
         }
 
         /// <summary>Floor and ceiling quads over one world-space rectangle, with continuous world-anchored module UVs.</summary>
@@ -1927,7 +1994,7 @@ namespace WolfMini.Level
             spill.transform.SetParent(parent, true);
             spill.transform.position = new Vector3(basePosition.x, ceilingY - 0.02f, basePosition.z);
             spill.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            float diameter = (warm ? 3.8f : 3.2f) * WorldScale;
+            float diameter = (warm ? 4.4f : 3.8f) * WorldScale;
             spill.transform.localScale = new Vector3(diameter, diameter, 1f);
 
             Renderer renderer = spill.GetComponent<Renderer>();
@@ -1936,6 +2003,10 @@ namespace WolfMini.Level
             renderer.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
             renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            BoostOverlay(
+                renderer,
+                warm ? new Color(1f, 0.82f, 0.58f, 0.38f) : new Color(0.82f, 0.90f, 1f, 0.34f),
+                warm ? new Color(0.42f, 0.30f, 0.16f, 1f) : new Color(0.18f, 0.24f, 0.34f, 1f));
             DestroySafely(spill.GetComponent<Collider>());
         }
 
@@ -1949,8 +2020,8 @@ namespace WolfMini.Level
             if (TryFindSceneSurface(anchor, Vector3.down, 24f * WorldScale, SurfaceTarget.Floor, out RaycastHit floorHit))
             {
                 float floorWidth = (warm ? 3.8f : 3.3f) * WorldScale;
-                float floorHeight = (warm ? 2.7f : 2.35f) * WorldScale;
-                CreateBoundedFloorReflectionQuad(
+                float floorHeight = (warm ? 3.0f : 2.6f) * WorldScale;
+                Renderer floorPool = CreateBoundedFloorReflectionQuad(
                     parent,
                     $"{name} floor reflection {suffix}",
                     floorHit.point + floorHit.normal * 0.026f,
@@ -1958,18 +2029,22 @@ namespace WolfMini.Level
                     floorMaterial,
                     floorWidth,
                     floorHeight);
+                BoostOverlay(
+                    floorPool,
+                    warm ? new Color(1f, 0.87f, 0.68f, 0.48f) : new Color(0.82f, 0.90f, 1f, 0.42f),
+                    warm ? new Color(0.20f, 0.13f, 0.05f, 1f) : new Color(0.07f, 0.11f, 0.16f, 1f));
             }
 
             Vector3 wallOrigin = anchor - Vector3.up * 0.34f * WorldScale;
             Vector3[] directions = { Vector3.forward, Vector3.back, Vector3.left, Vector3.right };
             float maxDistance = (warm ? 7.2f : 6.4f) * WorldScale;
-            float wallWidth = (warm ? 4.0f : 3.5f) * WorldScale;
-            float wallHeight = (warm ? 1.9f : 1.65f) * WorldScale;
+            float wallWidth = (warm ? 4.2f : 3.6f) * WorldScale;
+            float wallHeight = (warm ? 2.0f : 1.8f) * WorldScale;
             for (int i = 0; i < directions.Length; i++)
             {
                 if (TryFindSceneSurface(wallOrigin, directions[i], maxDistance, SurfaceTarget.Wall, out RaycastHit wallHit))
                 {
-                    CreateSurfaceReflectionQuad(
+                    Renderer wallWash = CreateSurfaceReflectionQuad(
                         parent,
                         $"{name} wall reflection {suffix}",
                         wallHit.point + wallHit.normal * 0.024f,
@@ -1978,6 +2053,10 @@ namespace WolfMini.Level
                         wallMaterial,
                         wallWidth,
                         wallHeight);
+                    BoostOverlay(
+                        wallWash,
+                        warm ? new Color(1f, 0.85f, 0.66f, 0.28f) : new Color(0.80f, 0.89f, 1f, 0.24f),
+                        warm ? new Color(0.08f, 0.052f, 0.022f, 1f) : new Color(0.026f, 0.050f, 0.078f, 1f));
                 }
             }
         }
@@ -2008,7 +2087,7 @@ namespace WolfMini.Level
                 Color warm = Color.Lerp(WolfLevelContent.WarmLampColor, Color.white, 0.46f);
                 Color cool = Color.Lerp(WolfLevelContent.CoolLampColor, Color.white, 0.58f);
 
-                CreateBoundedFloorReflectionQuad(
+                Renderer atriumPool = CreateBoundedFloorReflectionQuad(
                     group.transform,
                     $"atrium floor reflection {index:00}",
                     new Vector3(center.x, opening.bottomY + 0.028f, center.z),
@@ -2016,13 +2095,17 @@ namespace WolfMini.Level
                     materialLibrary.LampFloorReflectionWarmMaterial,
                     width,
                     depth);
+                BoostOverlay(
+                    atriumPool,
+                    new Color(1f, 0.90f, 0.76f, 0.44f),
+                    new Color(0.14f, 0.09f, 0.036f, 1f));
 
                 Light lower = CreatePointLight(
                     group.transform,
                     $"atrium lower fill {index:00}",
                     new Vector3(center.x, opening.bottomY + 1.25f * WorldScale, center.z),
                     warm,
-                    0.34f,
+                    0.42f,
                     radius,
                     LightShadows.Soft);
                 lower.shadowStrength = 0.24f;
@@ -2033,7 +2116,7 @@ namespace WolfMini.Level
                     $"atrium vertical glow {index:00}",
                     new Vector3(center.x, Mathf.Lerp(opening.bottomY, opening.topY, 0.52f), center.z),
                     Color.Lerp(warm, cool, 0.35f),
-                    0.12f,
+                    0.16f,
                     radius * 0.82f,
                     LightShadows.None);
 
@@ -2042,7 +2125,7 @@ namespace WolfMini.Level
                     $"atrium upper fill {index:00}",
                     new Vector3(center.x, opening.topY + 1.35f * WorldScale, center.z),
                     cool,
-                    0.18f,
+                    0.24f,
                     radius * 0.68f,
                     LightShadows.Soft);
                 upper.shadowStrength = 0.16f;
@@ -2051,7 +2134,7 @@ namespace WolfMini.Level
             }
         }
 
-        private void CreateBoundedFloorReflectionQuad(
+        private Renderer CreateBoundedFloorReflectionQuad(
             Transform parent,
             string name,
             Vector3 position,
@@ -2077,13 +2160,13 @@ namespace WolfMini.Level
             float isolatedHeight = positiveZ + negativeZ;
             if (isolatedWidth < MinimumReflectionSize || isolatedHeight < MinimumReflectionSize)
             {
-                return;
+                return null;
             }
 
             Vector3 isolatedCenter = position +
                 xAxis * ((positiveX - negativeX) * 0.5f) +
                 zAxis * ((positiveZ - negativeZ) * 0.5f);
-            CreateSurfaceReflectionQuad(parent, name, isolatedCenter, safeNormal, zAxis, material, isolatedWidth, isolatedHeight);
+            return CreateSurfaceReflectionQuad(parent, name, isolatedCenter, safeNormal, zAxis, material, isolatedWidth, isolatedHeight);
         }
 
         private float FindReflectionBoundaryExtent(Vector3 center, Vector3 normal, Vector3 direction, float requestedExtent)
@@ -2146,7 +2229,7 @@ namespace WolfMini.Level
                 objectName.Contains("spill", System.StringComparison.OrdinalIgnoreCase);
         }
 
-        private void CreateSurfaceReflectionQuad(
+        private Renderer CreateSurfaceReflectionQuad(
             Transform parent,
             string name,
             Vector3 position,
@@ -2158,7 +2241,7 @@ namespace WolfMini.Level
         {
             if (material == null)
             {
-                return;
+                return null;
             }
 
             GameObject reflection = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -2185,14 +2268,31 @@ namespace WolfMini.Level
             renderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             DestroySafely(reflection.GetComponent<Collider>());
+            return renderer;
+        }
+
+        // Per-renderer boost over the shared overlay materials: the polished
+        // reference needs far hotter light pools and washes than the authored
+        // assets provide, and a property block keeps the .mat files untouched.
+        private static void BoostOverlay(Renderer renderer, Color color, Color emission)
+        {
+            if (renderer == null)
+            {
+                return;
+            }
+
+            var properties = new MaterialPropertyBlock();
+            properties.SetColor("_Color", color);
+            properties.SetColor("_EmissionColor", emission);
+            renderer.SetPropertyBlock(properties);
         }
 
         private void AddLampLightRig(Transform parent, string name, Vector3 basePosition, float ceilingY, bool warm)
         {
             // A coincident unshadowed component approximates first-bounce light
             // from the visible bulb without introducing a sourceless fill.
-            float primaryIntensity = warm ? 2.15f : 1.90f;
-            float bounceIntensity = warm ? 0.32f : 0.29f;
+            float primaryIntensity = warm ? 2.65f : 2.35f;
+            float bounceIntensity = warm ? 0.42f : 0.38f;
             Color color = warm
                 ? WolfLevelContent.WarmLampColor
                 : Color.Lerp(WolfLevelContent.CoolLampColor, WolfLevelContent.WarmLampColor, 0.18f);
@@ -2335,7 +2435,7 @@ namespace WolfMini.Level
                 $"Atrium chandelier light {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                1.85f,
+                2.15f,
                 lightRange,
                 LightShadows.Soft);
             primary.shadowStrength = PrimaryShadowStrength;
@@ -2349,7 +2449,7 @@ namespace WolfMini.Level
                 $"Atrium chandelier ceiling bounce {center.x:0},{center.y:0}",
                 lightPosition,
                 lightColor,
-                0.36f,
+                0.44f,
                 lightRange,
                 LightShadows.None);
         }
@@ -2547,9 +2647,9 @@ namespace WolfMini.Level
             probe.size = size;
             probe.resolution = resolution;
             probe.hdr = true;
-            // Above 1 the boosted reflections read as a wet floor and blow out
-            // under the lamps; 1 keeps them at the captured brightness.
-            probe.intensity = 1f;
+            // A modest probe boost keeps polished surfaces alive without
+            // flattening the authored colors into mirror-like room bands.
+            probe.intensity = 0.95f;
             probe.importance = importance;
             probe.blendDistance = ReflectionProbeBlendDistance;
             probe.shadowDistance = 26f * WorldScale;

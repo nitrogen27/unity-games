@@ -22,22 +22,22 @@ namespace HelloWorldRoom
         [SerializeField, Range(0.0312f, 0.333f)] private float postAntialiasingEdgeThreshold = 0.11f;
         [SerializeField, Range(0.0156f, 0.0833f)] private float postAntialiasingEdgeThresholdMin = 0.0312f;
         [SerializeField] private bool enableCinematicPostProcess = true;
-        [SerializeField, Range(0.5f, 2.0f)] private float cinematicExposure = 0.94f;
-        [SerializeField, Range(0.8f, 1.6f)] private float cinematicContrast = 1.06f;
-        [SerializeField, Range(0f, 0.18f)] private float cinematicBlackPoint = 0.002f;
-        [SerializeField, Range(0.7f, 1.4f)] private float cinematicSaturation = 1.04f;
-        [SerializeField, Range(0f, 0.45f)] private float cinematicLocalContrast = 0.09f;
+        [SerializeField, Range(0.5f, 2.0f)] private float cinematicExposure = 1.05f;
+        [SerializeField, Range(0.8f, 1.6f)] private float cinematicContrast = 1.16f;
+        [SerializeField, Range(0f, 0.18f)] private float cinematicBlackPoint = 0.008f;
+        [SerializeField, Range(0.7f, 1.4f)] private float cinematicSaturation = 1.20f;
+        [SerializeField, Range(0f, 0.45f)] private float cinematicLocalContrast = 0.16f;
         [SerializeField, Range(0.5f, 3.5f)] private float cinematicLocalRadius = 1.7f;
-        [SerializeField, Range(0f, 0.18f)] private float cinematicShadowLift = 0.13f;
-        [SerializeField, Range(0.6f, 2.5f)] private float cinematicBloomThreshold = 1.15f;
-        [SerializeField, Range(0f, 1.5f)] private float cinematicBloomIntensity = 0.28f;
-        [SerializeField, Range(0f, 1f)] private float cinematicBloomKnee = 0.46f;
-        [SerializeField, Range(0.7f, 2.4f)] private float cinematicBloomScatter = 1.35f;
+        [SerializeField, Range(0f, 0.18f)] private float cinematicShadowLift = 0.075f;
+        [SerializeField, Range(0.6f, 2.5f)] private float cinematicBloomThreshold = 1.05f;
+        [SerializeField, Range(0f, 1.5f)] private float cinematicBloomIntensity = 0.46f;
+        [SerializeField, Range(0f, 1f)] private float cinematicBloomKnee = 0.42f;
+        [SerializeField, Range(0.7f, 2.4f)] private float cinematicBloomScatter = 1.25f;
         [SerializeField, Range(1, 5)] private int cinematicBloomIterations = 3;
         [SerializeField, Range(1, 4)] private int cinematicBloomDownsample = 2;
-        [SerializeField, Range(0f, 0.35f)] private float cinematicVignette = 0.07f;
-        [SerializeField, Range(0f, 0.35f)] private float cinematicWarmHighlights = 0.055f;
-        [SerializeField, Range(0f, 0.2f)] private float cinematicCoolShadows = 0.045f;
+        [SerializeField, Range(0f, 0.35f)] private float cinematicVignette = 0.075f;
+        [SerializeField, Range(0f, 0.35f)] private float cinematicWarmHighlights = 0.095f;
+        [SerializeField, Range(0f, 0.2f)] private float cinematicCoolShadows = 0.055f;
 
         private void Awake()
         {
